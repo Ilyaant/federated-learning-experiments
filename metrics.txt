@@ -1,0 +1,476 @@
+2026-04-16 03:21:02,725 root INFO Эксперимент с разбиением: dirichlet
+2026-04-16 03:21:07,263 flwr WARNING DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-04-16 03:21:07,263 flwr INFO Starting Flower simulation, config: num_rounds=8, no round_timeout
+2026-04-16 03:21:08,452 flwr INFO Flower VCE: Ray initialized with resources: {'memory': 9106571264.0, 'node:127.0.0.1': 1.0, 'object_store_memory': 2147483648.0, 'CPU': 10.0, 'node:__internal_head__': 1.0}
+2026-04-16 03:21:08,452 flwr INFO Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-04-16 03:21:08,452 flwr INFO No `client_resources` specified. Using minimal resources for clients.
+2026-04-16 03:21:08,452 flwr INFO Flower VCE: Resources for each Virtual Client: {'num_cpus': 1, 'num_gpus': 0.0}
+2026-04-16 03:21:08,468 flwr INFO Flower VCE: Creating VirtualClientEngineActorPool with 10 actors
+2026-04-16 03:21:08,468 flwr INFO [INIT]
+2026-04-16 03:21:08,468 flwr INFO Requesting initial parameters from one random client
+2026-04-16 03:21:10,406 flwr INFO Received initial parameters from one random client
+2026-04-16 03:21:10,406 flwr INFO Starting evaluation of initial global parameters
+2026-04-16 03:21:10,406 flwr INFO Evaluation returned no results (`None`)
+2026-04-16 03:21:10,406 flwr INFO 
+2026-04-16 03:21:10,406 flwr INFO [ROUND 1]
+2026-04-16 03:21:10,407 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 05:41:52,329 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 05:41:52,422 flwr WARNING No fit_metrics_aggregation_fn provided
+2026-04-16 05:41:52,426 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 05:42:17,831 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 05:42:17,831 flwr INFO 
+2026-04-16 05:42:17,831 flwr INFO [ROUND 2]
+2026-04-16 05:42:17,831 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 07:07:26,409 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 07:07:26,514 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 07:07:57,569 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 07:07:57,571 flwr INFO 
+2026-04-16 07:07:57,571 flwr INFO [ROUND 3]
+2026-04-16 07:07:57,571 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 08:32:31,548 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 08:32:31,665 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 08:32:53,775 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 08:32:53,776 flwr INFO 
+2026-04-16 08:32:53,776 flwr INFO [ROUND 4]
+2026-04-16 08:32:53,776 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 09:57:34,835 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 09:57:34,946 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 09:57:56,982 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 09:57:56,984 flwr INFO 
+2026-04-16 09:57:56,984 flwr INFO [ROUND 5]
+2026-04-16 09:57:56,984 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 11:15:50,133 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 11:15:50,276 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 11:16:15,825 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 11:16:15,827 flwr INFO 
+2026-04-16 11:16:15,827 flwr INFO [ROUND 6]
+2026-04-16 11:16:15,827 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 13:07:41,395 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 13:07:41,500 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 13:07:58,568 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 13:07:58,570 flwr INFO 
+2026-04-16 13:07:58,570 flwr INFO [ROUND 7]
+2026-04-16 13:07:58,571 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 14:42:16,101 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 14:42:16,211 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 14:42:43,174 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 14:42:43,175 flwr INFO 
+2026-04-16 14:42:43,175 flwr INFO [ROUND 8]
+2026-04-16 14:42:43,175 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 16:21:01,994 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 16:21:02,118 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 16:21:19,736 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 16:21:19,744 flwr INFO 
+2026-04-16 16:21:19,744 flwr INFO [SUMMARY]
+2026-04-16 16:21:19,744 flwr INFO Run finished 8 round(s) in 31409.88s
+2026-04-16 16:21:19,744 flwr INFO 	History (loss, distributed):
+2026-04-16 16:21:19,745 flwr INFO 		round 1: 912.3628153800964
+2026-04-16 16:21:19,745 flwr INFO 		round 2: 277.8247172832489
+2026-04-16 16:21:19,745 flwr INFO 		round 3: 231.3875801563263
+2026-04-16 16:21:19,745 flwr INFO 		round 4: 229.2216534614563
+2026-04-16 16:21:19,745 flwr INFO 		round 5: 226.8538401722908
+2026-04-16 16:21:19,745 flwr INFO 		round 6: 222.8677543401718
+2026-04-16 16:21:19,745 flwr INFO 		round 7: 219.73369801044464
+2026-04-16 16:21:19,745 flwr INFO 		round 8: 216.48987591266632
+2026-04-16 16:21:19,746 flwr INFO 	History (metrics, distributed, evaluate):
+2026-04-16 16:21:19,746 flwr INFO 	{'accuracy': [(1, 0.0166),
+2026-04-16 16:21:19,746 flwr INFO 	              (2, 0.5416),
+2026-04-16 16:21:19,746 flwr INFO 	              (3, 0.641),
+2026-04-16 16:21:19,746 flwr INFO 	              (4, 0.6657),
+2026-04-16 16:21:19,746 flwr INFO 	              (5, 0.6778999999999998),
+2026-04-16 16:21:19,746 flwr INFO 	              (6, 0.6852),
+2026-04-16 16:21:19,746 flwr INFO 	              (7, 0.6913),
+2026-04-16 16:21:19,746 flwr INFO 	              (8, 0.6948)],
+2026-04-16 16:21:19,746 flwr INFO 	 'f1': [(1, 0.0021236858671460513),
+2026-04-16 16:21:19,746 flwr INFO 	        (2, 0.5476288228868081),
+2026-04-16 16:21:19,746 flwr INFO 	        (3, 0.6386314667772826),
+2026-04-16 16:21:19,746 flwr INFO 	        (4, 0.6632261867294089),
+2026-04-16 16:21:19,746 flwr INFO 	        (5, 0.6752185319146008),
+2026-04-16 16:21:19,746 flwr INFO 	        (6, 0.6825627810061285),
+2026-04-16 16:21:19,746 flwr INFO 	        (7, 0.688785796177729),
+2026-04-16 16:21:19,746 flwr INFO 	        (8, 0.6927586912184496)],
+2026-04-16 16:21:19,746 flwr INFO 	 'precision': [(1, 0.0017095524787245915),
+2026-04-16 16:21:19,746 flwr INFO 	               (2, 0.60053679097029),
+2026-04-16 16:21:19,746 flwr INFO 	               (3, 0.6468907630356423),
+2026-04-16 16:21:19,746 flwr INFO 	               (4, 0.6690182712910929),
+2026-04-16 16:21:19,746 flwr INFO 	               (5, 0.6803621997632008),
+2026-04-16 16:21:19,746 flwr INFO 	               (6, 0.688078234466225),
+2026-04-16 16:21:19,746 flwr INFO 	               (7, 0.6936696043266538),
+2026-04-16 16:21:19,746 flwr INFO 	               (8, 0.6987736505407005)],
+2026-04-16 16:21:19,746 flwr INFO 	 'recall': [(1, 0.0166),
+2026-04-16 16:21:19,746 flwr INFO 	            (2, 0.5415999999999999),
+2026-04-16 16:21:19,746 flwr INFO 	            (3, 0.6409999999999999),
+2026-04-16 16:21:19,746 flwr INFO 	            (4, 0.6656999999999997),
+2026-04-16 16:21:19,746 flwr INFO 	            (5, 0.6778999999999998),
+2026-04-16 16:21:19,746 flwr INFO 	            (6, 0.6852000000000001),
+2026-04-16 16:21:19,746 flwr INFO 	            (7, 0.6912999999999998),
+2026-04-16 16:21:19,746 flwr INFO 	            (8, 0.6948000000000002)]}
+2026-04-16 16:21:19,746 flwr INFO 
+2026-04-16 16:21:19,756 root INFO Эксперимент с разбиением: pathological
+2026-04-16 16:21:24,291 flwr WARNING DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-04-16 16:21:24,291 flwr INFO Starting Flower simulation, config: num_rounds=8, no round_timeout
+2026-04-16 16:21:26,941 flwr INFO Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'node:127.0.0.1': 1.0, 'object_store_memory': 2147483648.0, 'CPU': 10.0, 'memory': 11350392832.0}
+2026-04-16 16:21:26,941 flwr INFO Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-04-16 16:21:26,941 flwr INFO No `client_resources` specified. Using minimal resources for clients.
+2026-04-16 16:21:26,941 flwr INFO Flower VCE: Resources for each Virtual Client: {'num_cpus': 1, 'num_gpus': 0.0}
+2026-04-16 16:21:26,948 flwr INFO Flower VCE: Creating VirtualClientEngineActorPool with 10 actors
+2026-04-16 16:21:26,948 flwr INFO [INIT]
+2026-04-16 16:21:26,948 flwr INFO Requesting initial parameters from one random client
+2026-04-16 16:21:29,562 flwr INFO Received initial parameters from one random client
+2026-04-16 16:21:29,562 flwr INFO Starting evaluation of initial global parameters
+2026-04-16 16:21:29,562 flwr INFO Evaluation returned no results (`None`)
+2026-04-16 16:21:29,562 flwr INFO 
+2026-04-16 16:21:29,562 flwr INFO [ROUND 1]
+2026-04-16 16:21:29,562 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 18:43:00,527 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 18:43:00,623 flwr WARNING No fit_metrics_aggregation_fn provided
+2026-04-16 18:43:00,626 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 18:43:26,292 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 18:43:26,293 flwr INFO 
+2026-04-16 18:43:26,293 flwr INFO [ROUND 2]
+2026-04-16 18:43:26,293 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 20:08:35,828 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 20:08:35,945 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 20:09:01,491 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 20:09:01,493 flwr INFO 
+2026-04-16 20:09:01,493 flwr INFO [ROUND 3]
+2026-04-16 20:09:01,493 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 21:35:03,448 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 21:35:03,554 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 21:35:25,821 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 21:35:25,822 flwr INFO 
+2026-04-16 21:35:25,822 flwr INFO [ROUND 4]
+2026-04-16 21:35:25,822 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-16 23:00:48,054 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-16 23:00:48,177 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-16 23:01:14,499 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-16 23:01:14,501 flwr INFO 
+2026-04-16 23:01:14,501 flwr INFO [ROUND 5]
+2026-04-16 23:01:14,501 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 00:41:00,533 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 00:41:00,638 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 00:41:28,239 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 00:41:28,240 flwr INFO 
+2026-04-17 00:41:28,240 flwr INFO [ROUND 6]
+2026-04-17 00:41:28,240 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 02:11:55,736 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 02:11:55,858 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 02:12:16,158 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 02:12:16,161 flwr INFO 
+2026-04-17 02:12:16,161 flwr INFO [ROUND 7]
+2026-04-17 02:12:16,161 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 03:58:37,850 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 03:58:37,968 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 03:59:04,089 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 03:59:04,090 flwr INFO 
+2026-04-17 03:59:04,090 flwr INFO [ROUND 8]
+2026-04-17 03:59:04,090 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 05:14:03,123 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 05:14:03,262 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 05:14:30,956 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 05:14:30,967 flwr INFO 
+2026-04-17 05:14:30,967 flwr INFO [SUMMARY]
+2026-04-17 05:14:30,967 flwr INFO Run finished 8 round(s) in 32884.19s
+2026-04-17 05:14:30,967 flwr INFO 	History (loss, distributed):
+2026-04-17 05:14:30,967 flwr INFO 		round 1: 825.4890265464783
+2026-04-17 05:14:30,967 flwr INFO 		round 2: 352.5478550195694
+2026-04-17 05:14:30,967 flwr INFO 		round 3: 243.2507824897766
+2026-04-17 05:14:30,967 flwr INFO 		round 4: 240.25512039661407
+2026-04-17 05:14:30,967 flwr INFO 		round 5: 237.11544513702393
+2026-04-17 05:14:30,967 flwr INFO 		round 6: 234.75060206651688
+2026-04-17 05:14:30,967 flwr INFO 		round 7: 231.1324805021286
+2026-04-17 05:14:30,967 flwr INFO 		round 8: 227.95550590753555
+2026-04-17 05:14:30,967 flwr INFO 	History (metrics, distributed, evaluate):
+2026-04-17 05:14:30,967 flwr INFO 	{'accuracy': [(1, 0.0138),
+2026-04-17 05:14:30,967 flwr INFO 	              (2, 0.4364),
+2026-04-17 05:14:30,967 flwr INFO 	              (3, 0.6192),
+2026-04-17 05:14:30,967 flwr INFO 	              (4, 0.6441),
+2026-04-17 05:14:30,967 flwr INFO 	              (5, 0.6582),
+2026-04-17 05:14:30,967 flwr INFO 	              (6, 0.669),
+2026-04-17 05:14:30,967 flwr INFO 	              (7, 0.6767),
+2026-04-17 05:14:30,967 flwr INFO 	              (8, 0.6844)],
+2026-04-17 05:14:30,967 flwr INFO 	 'f1': [(1, 0.0009229761754770564),
+2026-04-17 05:14:30,967 flwr INFO 	        (2, 0.4392106693528514),
+2026-04-17 05:14:30,967 flwr INFO 	        (3, 0.6165110153293918),
+2026-04-17 05:14:30,967 flwr INFO 	        (4, 0.6408345837444671),
+2026-04-17 05:14:30,967 flwr INFO 	        (5, 0.6549496616376214),
+2026-04-17 05:14:30,967 flwr INFO 	        (6, 0.6660253985288275),
+2026-04-17 05:14:30,967 flwr INFO 	        (7, 0.6739515982801147),
+2026-04-17 05:14:30,967 flwr INFO 	        (8, 0.6823461386270353)],
+2026-04-17 05:14:30,967 flwr INFO 	 'precision': [(1, 0.0004828224194406339),
+2026-04-17 05:14:30,967 flwr INFO 	               (2, 0.5483390104591442),
+2026-04-17 05:14:30,967 flwr INFO 	               (3, 0.6246709021409389),
+2026-04-17 05:14:30,968 flwr INFO 	               (4, 0.6448029335663225),
+2026-04-17 05:14:30,968 flwr INFO 	               (5, 0.6589793293433295),
+2026-04-17 05:14:30,968 flwr INFO 	               (6, 0.6687511737528092),
+2026-04-17 05:14:30,968 flwr INFO 	               (7, 0.6763613401692755),
+2026-04-17 05:14:30,968 flwr INFO 	               (8, 0.6851634649065689)],
+2026-04-17 05:14:30,968 flwr INFO 	 'recall': [(1, 0.0138),
+2026-04-17 05:14:30,968 flwr INFO 	            (2, 0.4364),
+2026-04-17 05:14:30,968 flwr INFO 	            (3, 0.6191999999999999),
+2026-04-17 05:14:30,968 flwr INFO 	            (4, 0.6441),
+2026-04-17 05:14:30,968 flwr INFO 	            (5, 0.6582000000000001),
+2026-04-17 05:14:30,968 flwr INFO 	            (6, 0.6689999999999998),
+2026-04-17 05:14:30,968 flwr INFO 	            (7, 0.6766999999999999),
+2026-04-17 05:14:30,968 flwr INFO 	            (8, 0.6844000000000001)]}
+2026-04-17 05:14:30,968 flwr INFO 
+2026-04-17 05:14:30,980 root INFO Эксперимент с разбиением: quantity_skew
+2026-04-17 05:14:35,523 flwr WARNING DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-04-17 05:14:35,524 flwr INFO Starting Flower simulation, config: num_rounds=8, no round_timeout
+2026-04-17 05:14:38,387 flwr INFO Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'node:127.0.0.1': 1.0, 'object_store_memory': 2147483648.0, 'CPU': 10.0, 'memory': 11833180160.0}
+2026-04-17 05:14:38,387 flwr INFO Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-04-17 05:14:38,387 flwr INFO No `client_resources` specified. Using minimal resources for clients.
+2026-04-17 05:14:38,387 flwr INFO Flower VCE: Resources for each Virtual Client: {'num_cpus': 1, 'num_gpus': 0.0}
+2026-04-17 05:14:38,395 flwr INFO Flower VCE: Creating VirtualClientEngineActorPool with 10 actors
+2026-04-17 05:14:38,395 flwr INFO [INIT]
+2026-04-17 05:14:38,395 flwr INFO Requesting initial parameters from one random client
+2026-04-17 05:14:41,263 flwr INFO Received initial parameters from one random client
+2026-04-17 05:14:41,263 flwr INFO Starting evaluation of initial global parameters
+2026-04-17 05:14:41,263 flwr INFO Evaluation returned no results (`None`)
+2026-04-17 05:14:41,263 flwr INFO 
+2026-04-17 05:14:41,263 flwr INFO [ROUND 1]
+2026-04-17 05:14:41,263 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 06:44:49,556 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 06:44:49,648 flwr WARNING No fit_metrics_aggregation_fn provided
+2026-04-17 06:44:49,654 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 06:45:17,348 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 06:45:17,348 flwr INFO 
+2026-04-17 06:45:17,348 flwr INFO [ROUND 2]
+2026-04-17 06:45:17,348 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 08:13:24,468 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 08:13:24,596 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 08:13:52,099 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 08:13:52,100 flwr INFO 
+2026-04-17 08:13:52,100 flwr INFO [ROUND 3]
+2026-04-17 08:13:52,103 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 09:43:18,476 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 09:43:18,602 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 09:43:46,209 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 09:43:46,211 flwr INFO 
+2026-04-17 09:43:46,211 flwr INFO [ROUND 4]
+2026-04-17 09:43:46,212 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 11:11:32,235 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 11:11:32,348 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 11:11:57,297 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 11:11:57,299 flwr INFO 
+2026-04-17 11:11:57,299 flwr INFO [ROUND 5]
+2026-04-17 11:11:57,299 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 12:39:34,620 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 12:39:34,731 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 12:40:02,292 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 12:40:02,293 flwr INFO 
+2026-04-17 12:40:02,293 flwr INFO [ROUND 6]
+2026-04-17 12:40:02,293 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 14:14:27,726 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 14:14:27,828 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 14:14:55,918 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 14:14:55,918 flwr INFO 
+2026-04-17 14:14:55,918 flwr INFO [ROUND 7]
+2026-04-17 14:14:55,919 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 15:45:39,415 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 15:45:39,532 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 15:46:06,768 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 15:46:06,771 flwr INFO 
+2026-04-17 15:46:06,771 flwr INFO [ROUND 8]
+2026-04-17 15:46:06,771 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 17:22:36,563 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 17:22:36,694 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 17:23:02,962 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 17:23:02,969 flwr INFO 
+2026-04-17 17:23:02,969 flwr INFO [SUMMARY]
+2026-04-17 17:23:02,969 flwr INFO Run finished 8 round(s) in 33806.21s
+2026-04-17 17:23:02,970 flwr INFO 	History (loss, distributed):
+2026-04-17 17:23:02,970 flwr INFO 		round 1: 1061.6060581207275
+2026-04-17 17:23:02,970 flwr INFO 		round 2: 236.37231647968292
+2026-04-17 17:23:02,970 flwr INFO 		round 3: 213.06484252214432
+2026-04-17 17:23:02,970 flwr INFO 		round 4: 211.13609129190445
+2026-04-17 17:23:02,970 flwr INFO 		round 5: 208.21903890371323
+2026-04-17 17:23:02,970 flwr INFO 		round 6: 206.12793916463852
+2026-04-17 17:23:02,970 flwr INFO 		round 7: 204.38333785533905
+2026-04-17 17:23:02,970 flwr INFO 		round 8: 201.4108568429947
+2026-04-17 17:23:02,970 flwr INFO 	History (metrics, distributed, evaluate):
+2026-04-17 17:23:02,970 flwr INFO 	{'accuracy': [(1, 0.0104),
+2026-04-17 17:23:02,970 flwr INFO 	              (2, 0.6081),
+2026-04-17 17:23:02,970 flwr INFO 	              (3, 0.674),
+2026-04-17 17:23:02,970 flwr INFO 	              (4, 0.6934),
+2026-04-17 17:23:02,970 flwr INFO 	              (5, 0.7023),
+2026-04-17 17:23:02,970 flwr INFO 	              (6, 0.7073),
+2026-04-17 17:23:02,970 flwr INFO 	              (7, 0.7127),
+2026-04-17 17:23:02,970 flwr INFO 	              (8, 0.717)],
+2026-04-17 17:23:02,970 flwr INFO 	 'f1': [(1, 0.00041580537854237507),
+2026-04-17 17:23:02,970 flwr INFO 	        (2, 0.612728735480917),
+2026-04-17 17:23:02,970 flwr INFO 	        (3, 0.6703512949119657),
+2026-04-17 17:23:02,970 flwr INFO 	        (4, 0.6893404542920986),
+2026-04-17 17:23:02,970 flwr INFO 	        (5, 0.6980787427553458),
+2026-04-17 17:23:02,970 flwr INFO 	        (6, 0.7038098883569065),
+2026-04-17 17:23:02,970 flwr INFO 	        (7, 0.7092861362110539),
+2026-04-17 17:23:02,970 flwr INFO 	        (8, 0.7143584921502893)],
+2026-04-17 17:23:02,970 flwr INFO 	 'precision': [(1, 0.00024725324707391126),
+2026-04-17 17:23:02,970 flwr INFO 	               (2, 0.6384993053542508),
+2026-04-17 17:23:02,970 flwr INFO 	               (3, 0.6747106264386029),
+2026-04-17 17:23:02,970 flwr INFO 	               (4, 0.692896782802575),
+2026-04-17 17:23:02,970 flwr INFO 	               (5, 0.7000150297992624),
+2026-04-17 17:23:02,970 flwr INFO 	               (6, 0.7061082827617403),
+2026-04-17 17:23:02,970 flwr INFO 	               (7, 0.711360205476291),
+2026-04-17 17:23:02,970 flwr INFO 	               (8, 0.7165732157100722)],
+2026-04-17 17:23:02,970 flwr INFO 	 'recall': [(1, 0.0104),
+2026-04-17 17:23:02,970 flwr INFO 	            (2, 0.6081),
+2026-04-17 17:23:02,970 flwr INFO 	            (3, 0.6739999999999998),
+2026-04-17 17:23:02,970 flwr INFO 	            (4, 0.6934),
+2026-04-17 17:23:02,970 flwr INFO 	            (5, 0.7023),
+2026-04-17 17:23:02,970 flwr INFO 	            (6, 0.7073),
+2026-04-17 17:23:02,970 flwr INFO 	            (7, 0.7127),
+2026-04-17 17:23:02,970 flwr INFO 	            (8, 0.7170000000000002)]}
+2026-04-17 17:23:02,970 flwr INFO 
+2026-04-17 17:23:02,974 root INFO Эксперимент с разбиением: iid
+2026-04-17 17:23:07,513 flwr WARNING DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-04-17 17:23:07,514 flwr INFO Starting Flower simulation, config: num_rounds=8, no round_timeout
+2026-04-17 17:23:10,510 flwr INFO Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'node:127.0.0.1': 1.0, 'object_store_memory': 2147483648.0, 'CPU': 10.0, 'memory': 11675090944.0}
+2026-04-17 17:23:10,510 flwr INFO Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-04-17 17:23:10,510 flwr INFO No `client_resources` specified. Using minimal resources for clients.
+2026-04-17 17:23:10,510 flwr INFO Flower VCE: Resources for each Virtual Client: {'num_cpus': 1, 'num_gpus': 0.0}
+2026-04-17 17:23:10,520 flwr INFO Flower VCE: Creating VirtualClientEngineActorPool with 10 actors
+2026-04-17 17:23:10,520 flwr INFO [INIT]
+2026-04-17 17:23:10,520 flwr INFO Requesting initial parameters from one random client
+2026-04-17 17:23:13,421 flwr INFO Received initial parameters from one random client
+2026-04-17 17:23:13,421 flwr INFO Starting evaluation of initial global parameters
+2026-04-17 17:23:13,421 flwr INFO Evaluation returned no results (`None`)
+2026-04-17 17:23:13,421 flwr INFO 
+2026-04-17 17:23:13,421 flwr INFO [ROUND 1]
+2026-04-17 17:23:13,421 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 19:01:34,684 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 19:01:34,772 flwr WARNING No fit_metrics_aggregation_fn provided
+2026-04-17 19:01:34,780 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 19:01:51,385 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 19:01:51,385 flwr INFO 
+2026-04-17 19:01:51,385 flwr INFO [ROUND 2]
+2026-04-17 19:01:51,385 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 20:34:51,961 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 20:34:52,065 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 20:35:09,222 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 20:35:09,223 flwr INFO 
+2026-04-17 20:35:09,223 flwr INFO [ROUND 3]
+2026-04-17 20:35:09,223 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 22:00:54,795 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 22:00:54,903 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 22:01:20,600 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 22:01:20,602 flwr INFO 
+2026-04-17 22:01:20,602 flwr INFO [ROUND 4]
+2026-04-17 22:01:20,603 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-17 23:05:22,595 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-17 23:05:22,707 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-17 23:05:40,881 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-17 23:05:40,882 flwr INFO 
+2026-04-17 23:05:40,882 flwr INFO [ROUND 5]
+2026-04-17 23:05:40,882 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-18 00:54:47,206 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-18 00:54:47,312 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-18 00:55:02,763 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-18 00:55:02,763 flwr INFO 
+2026-04-18 00:55:02,763 flwr INFO [ROUND 6]
+2026-04-18 00:55:02,763 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-18 02:44:29,293 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-18 02:44:29,400 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-18 02:44:47,435 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-18 02:44:47,436 flwr INFO 
+2026-04-18 02:44:47,436 flwr INFO [ROUND 7]
+2026-04-18 02:44:47,436 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-18 04:16:32,765 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-18 04:16:32,881 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-18 04:16:56,477 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-18 04:16:56,477 flwr INFO 
+2026-04-18 04:16:56,477 flwr INFO [ROUND 8]
+2026-04-18 04:16:56,477 flwr INFO configure_fit: strategy sampled 5 clients (out of 5)
+2026-04-18 05:26:39,434 flwr INFO aggregate_fit: received 5 results and 0 failures
+2026-04-18 05:26:39,532 flwr INFO configure_evaluate: strategy sampled 5 clients (out of 5)
+2026-04-18 05:27:05,897 flwr INFO aggregate_evaluate: received 5 results and 0 failures
+2026-04-18 05:27:05,904 flwr INFO 
+2026-04-18 05:27:05,904 flwr INFO [SUMMARY]
+2026-04-18 05:27:05,904 flwr INFO Run finished 8 round(s) in 28039.92s
+2026-04-18 05:27:05,905 flwr INFO 	History (loss, distributed):
+2026-04-18 05:27:05,905 flwr INFO 		round 1: 1090.912672996521
+2026-04-18 05:27:05,905 flwr INFO 		round 2: 260.7881690263748
+2026-04-18 05:27:05,905 flwr INFO 		round 3: 218.39556843042374
+2026-04-18 05:27:05,905 flwr INFO 		round 4: 215.0305796265602
+2026-04-18 05:27:05,905 flwr INFO 		round 5: 211.52237820625305
+2026-04-18 05:27:05,905 flwr INFO 		round 6: 207.96746039390564
+2026-04-18 05:27:05,905 flwr INFO 		round 7: 205.1120952963829
+2026-04-18 05:27:05,905 flwr INFO 		round 8: 201.09756141901016
+2026-04-18 05:27:05,905 flwr INFO 	History (metrics, distributed, evaluate):
+2026-04-18 05:27:05,905 flwr INFO 	{'accuracy': [(1, 0.0099),
+2026-04-18 05:27:05,905 flwr INFO 	              (2, 0.5731),
+2026-04-18 05:27:05,905 flwr INFO 	              (3, 0.664),
+2026-04-18 05:27:05,905 flwr INFO 	              (4, 0.6847),
+2026-04-18 05:27:05,905 flwr INFO 	              (5, 0.6951000000000002),
+2026-04-18 05:27:05,905 flwr INFO 	              (6, 0.7075),
+2026-04-18 05:27:05,905 flwr INFO 	              (7, 0.7122000000000002),
+2026-04-18 05:27:05,905 flwr INFO 	              (8, 0.7221)],
+2026-04-18 05:27:05,905 flwr INFO 	 'f1': [(1, 0.0006067496366969093),
+2026-04-18 05:27:05,905 flwr INFO 	        (2, 0.5805083922245236),
+2026-04-18 05:27:05,905 flwr INFO 	        (3, 0.6612199230869299),
+2026-04-18 05:27:05,905 flwr INFO 	        (4, 0.681213080094557),
+2026-04-18 05:27:05,905 flwr INFO 	        (5, 0.6921563094168408),
+2026-04-18 05:27:05,905 flwr INFO 	        (6, 0.7049101330281259),
+2026-04-18 05:27:05,905 flwr INFO 	        (7, 0.7097867602663013),
+2026-04-18 05:27:05,905 flwr INFO 	        (8, 0.7201946075374484)],
+2026-04-18 05:27:05,905 flwr INFO 	 'precision': [(1, 0.0003565474058112338),
+2026-04-18 05:27:05,905 flwr INFO 	               (2, 0.6259136836801793),
+2026-04-18 05:27:05,905 flwr INFO 	               (3, 0.6672453546370117),
+2026-04-18 05:27:05,905 flwr INFO 	               (4, 0.6845400105162153),
+2026-04-18 05:27:05,905 flwr INFO 	               (5, 0.6949565746595752),
+2026-04-18 05:27:05,905 flwr INFO 	               (6, 0.7078929740813787),
+2026-04-18 05:27:05,905 flwr INFO 	               (7, 0.7120578611767704),
+2026-04-18 05:27:05,905 flwr INFO 	               (8, 0.7224941337298393)],
+2026-04-18 05:27:05,905 flwr INFO 	 'recall': [(1, 0.009899999999999999),
+2026-04-18 05:27:05,905 flwr INFO 	            (2, 0.5731),
+2026-04-18 05:27:05,905 flwr INFO 	            (3, 0.664),
+2026-04-18 05:27:05,905 flwr INFO 	            (4, 0.6847),
+2026-04-18 05:27:05,905 flwr INFO 	            (5, 0.6950999999999998),
+2026-04-18 05:27:05,905 flwr INFO 	            (6, 0.7075),
+2026-04-18 05:27:05,905 flwr INFO 	            (7, 0.7122000000000002),
+2026-04-18 05:27:05,905 flwr INFO 	            (8, 0.7221)]}
+2026-04-18 05:27:05,905 flwr INFO 
