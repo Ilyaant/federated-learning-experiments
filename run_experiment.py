@@ -8,6 +8,7 @@ from collections import OrderedDict
 import numpy as np
 import random
 import logging
+import pickle
 
 from split_data import split_cifar100, analyze_split
 from models import CIFARMediumCNN, train, test
@@ -151,3 +152,6 @@ if __name__ == "__main__":
         print("\n--- ИТОГОВЫЕ РЕЗУЛЬТАТЫ (ПОСЛЕДНИЙ РАУНД) ---")
         print("Accuracy:", history_exp2.metrics_distributed['accuracy'][-1][1])
         print("F1-score:", history_exp2.metrics_distributed['f1'][-1][1])
+
+        with open(f'history_{share_strategy}_{SHARED_RATIO}.pkl', 'wb') as f:
+            pickle.dump(history_exp2, f)
