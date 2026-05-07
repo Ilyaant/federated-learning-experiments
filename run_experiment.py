@@ -23,11 +23,16 @@ ROUNDS = 8
 # SHARED_RATIO = 0.1
 SHARED_RATIO = 0
 BATCH_SIZE = 64
-NUM_CLIENTS = 5
+NUM_CLIENTS = 15
 NUM_CLASSES = 100
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-logging.basicConfig(filename='metrics_0.txt',
+if SHARED_RATIO == 0:
+    metrics_log_file = 'metrics_0.txt'
+else:
+    metrics_log_file = 'metrics.txt'
+
+logging.basicConfig(filename=metrics_log_file,
                     filemode='a',
                     format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
