@@ -19,8 +19,8 @@ torch.manual_seed(42)
 random.seed(42)
 np.random.seed(42)
 
-EPOCHS = 30
-ROUNDS = 8
+EPOCHS = 3
+ROUNDS = 100
 # SHARED_RATIO = 0.1
 SHARED_RATIO = 0
 BATCH_SIZE = 64
