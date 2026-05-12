@@ -104,18 +104,18 @@ def run_experiment(split_strategy: str, shared_ratio: float, num_clients: int = 
 
     # Функция для генерации клиента по его ID
     def client_fn(cid: str) -> fl.client.Client:
-        # model = CIFARMediumCNN()
+        model = CIFARMediumCNN()
 
         # model = torchvision.models.efficientnet_v2_s(weights=None)
         # model.classifier[1] = nn.Linear(model.classifier[1].in_features, NUM_CLASSES)
 
-        model = torchvision.models.resnet18(weights=None, num_classes=NUM_CLASSES)
-        model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        model.maxpool = nn.Identity()
+        # model = torchvision.models.resnet18(weights=None, num_classes=NUM_CLASSES)
+        # model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        # model.maxpool = nn.Identity()
 
         model = model.to(device)
         trainloader = DataLoader(client_datasets[int(cid)], batch_size=BATCH_SIZE, shuffle=True)
-        # Обратите внимание: .to_client() преобразует NumPyClient в базовый Client
+        # .to_client() преобразует NumPyClient в базовый Client
         return CIFARClient(model, trainloader, testloader).to_client()
 
     # Стратегия сервера (FedAvg)
