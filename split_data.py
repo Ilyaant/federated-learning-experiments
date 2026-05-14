@@ -48,12 +48,33 @@ def split_cifar100(dataset, num_clients=5, strategy="iid", shared_ratio=0.1, **k
             
     elif strategy == "quantity_skew":
         # Стратегия 2: Разный объем (Quantity Skew)
-        # По умолчанию: 10%, 15%, 20%, 25%, 30% от оставшихся данных
-        proportions = kwargs.get('proportions', [0.1, 0.15, 0.2, 0.25, 0.3])
-        assert sum(proportions) == 1.0, "Сумма пропорций должна быть равна 1"
-        
-        split_points = (np.cumsum(proportions) * len(remaining_idx)).astype(int)[:-1]
-        splits = np.split(remaining_idx, split_points)
+        # proportions: доля remaining_idx на каждого клиента; длина == num_clients, сумма ~ 1
+        if "proportions" in kwargs:
+            proportions = np.asarray(kwargs["proportions"], dtype=float)
+        else:
+            # По умолчанию: как раньше для 5 клиентов (10%, 15%, …), в общем виде:
+            # p_i ∝ (i+1), i = 1..num_clients  =>  p_i = 2(i+1) / (n(n+3))
+            i = np.arange(1, num_clients + 1, dtype=float)
+            proportions = 2.0 * (i + 1.0) / (num_clients * (num_clients + 3.0))
+
+        if len(proportions) != num_clients:
+            raise ValueError(
+                f"quantity_skew: len(proportions)={len(proportions)} не совпадает с num_clients={num_clients}"
+            )
+        proportions = proportions / proportions.sum()
+        if not np.isclose(proportions.sum(), 1.0):
+            raise ValueError("quantity_skew: сумма пропорций должна быть равна 1 (с допуском float)")
+
+        n_rem = len(remaining_idx)
+        exact = proportions * n_rem
+        counts = np.floor(exact).astype(int)
+        rem = n_rem - int(counts.sum())
+        if rem > 0:
+            frac = exact - counts
+            for j in np.argsort(-frac)[:rem]:
+                counts[j] += 1
+
+        splits = np.split(remaining_idx, np.cumsum(counts)[:-1])
         for i in range(num_clients):
             client_local_indices[i] = splits[i].tolist()
             
