@@ -474,3 +474,30 @@
 2026-04-18 05:27:05,905 flwr INFO 	            (7, 0.7122000000000002),
 2026-04-18 05:27:05,905 flwr INFO 	            (8, 0.7221)]}
 2026-04-18 05:27:05,905 flwr INFO 
+2026-05-15 21:39:33,234 root INFO Эксперимент с разбиением: dirichlet
+2026-05-15 21:41:59,655 flwr WARNING DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-05-15 21:41:59,657 flwr INFO Starting Flower simulation, config: num_rounds=100, no round_timeout
+2026-05-15 21:42:08,289 flwr INFO Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'memory': 170204274688.0, 'object_store_memory': 72944689152.0, 'node:83.149.248.99': 1.0, 'CPU': 80.0}
+2026-05-15 21:42:08,289 flwr INFO Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-05-15 21:42:08,289 flwr INFO No `client_resources` specified. Using minimal resources for clients.
+2026-05-15 21:42:08,290 flwr INFO Flower VCE: Resources for each Virtual Client: {'num_cpus': 1, 'num_gpus': 0.0}
+2026-05-15 21:42:08,440 flwr INFO Flower VCE: Creating VirtualClientEngineActorPool with 80 actors
+2026-05-15 21:42:08,441 flwr INFO [INIT]
+2026-05-15 21:42:08,441 flwr INFO Requesting initial parameters from one random client
+2026-05-15 21:42:23,253 flwr INFO Received initial parameters from one random client
+2026-05-15 21:42:23,253 flwr INFO Starting evaluation of initial global parameters
+2026-05-15 21:42:23,253 flwr INFO Evaluation returned no results (`None`)
+2026-05-15 21:42:23,254 flwr INFO 
+2026-05-15 21:42:23,254 flwr INFO [ROUND 1]
+2026-05-15 21:42:23,256 flwr INFO configure_fit: strategy sampled 15 clients (out of 15)
