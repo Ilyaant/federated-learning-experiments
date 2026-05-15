@@ -21,8 +21,8 @@ np.random.seed(42)
 
 EPOCHS = 3
 ROUNDS = 100
-# SHARED_RATIO = 0.1
-SHARED_RATIO = 0
+SHARED_RATIO = 0.1
+# SHARED_RATIO = 0
 BATCH_SIZE = 64
 NUM_CLIENTS = 15
 NUM_CLASSES = 100
@@ -140,8 +140,7 @@ def run_experiment(split_strategy: str, shared_ratio: float, num_clients: int = 
 
 
 if __name__ == "__main__":
-    # for share_strategy in ["dirichlet", "pathological", "quantity_skew", "iid"]:
-    for share_strategy in ["quantity_skew", "iid"]:
+    for share_strategy in ["dirichlet", "pathological", "quantity_skew", "iid"]:
         history_exp2 = run_experiment(
             share_strategy, 
             shared_ratio=SHARED_RATIO,
