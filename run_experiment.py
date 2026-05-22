@@ -28,10 +28,12 @@ NUM_CLIENTS = 15
 NUM_CLASSES = 100
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-if SHARED_RATIO == 0:
-    metrics_log_file = 'metrics_0.txt'
-else:
-    metrics_log_file = 'metrics.txt'
+# if SHARED_RATIO == 0:
+#     metrics_log_file = 'metrics_0.txt'
+# else:
+#     metrics_log_file = 'metrics.txt'
+
+metrics_log_file = 'metrics_noniid.txt'
 
 logging.basicConfig(filename=metrics_log_file,
                     filemode='a',
@@ -140,7 +142,8 @@ def run_experiment(split_strategy: str, shared_ratio: float, num_clients: int = 
 
 
 if __name__ == "__main__":
-    for share_strategy in ["dirichlet", "pathological", "quantity_skew", "iid"]:
+    # for share_strategy in ["dirichlet", "pathological", "quantity_skew", "iid"]:
+    for share_strategy in ["pathological"]:
         history_exp2 = run_experiment(
             share_strategy, 
             shared_ratio=SHARED_RATIO,
@@ -154,4 +157,20 @@ if __name__ == "__main__":
         print("F1-score:", history_exp2.metrics_distributed['f1'][-1][1])
 
         with open(f'history_{share_strategy}_{SHARED_RATIO}.pkl', 'wb') as f:
+            pickle.dump(history_exp2, f)
+        
+        history_exp2 = run_experiment(
+            share_strategy, 
+            shared_ratio=0,
+            num_clients=NUM_CLIENTS,
+            num_rounds=ROUNDS,
+            device=DEVICE
+        )
+
+        print("\n--- ИТОГОВЫЕ РЕЗУЛЬТАТЫ (ПОСЛЕДНИЙ РАУНД) ---")
+        print("Accuracy:", history_exp2.metrics_distributed['accuracy'][-1][1])
+        print("F1-score:", history_exp2.metrics_distributed['f1'][-1][1])
+
+        # with open(f'history_{share_strategy}_{SHARED_RATIO}.pkl', 'wb') as f:
+        with open(f'history_{share_strategy}_0.pkl', 'wb') as f:
             pickle.dump(history_exp2, f)
