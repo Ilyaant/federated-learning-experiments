@@ -102,17 +102,17 @@ def split_cifar100(dataset, num_clients=5, strategy="iid", shared_ratio=0.1, **k
                 
     elif strategy == "pathological":
         # Стратегия 4: Патологический Non-IID (Клиент видит только уникальные классы)
-        # 100 классов / 5 клиентов = по 20 уникальных классов на клиента
+        # Классы не пересекаются между клиентами; при num_clients ∤ 100 часть клиентов
+        # получает на 1 класс больше (напр. 15 клиентов: 10×7 + 5×6 = 100).
         rem_class_indices = {i: [] for i in range(100)}
         for idx in remaining_idx:
             rem_class_indices[targets[idx]].append(idx)
-            
-        classes_per_client = 100 // num_clients
-        classes_assigned = np.random.permutation(100) # Перемешиваем классы
-        
+
+        classes_assigned = np.random.permutation(100)
+        client_class_splits = np.array_split(classes_assigned, num_clients)
+
         for i in range(num_clients):
-            client_classes = classes_assigned[i*classes_per_client : (i+1)*classes_per_client]
-            for cls in client_classes:
+            for cls in client_class_splits[i]:
                 client_local_indices[i].extend(rem_class_indices[cls])
                 
     else:
