@@ -3,7 +3,7 @@ import pickle
 import pyrallis
 import torch
 
-from run_experiment import run_experiment
+from src.run_experiment import run_experiment
 
 
 @dataclass
@@ -13,7 +13,7 @@ class Config:
     num_clients: int = 15
     rounds: int = 100
     device: str = 'cpu'
-    metrics_log_file: str = 'logs/metrics_0.txt'
+    metrics_log_file: str = '../logs/metrics_0.txt'
     model: str = 'CIFARMediumCNN'  # or efficientnet_v2_s or resnet18
     num_classes: int = 100
     batch_size: int = 64
@@ -21,7 +21,7 @@ class Config:
 
     def __post_init__(self):
         self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-        self.metrics_log_file = 'logs/metrics_ds.txt' if self.shared_ratio else 'logs/metrics_0.txt'
+        self.metrics_log_file = '../logs/metrics_ds.txt' if self.shared_ratio else '../logs/metrics_0.txt'
 
 
 @pyrallis.wrap()
@@ -44,7 +44,7 @@ def main(config: Config):
         print("Accuracy:", history_exp2.metrics_distributed['accuracy'][-1][1])
         print("F1-score:", history_exp2.metrics_distributed['f1'][-1][1])
 
-        with open(f'data/history_{share_strategy}_{config.shared_ratio}.pkl', 'wb') as f:
+        with open(f'../metrics/history_{share_strategy}_{config.shared_ratio}.pkl', 'wb') as f:
             pickle.dump(history_exp2, f)
 
 

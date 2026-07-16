@@ -9,9 +9,9 @@ import numpy as np
 import random
 import logging
 
-from split_data import split_cifar100, analyze_split
-from models import CIFARMediumCNN, train, test
-from metrics import print_client_distribution_metrics, weighted_average
+from src.split_data import split_cifar100, analyze_split
+from src.models import CIFARMediumCNN, train, test
+from src.metrics import print_client_distribution_metrics, weighted_average
 
 
 torch.manual_seed(42)
@@ -62,7 +62,7 @@ def run_experiment(
     model_name: str = 'CIFARMediumCNN',
     num_classes: int = 100,
     batch_size: int = 64,
-    metrics_log_file: str = 'metrics_0.txt'
+    metrics_log_file: str = '../logs/metrics_0.txt'
 ):
     logging.basicConfig(filename=metrics_log_file,
                     filemode='a',
@@ -95,7 +95,7 @@ def run_experiment(
         **kwargs
     )
     analyze_split(local_indices, shared_idx, cifar100_train, split_strategy)
-    cifar100_test = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=test_transform)
+    cifar100_test = torchvision.datasets.CIFAR100(root='../data', train=False, download=True, transform=test_transform)
     print_client_distribution_metrics(client_datasets, num_classes=num_classes)
     testloader = DataLoader(cifar100_test, batch_size=batch_size)
 
