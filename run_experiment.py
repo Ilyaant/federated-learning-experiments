@@ -8,7 +8,6 @@ from collections import OrderedDict
 import numpy as np
 import random
 import logging
-import pickle
 
 from split_data import split_cifar100, analyze_split
 from models import CIFARMediumCNN, train, test
@@ -19,36 +18,16 @@ torch.manual_seed(42)
 random.seed(42)
 np.random.seed(42)
 
-EPOCHS = 3
-ROUNDS = 100
-SHARED_RATIO = 0.1
-# SHARED_RATIO = 0
-BATCH_SIZE = 64
-NUM_CLIENTS = 15
-NUM_CLASSES = 100
-DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-
-# if SHARED_RATIO == 0:
-#     metrics_log_file = 'metrics_0.txt'
-# else:
-#     metrics_log_file = 'metrics.txt'
-
-metrics_log_file = 'metrics_noniid.txt'
-
-logging.basicConfig(filename=metrics_log_file,
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.INFO)
-
 
 class CIFARClient(fl.client.NumPyClient):
-    def __init__(self, model, trainloader, testloader):
+    def __init__(self, model, trainloader, testloader, epochs, device):
         self.model = model
         self.trainloader = trainloader
         self.testloader = testloader
+        self.epochs = epochs
+        self.device = device
 
-    def get_parameters(self, config):
+    def get_parameters(self):
         return[val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
@@ -56,14 +35,14 @@ class CIFARClient(fl.client.NumPyClient):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.load_state_dict(state_dict, strict=True)
 
-    def fit(self, parameters, config):
+    def fit(self, parameters):
         self.set_parameters(parameters)
-        train(self.model, self.trainloader, epochs=EPOCHS, device=DEVICE)
+        train(self.model, self.trainloader, epochs=self.epochs, device=self.device)
         return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
-    def evaluate(self, parameters, config):
+    def evaluate(self, parameters):
         self.set_parameters(parameters)
-        loss, accuracy, precision, recall, f1 = test(self.model, self.testloader, device=DEVICE)
+        loss, accuracy, precision, recall, f1 = test(self.model, self.testloader, device=self.device)
 
         return float(loss), len(self.testloader.dataset), {
             "accuracy": float(accuracy),
@@ -73,7 +52,23 @@ class CIFARClient(fl.client.NumPyClient):
         }
 
 
-def run_experiment(split_strategy: str, shared_ratio: float, num_clients: int = 5, num_rounds: int = 5, device: str = 'cpu'):
+def run_experiment(
+    split_strategy: str,
+    shared_ratio: float,
+    num_clients: int = 5,
+    num_rounds: int = 5,
+    epochs: int = 5,
+    device: str = 'cpu',
+    model_name: str = 'CIFARMediumCNN',
+    num_classes: int = 100,
+    batch_size: int = 64,
+    metrics_log_file: str = 'metrics_0.txt'
+):
+    logging.basicConfig(filename=metrics_log_file,
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.INFO)
     logging.info(f"Эксперимент с разбиением: {split_strategy}")
     # Подготовка данных
     train_transform = v2.Compose([
@@ -101,24 +96,26 @@ def run_experiment(split_strategy: str, shared_ratio: float, num_clients: int = 
     )
     analyze_split(local_indices, shared_idx, cifar100_train, split_strategy)
     cifar100_test = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=test_transform)
-    print_client_distribution_metrics(client_datasets, num_classes=NUM_CLASSES)
-    testloader = DataLoader(cifar100_test, batch_size=BATCH_SIZE)
+    print_client_distribution_metrics(client_datasets, num_classes=num_classes)
+    testloader = DataLoader(cifar100_test, batch_size=batch_size)
 
     # Функция для генерации клиента по его ID
     def client_fn(cid: str) -> fl.client.Client:
-        model = CIFARMediumCNN()
+        if model_name == 'CIFARMediumCNN':
+            model = CIFARMediumCNN()
+        
+        if model_name == 'efficientnet_v2_s':
+            model = torchvision.models.efficientnet_v2_s(weights=None)
+            model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
 
-        # model = torchvision.models.efficientnet_v2_s(weights=None)
-        # model.classifier[1] = nn.Linear(model.classifier[1].in_features, NUM_CLASSES)
-
-        # model = torchvision.models.resnet18(weights=None, num_classes=NUM_CLASSES)
-        # model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        # model.maxpool = nn.Identity()
+        if model_name == 'resnet18':
+            model = torchvision.models.resnet18(weights=None, num_classes=num_classes)
+            model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            model.maxpool = nn.Identity()
 
         model = model.to(device)
-        trainloader = DataLoader(client_datasets[int(cid)], batch_size=BATCH_SIZE, shuffle=True)
-        # .to_client() преобразует NumPyClient в базовый Client
-        return CIFARClient(model, trainloader, testloader).to_client()
+        trainloader = DataLoader(client_datasets[int(cid)], batch_size=batch_size, shuffle=True)
+        return CIFARClient(model, trainloader, testloader, epochs, device).to_client()
 
     # Стратегия сервера (FedAvg)
     strategy = fl.server.strategy.FedAvg(
@@ -139,38 +136,3 @@ def run_experiment(split_strategy: str, shared_ratio: float, num_clients: int = 
     )
     
     return history
-
-
-if __name__ == "__main__":
-    # for share_strategy in ["dirichlet", "pathological", "quantity_skew", "iid"]:
-    for share_strategy in ["pathological"]:
-        history_exp2 = run_experiment(
-            share_strategy, 
-            shared_ratio=SHARED_RATIO,
-            num_clients=NUM_CLIENTS,
-            num_rounds=ROUNDS,
-            device=DEVICE
-        )
-
-        print("\n--- ИТОГОВЫЕ РЕЗУЛЬТАТЫ (ПОСЛЕДНИЙ РАУНД) ---")
-        print("Accuracy:", history_exp2.metrics_distributed['accuracy'][-1][1])
-        print("F1-score:", history_exp2.metrics_distributed['f1'][-1][1])
-
-        with open(f'history_{share_strategy}_{SHARED_RATIO}.pkl', 'wb') as f:
-            pickle.dump(history_exp2, f)
-        
-        history_exp2 = run_experiment(
-            share_strategy, 
-            shared_ratio=0,
-            num_clients=NUM_CLIENTS,
-            num_rounds=ROUNDS,
-            device=DEVICE
-        )
-
-        print("\n--- ИТОГОВЫЕ РЕЗУЛЬТАТЫ (ПОСЛЕДНИЙ РАУНД) ---")
-        print("Accuracy:", history_exp2.metrics_distributed['accuracy'][-1][1])
-        print("F1-score:", history_exp2.metrics_distributed['f1'][-1][1])
-
-        # with open(f'history_{share_strategy}_{SHARED_RATIO}.pkl', 'wb') as f:
-        with open(f'history_{share_strategy}_0.pkl', 'wb') as f:
-            pickle.dump(history_exp2, f)
