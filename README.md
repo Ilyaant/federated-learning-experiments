@@ -1,6 +1,7 @@
 # Эксперименты по федеративному обучению
 В этом репозитории содержатся эксперименты с датасетом CIFAR-100 и федеративным обучением
 ## Установка зависимостей
+### Напрямую
 Для скачивания репозитория выполнить:
 ```shell
 git clone https://github.com/Ilyaant/federated-learning-experiments.git
@@ -9,6 +10,16 @@ git clone https://github.com/Ilyaant/federated-learning-experiments.git
 ```shell
 pip install -r requirements.txt
 ```
+### С использованием Docker
+Выполнить сборку образа:
+```shell
+docker build -t fl-experiments-image .
+```
+Запустить контейнер:
+```shell
+docker run -itd --name fl-experiments --gpus all fl-experiments-image /bin/bash
+```
+Внутрь контейнера клонировать репозиторий и выполнить установку зависимостей (см. предыдущий пункт).
 **Требуется Python 3.12.10**
 ## Запуск экспериментов
 Для запуска эксперимента **с подходом data sharing** выполнить:
