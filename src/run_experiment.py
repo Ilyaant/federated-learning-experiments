@@ -1,251 +1,251 @@
 import os
 import copy
 import logging
+from dataclasses import dataclass
+import pyrallis
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
 from torchvision import datasets, transforms
 from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
-
 from torch.utils.data import DataLoader
+from transformers import ConvNeXTV2Config, ConvNextV2Model
 
-# ==========================
-# Настройки
-# ==========================
 
-DATA_DIR = "data/brodatz_exp"
+@dataclass
+class Config:
+    data_dir: str = "data/brodatz_exp"
+    batch_size: int = 32
+    image_size: int = 224
+    epochs: int = 25
+    lr: float = 1e-4
+    device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model: str = 'ConvNextV2Model'
 
-BATCH_SIZE = 32
-IMAGE_SIZE = 224
 
-EPOCHS = 25
-
-LR = 1e-4
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-logging.basicConfig(filename='logs/efficientnet_v2_s.log',
+@pyrallis.wrap()
+def main(config: Config):
+    logging.basicConfig(filename=f'logs/{config.model}.log',
                     filemode='a',
                     format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-# ==========================
-# Аугментации
-# ==========================
+    train_transform = transforms.Compose([
+        transforms.Resize((config.image_size, config.image_size)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomRotation(20),
+        transforms.RandomResizedCrop(
+            config.image_size,
+            scale=(0.8, 1.0)
+        ),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485,0.456,0.406],
+            std=[0.229,0.224,0.225]
+        )
+    ])
 
-train_transform = transforms.Compose([
-    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.RandomRotation(20),
-    transforms.RandomResizedCrop(
-        IMAGE_SIZE,
-        scale=(0.8, 1.0)
-    ),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485,0.456,0.406],
-        std=[0.229,0.224,0.225]
+    test_transform = transforms.Compose([
+        transforms.Resize((config.image_size, config.image_size)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485,0.456,0.406],
+            std=[0.229,0.224,0.225]
+        )
+    ])
+
+    # ==========================
+    # Dataset
+    # ==========================
+
+    train_dataset = datasets.ImageFolder(
+        os.path.join(config.data_dir, "train"),
+        transform=train_transform
     )
-])
 
-test_transform = transforms.Compose([
-    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485,0.456,0.406],
-        std=[0.229,0.224,0.225]
+    val_dataset = datasets.ImageFolder(
+        os.path.join(config.data_dir, "val"),
+        transform=test_transform
     )
-])
 
-# ==========================
-# Dataset
-# ==========================
+    test_dataset = datasets.ImageFolder(
+        os.path.join(config.data_dir, "test"),
+        transform=test_transform
+    )
 
-train_dataset = datasets.ImageFolder(
-    os.path.join(DATA_DIR, "train"),
-    transform=train_transform
-)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=config.batch_size,
+        shuffle=True,
+        num_workers=0
+    )
 
-val_dataset = datasets.ImageFolder(
-    os.path.join(DATA_DIR, "val"),
-    transform=test_transform
-)
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=0
+    )
 
-test_dataset = datasets.ImageFolder(
-    os.path.join(DATA_DIR, "test"),
-    transform=test_transform
-)
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=0
+    )
 
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=BATCH_SIZE,
-    shuffle=True,
-    num_workers=0
-)
+    NUM_CLASSES = len(train_dataset.classes)
 
-val_loader = DataLoader(
-    val_dataset,
-    batch_size=BATCH_SIZE,
-    shuffle=False,
-    num_workers=0
-)
+    print(train_dataset.classes)
 
-test_loader = DataLoader(
-    test_dataset,
-    batch_size=BATCH_SIZE,
-    shuffle=False,
-    num_workers=0
-)
+    # ==========================
+    # Модель
+    # ==========================
+    if config.model == 'efficientnet_v2_s'
+        weights = EfficientNet_V2_S_Weights.DEFAULT
+        model = efficientnet_v2_s(weights=weights)
 
-NUM_CLASSES = len(train_dataset.classes)
+    in_features = model.classifier[1].in_features
 
-print(train_dataset.classes)
+    model.classifier[1] = nn.Linear(
+        in_features,
+        NUM_CLASSES
+    )
 
-# ==========================
-# Модель
-# ==========================
+    model = model.to(config.device)
 
-weights = EfficientNet_V2_S_Weights.DEFAULT
+    # ==========================
+    # Loss
+    # ==========================
 
-model = efficientnet_v2_s(weights=weights)
+    criterion = nn.CrossEntropyLoss()
 
-in_features = model.classifier[1].in_features
+    optimizer = optim.AdamW(
+        model.parameters(),
+        lr=config.lr,
+        weight_decay=1e-4
+    )
 
-model.classifier[1] = nn.Linear(
-    in_features,
-    NUM_CLASSES
-)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=config.epochs
+    )
 
-model = model.to(DEVICE)
+    # ==========================
+    # Train
+    # ==========================
 
-# ==========================
-# Loss
-# ==========================
+    best_acc = 0
+    best_weights = copy.deepcopy(model.state_dict())
 
-criterion = nn.CrossEntropyLoss()
+    for epoch in range(config.epochs):
 
-optimizer = optim.AdamW(
-    model.parameters(),
-    lr=LR,
-    weight_decay=1e-4
-)
+        print(f"\nEpoch {epoch+1}/{config.epochs}")
 
-scheduler = optim.lr_scheduler.CosineAnnealingLR(
-    optimizer,
-    T_max=EPOCHS
-)
+        ##########################
+        # TRAIN
+        ##########################
 
-# ==========================
-# Train
-# ==========================
+        model.train()
 
-best_acc = 0
-best_weights = copy.deepcopy(model.state_dict())
+        running_loss = 0
+        running_correct = 0
 
-for epoch in range(EPOCHS):
+        for images, labels in train_loader:
 
-    print(f"\nEpoch {epoch+1}/{EPOCHS}")
+            images = images.to(config.device)
+            labels = labels.to(config.device)
 
-    ##########################
-    # TRAIN
-    ##########################
-
-    model.train()
-
-    running_loss = 0
-    running_correct = 0
-
-    for images, labels in train_loader:
-
-        images = images.to(DEVICE)
-        labels = labels.to(DEVICE)
-
-        optimizer.zero_grad()
-
-        outputs = model(images)
-
-        loss = criterion(outputs, labels)
-
-        loss.backward()
-
-        optimizer.step()
-
-        preds = outputs.argmax(1)
-
-        running_loss += loss.item() * images.size(0)
-        running_correct += (preds == labels).sum().item()
-
-    train_loss = running_loss / len(train_dataset)
-    train_acc = running_correct / len(train_dataset)
-
-    ##########################
-    # VALIDATION
-    ##########################
-
-    model.eval()
-
-    running_loss = 0
-    running_correct = 0
-
-    with torch.no_grad():
-
-        for images, labels in val_loader:
-
-            images = images.to(DEVICE)
-            labels = labels.to(DEVICE)
+            optimizer.zero_grad()
 
             outputs = model(images)
 
             loss = criterion(outputs, labels)
+
+            loss.backward()
+
+            optimizer.step()
 
             preds = outputs.argmax(1)
 
             running_loss += loss.item() * images.size(0)
             running_correct += (preds == labels).sum().item()
 
-    val_loss = running_loss / len(val_dataset)
-    val_acc = running_correct / len(val_dataset)
+        train_loss = running_loss / len(train_dataset)
+        train_acc = running_correct / len(train_dataset)
 
-    scheduler.step()
+        ##########################
+        # VALIDATION
+        ##########################
 
-    logging.info(f"Train Loss: {train_loss:.4f}")
-    logging.info(f"Train Acc : {train_acc:.4f}")
+        model.eval()
 
-    logging.info(f"Val Loss  : {val_loss:.4f}")
-    logging.info(f"Val Acc   : {val_acc:.4f}")
+        running_loss = 0
+        running_correct = 0
 
-    if val_acc > best_acc:
-        best_acc = val_acc
-        best_weights = copy.deepcopy(model.state_dict())
+        with torch.no_grad():
 
-# ==========================
-# TEST
-# ==========================
+            for images, labels in val_loader:
 
-model.load_state_dict(best_weights)
+                images = images.to(config.device)
+                labels = labels.to(config.device)
 
-model.eval()
+                outputs = model(images)
 
-correct = 0
+                loss = criterion(outputs, labels)
 
-with torch.no_grad():
+                preds = outputs.argmax(1)
 
-    for images, labels in test_loader:
+                running_loss += loss.item() * images.size(0)
+                running_correct += (preds == labels).sum().item()
 
-        images = images.to(DEVICE)
-        labels = labels.to(DEVICE)
+        val_loss = running_loss / len(val_dataset)
+        val_acc = running_correct / len(val_dataset)
 
-        outputs = model(images)
+        scheduler.step()
 
-        preds = outputs.argmax(1)
+        logging.info(f"Train Loss: {train_loss:.4f}")
+        logging.info(f"Train Acc : {train_acc:.4f}")
 
-        correct += (preds == labels).sum().item()
+        logging.info(f"Val Loss  : {val_loss:.4f}")
+        logging.info(f"Val Acc   : {val_acc:.4f}")
 
-test_acc = correct / len(test_dataset)
+        if val_acc > best_acc:
+            best_acc = val_acc
+            best_weights = copy.deepcopy(model.state_dict())
 
-logging.info(f"\nBest validation accuracy: {best_acc:.4f}")
-logging.info(f"Test accuracy: {test_acc:.4f}")
+    # ==========================
+    # TEST
+    # ==========================
 
-torch.save(model.state_dict(), "models/brodatz_efficientnetv2.pth")
+    model.load_state_dict(best_weights)
+
+    model.eval()
+
+    correct = 0
+
+    with torch.no_grad():
+
+        for images, labels in test_loader:
+
+            images = images.to(config.device)
+            labels = labels.to(config.device)
+
+            outputs = model(images)
+
+            preds = outputs.argmax(1)
+
+            correct += (preds == labels).sum().item()
+
+    test_acc = correct / len(test_dataset)
+
+    logging.info(f"\nBest validation accuracy: {best_acc:.4f}")
+    logging.info(f"Test accuracy: {test_acc:.4f}")
+
+    torch.save(model.state_dict(), "models/brodatz_efficientnetv2.pth")
+
+
+if __name__ == "__main__":
+    main()
