@@ -1,138 +1,251 @@
+import os
+import copy
+import logging
 import torch
 import torch.nn as nn
-from torchvision.transforms import v2
-import torchvision
+import torch.optim as optim
+
+from torchvision import datasets, transforms
+from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
+
 from torch.utils.data import DataLoader
-import flwr as fl
-from collections import OrderedDict
-import numpy as np
-import random
-import logging
 
-from src.split_data import split_cifar100, analyze_split
-from src.models import CIFARMediumCNN, train, test
-from src.metrics import print_client_distribution_metrics, weighted_average
+# ==========================
+# Настройки
+# ==========================
 
+DATA_DIR = "data/brodatz_exp"
 
-torch.manual_seed(42)
-random.seed(42)
-np.random.seed(42)
+BATCH_SIZE = 32
+IMAGE_SIZE = 224
 
+EPOCHS = 25
 
-class CIFARClient(fl.client.NumPyClient):
-    def __init__(self, model, trainloader, testloader, epochs, device):
-        self.model = model
-        self.trainloader = trainloader
-        self.testloader = testloader
-        self.epochs = epochs
-        self.device = device
+LR = 1e-4
 
-    def get_parameters(self):
-        return[val.cpu().numpy() for _, val in self.model.state_dict().items()]
-
-    def set_parameters(self, parameters):
-        params_dict = zip(self.model.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        self.model.load_state_dict(state_dict, strict=True)
-
-    def fit(self, parameters):
-        self.set_parameters(parameters)
-        train(self.model, self.trainloader, epochs=self.epochs, device=self.device)
-        return self.get_parameters(config={}), len(self.trainloader.dataset), {}
-
-    def evaluate(self, parameters):
-        self.set_parameters(parameters)
-        loss, accuracy, precision, recall, f1 = test(self.model, self.testloader, device=self.device)
-
-        return float(loss), len(self.testloader.dataset), {
-            "accuracy": float(accuracy),
-            "precision": float(precision),
-            "recall": float(recall),
-            "f1": float(f1)
-        }
-
-
-def run_experiment(
-    split_strategy: str,
-    shared_ratio: float,
-    num_clients: int = 5,
-    num_rounds: int = 5,
-    epochs: int = 5,
-    device: str = 'cpu',
-    model_name: str = 'CIFARMediumCNN',
-    num_classes: int = 100,
-    batch_size: int = 64,
-    metrics_log_file: str = '../logs/metrics_0.txt'
-):
-    logging.basicConfig(filename=metrics_log_file,
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logging.basicConfig(filename='logs/brodatz.log',
                     filemode='a',
                     format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
-    logging.info(f"Эксперимент с разбиением: {split_strategy}")
-    # Подготовка данных
-    train_transform = v2.Compose([
-        v2.ToTensor(),
-        v2.RandomCrop(32, padding=4),
-        v2.RandomHorizontalFlip(),
-        v2.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-    ])
 
-    test_transform = v2.Compose([
-        v2.ToTensor(),
-        v2.Resize((32, 32)),
-        #v2.Normalize(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD),  # from ImageNet
-        v2.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-    ])
-    cifar100_train = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=train_transform)
+# ==========================
+# Аугментации
+# ==========================
 
-    kwargs = {'alpha': 0.1} if split_strategy == "dirichlet" else {}
-    client_datasets, local_indices, shared_idx = split_cifar100(
-        dataset=cifar100_train, 
-        num_clients=num_clients, 
-        strategy=split_strategy, 
-        shared_ratio=shared_ratio,
-        **kwargs
+train_transform = transforms.Compose([
+    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
+    transforms.RandomRotation(20),
+    transforms.RandomResizedCrop(
+        IMAGE_SIZE,
+        scale=(0.8, 1.0)
+    ),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485,0.456,0.406],
+        std=[0.229,0.224,0.225]
     )
-    analyze_split(local_indices, shared_idx, cifar100_train, split_strategy)
-    cifar100_test = torchvision.datasets.CIFAR100(root='../data', train=False, download=True, transform=test_transform)
-    print_client_distribution_metrics(client_datasets, num_classes=num_classes)
-    testloader = DataLoader(cifar100_test, batch_size=batch_size)
+])
 
-    # Функция для генерации клиента по его ID
-    def client_fn(cid: str) -> fl.client.Client:
-        if model_name == 'CIFARMediumCNN':
-            model = CIFARMediumCNN()
-        
-        if model_name == 'efficientnet_v2_s':
-            model = torchvision.models.efficientnet_v2_s(weights=None)
-            model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
-
-        if model_name == 'resnet18':
-            model = torchvision.models.resnet18(weights=None, num_classes=num_classes)
-            model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-            model.maxpool = nn.Identity()
-
-        model = model.to(device)
-        trainloader = DataLoader(client_datasets[int(cid)], batch_size=batch_size, shuffle=True)
-        return CIFARClient(model, trainloader, testloader, epochs, device).to_client()
-
-    # Стратегия сервера (FedAvg)
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=1.0, # Обучаем всех клиентов
-        fraction_evaluate=1.0, # Оцениваем на всех клиентах
-        min_fit_clients=num_clients,
-        min_evaluate_clients=num_clients,
-        min_available_clients=num_clients,
-        evaluate_metrics_aggregation_fn=weighted_average, # Усреднение точности
+test_transform = transforms.Compose([
+    transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485,0.456,0.406],
+        std=[0.229,0.224,0.225]
     )
+])
 
-    # Запуск симуляции (Flower поднимает виртуальные клиенты с использованием Ray)
-    history = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=num_clients,
-        config=fl.server.ServerConfig(num_rounds=num_rounds),
-        strategy=strategy,
-    )
-    
-    return history
+# ==========================
+# Dataset
+# ==========================
+
+train_dataset = datasets.ImageFolder(
+    os.path.join(DATA_DIR, "train"),
+    transform=train_transform
+)
+
+val_dataset = datasets.ImageFolder(
+    os.path.join(DATA_DIR, "val"),
+    transform=test_transform
+)
+
+test_dataset = datasets.ImageFolder(
+    os.path.join(DATA_DIR, "test"),
+    transform=test_transform
+)
+
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=BATCH_SIZE,
+    shuffle=True,
+    num_workers=8
+)
+
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=BATCH_SIZE,
+    shuffle=False,
+    num_workers=8
+)
+
+test_loader = DataLoader(
+    test_dataset,
+    batch_size=BATCH_SIZE,
+    shuffle=False,
+    num_workers=8
+)
+
+NUM_CLASSES = len(train_dataset.classes)
+
+print(train_dataset.classes)
+
+# ==========================
+# Модель
+# ==========================
+
+weights = EfficientNet_V2_S_Weights.DEFAULT
+
+model = efficientnet_v2_s(weights=weights)
+
+in_features = model.classifier[1].in_features
+
+model.classifier[1] = nn.Linear(
+    in_features,
+    NUM_CLASSES
+)
+
+model = model.to(DEVICE)
+
+# ==========================
+# Loss
+# ==========================
+
+criterion = nn.CrossEntropyLoss()
+
+optimizer = optim.AdamW(
+    model.parameters(),
+    lr=LR,
+    weight_decay=1e-4
+)
+
+scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    optimizer,
+    T_max=EPOCHS
+)
+
+# ==========================
+# Train
+# ==========================
+
+best_acc = 0
+best_weights = copy.deepcopy(model.state_dict())
+
+for epoch in range(EPOCHS):
+
+    print(f"\nEpoch {epoch+1}/{EPOCHS}")
+
+    ##########################
+    # TRAIN
+    ##########################
+
+    model.train()
+
+    running_loss = 0
+    running_correct = 0
+
+    for images, labels in train_loader:
+
+        images = images.to(DEVICE)
+        labels = labels.to(DEVICE)
+
+        optimizer.zero_grad()
+
+        outputs = model(images)
+
+        loss = criterion(outputs, labels)
+
+        loss.backward()
+
+        optimizer.step()
+
+        preds = outputs.argmax(1)
+
+        running_loss += loss.item() * images.size(0)
+        running_correct += (preds == labels).sum().item()
+
+    train_loss = running_loss / len(train_dataset)
+    train_acc = running_correct / len(train_dataset)
+
+    ##########################
+    # VALIDATION
+    ##########################
+
+    model.eval()
+
+    running_loss = 0
+    running_correct = 0
+
+    with torch.no_grad():
+
+        for images, labels in val_loader:
+
+            images = images.to(DEVICE)
+            labels = labels.to(DEVICE)
+
+            outputs = model(images)
+
+            loss = criterion(outputs, labels)
+
+            preds = outputs.argmax(1)
+
+            running_loss += loss.item() * images.size(0)
+            running_correct += (preds == labels).sum().item()
+
+    val_loss = running_loss / len(val_dataset)
+    val_acc = running_correct / len(val_dataset)
+
+    scheduler.step()
+
+    logging.info(f"Train Loss: {train_loss:.4f}")
+    logging.info(f"Train Acc : {train_acc:.4f}")
+
+    logging.info(f"Val Loss  : {val_loss:.4f}")
+    logging.info(f"Val Acc   : {val_acc:.4f}")
+
+    if val_acc > best_acc:
+        best_acc = val_acc
+        best_weights = copy.deepcopy(model.state_dict())
+
+# ==========================
+# TEST
+# ==========================
+
+model.load_state_dict(best_weights)
+
+model.eval()
+
+correct = 0
+
+with torch.no_grad():
+
+    for images, labels in test_loader:
+
+        images = images.to(DEVICE)
+        labels = labels.to(DEVICE)
+
+        outputs = model(images)
+
+        preds = outputs.argmax(1)
+
+        correct += (preds == labels).sum().item()
+
+test_acc = correct / len(test_dataset)
+
+logging.info(f"\nBest validation accuracy: {best_acc:.4f}")
+logging.info(f"Test accuracy: {test_acc:.4f}")
+
+torch.save(model.state_dict(), "models/brodatz_efficientnetv2.pth")

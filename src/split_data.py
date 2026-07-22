@@ -1,188 +1,110 @@
-import numpy as np
-import torchvision
-from torch.utils.data import Subset
-from collections import Counter
+import os
+import cv2
+import random
+from pathlib import Path
 
 
-def get_shared_and_remaining_indices(targets, shared_ratio=0.1):
-    """
-    Выделяет общую выборку (shared_ratio от датасета) с сохранением баланса классов.
-    Возвращает индексы общей выборки и индексы оставшихся данных.
-    """
-    shared_indices = []
-    remaining_indices = []
-    
-    # Группируем индексы по классам (от 0 до 99)
-    class_indices = {i: [] for i in range(100)}
-    for idx, target in enumerate(targets):
-        class_indices[target].append(idx)
-        
-    for cls, indices in class_indices.items():
-        np.random.shuffle(indices)
-        split_point = int(len(indices) * shared_ratio)
-        
-        shared_indices.extend(indices[:split_point])
-        remaining_indices.extend(indices[split_point:])
-        
-    return shared_indices, remaining_indices, class_indices
+SOURCE_DIR = "data/brodatz"
+OUTPUT_DIR = "data/brodatz_exp"
+
+# Размер блока
+BLOCK_SIZE = 128
+
+# Размер патча
+PATCH_SIZE = 64
+
+# Шаг окна
+STRIDE = 32
+
+# Для воспроизводимости
+RANDOM_SEED = 42
+
+random.seed(RANDOM_SEED)
 
 
-def split_cifar100(dataset, num_clients=5, strategy="iid", shared_ratio=0.1, **kwargs):
-    """
-    Разбивает датасет на клиентов согласно стратегии + добавляет каждому общую выборку.
-    """
-    targets = np.array(dataset.targets)
-    
-    # 1. Выделяем общую выборку
-    shared_idx, remaining_idx, class_indices = get_shared_and_remaining_indices(targets, shared_ratio)
-    np.random.shuffle(remaining_idx)
-    
-    client_local_indices = {i: [] for i in range(num_clients)}
+for split in ("train", "val", "test"):
+    os.makedirs(os.path.join(OUTPUT_DIR, split), exist_ok=True)
 
-    # 2. Распределяем оставшиеся данные по стратегиям
-    if strategy == "iid":
-        # Стратегия 1: Равномерное распределение
-        splits = np.array_split(remaining_idx, num_clients)
-        for i in range(num_clients):
-            client_local_indices[i] = splits[i].tolist()
-            
-    elif strategy == "quantity_skew":
-        # Стратегия 2: Разный объем (Quantity Skew)
-        # proportions: доля remaining_idx на каждого клиента; длина == num_clients, сумма ~ 1
-        if "proportions" in kwargs:
-            proportions = np.asarray(kwargs["proportions"], dtype=float)
-        else:
-            # По умолчанию: как раньше для 5 клиентов (10%, 15%, …), в общем виде:
-            # p_i ∝ (i+1), i = 1..num_clients  =>  p_i = 2(i+1) / (n(n+3))
-            i = np.arange(1, num_clients + 1, dtype=float)
-            proportions = 2.0 * (i + 1.0) / (num_clients * (num_clients + 3.0))
 
-        if len(proportions) != num_clients:
-            raise ValueError(
-                f"quantity_skew: len(proportions)={len(proportions)} не совпадает с num_clients={num_clients}"
+def save_patches(block, class_name, split, block_id):
+    """Сохранение патчей одного блока."""
+
+    out_dir = os.path.join(
+        OUTPUT_DIR,
+        split,
+        class_name
+    )
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    h, w = block.shape[:2]
+
+    idx = 0
+
+    for y in range(0, h - PATCH_SIZE + 1, STRIDE):
+        for x in range(0, w - PATCH_SIZE + 1, STRIDE):
+
+            patch = block[
+                y:y + PATCH_SIZE,
+                x:x + PATCH_SIZE
+            ]
+
+            filename = os.path.join(
+                out_dir,
+                f"block{block_id:02d}_{idx:03d}.png"
             )
-        proportions = proportions / proportions.sum()
-        if not np.isclose(proportions.sum(), 1.0):
-            raise ValueError("quantity_skew: сумма пропорций должна быть равна 1 (с допуском float)")
 
-        n_rem = len(remaining_idx)
-        exact = proportions * n_rem
-        counts = np.floor(exact).astype(int)
-        rem = n_rem - int(counts.sum())
-        if rem > 0:
-            frac = exact - counts
-            for j in np.argsort(-frac)[:rem]:
-                counts[j] += 1
+            cv2.imwrite(filename, patch)
 
-        splits = np.split(remaining_idx, np.cumsum(counts)[:-1])
-        for i in range(num_clients):
-            client_local_indices[i] = splits[i].tolist()
-            
-    elif strategy == "dirichlet":
-        # Стратегия 3: Дисбаланс распределения Дирихле (Label Distribution Skew)
-        alpha = kwargs.get('alpha', 0.5)
-        
-        # Пересобираем оставшиеся индексы по классам
-        rem_class_indices = {i: [] for i in range(100)}
-        for idx in remaining_idx:
-            rem_class_indices[targets[idx]].append(idx)
-            
-        for cls in range(100):
-            # Генерируем пропорции для 5 клиентов из распределения Дирихле
-            proportions = np.random.dirichlet([alpha] * num_clients)
-            
-            cls_indices = rem_class_indices[cls]
-            np.random.shuffle(cls_indices)
-            
-            split_points = (np.cumsum(proportions) * len(cls_indices)).astype(int)[:-1]
-            splits = np.split(cls_indices, split_points)
-            
-            for i in range(num_clients):
-                client_local_indices[i].extend(splits[i].tolist())
-                
-    elif strategy == "pathological":
-        # Стратегия 4: Патологический Non-IID (Клиент видит только уникальные классы)
-        # Классы не пересекаются между клиентами; при num_clients ∤ 100 часть клиентов
-        # получает на 1 класс больше (напр. 15 клиентов: 10×7 + 5×6 = 100).
-        rem_class_indices = {i: [] for i in range(100)}
-        for idx in remaining_idx:
-            rem_class_indices[targets[idx]].append(idx)
+            idx += 1
 
-        classes_assigned = np.random.permutation(100)
-        client_class_splits = np.array_split(classes_assigned, num_clients)
+for image_path in sorted(Path(SOURCE_DIR).glob("*")):
 
-        for i in range(num_clients):
-            for cls in client_class_splits[i]:
-                client_local_indices[i].extend(rem_class_indices[cls])
-                
-    else:
-        raise ValueError("Неизвестная стратегия")
+    image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
 
-    # 3. Объединяем локальные данные с общей выборкой для каждого клиента
-    client_final_datasets = []
-    for i in range(num_clients):
-        # Перемешиваем, чтобы общая выборка не лежала куском в начале/конце
-        combined_indices = client_local_indices[i] + shared_idx
-        np.random.shuffle(combined_indices)
-        
-        # Создаем Subset PyTorch для удобства дальнейшего использования в DataLoader
-        # client_final_datasets[i] = Subset(dataset, combined_indices)
-        client_final_datasets.append(Subset(dataset, combined_indices))
-        
-    return client_final_datasets, client_local_indices, shared_idx
+    if image is None:
+        continue
 
+    h, w = image.shape
 
-# --- ДЕМОНСТРАЦИЯ РАБОТЫ И АНАЛИЗ ---
-def analyze_split(client_local_indices, shared_idx, original_dataset, strategy_name):
-    print(f"\n{'='*60}")
-    print(f"СТРАТЕГИЯ: {strategy_name.upper()}")
-    
-    # Анализируем общую выборку один раз
-    shared_targets = [original_dataset.targets[idx] for idx in shared_idx]
-    shared_unique_classes = len(set(shared_targets))
-    print(f"ОБЩАЯ ВЫБОРКА (Shared): {len(shared_idx)} фото, Уникальных классов: {shared_unique_classes}/100")
-    print(f"{'-'*60}")
-    
-    for client_id, local_indices in client_local_indices.items():
-        # Считаем метки ТОЛЬКО в индивидуальной (локальной) части
-        local_targets = [original_dataset.targets[idx] for idx in local_indices]
-        local_unique_classes = len(set(local_targets))
-        
-        # Считаем метки в смешанном датасете (как будет видеть нейросеть)
-        combined_unique_classes = len(set(local_targets + shared_targets))
-        
-        print(f"Клиент {client_id+1}:")
-        print(f"  -- Локальная часть: {len(local_targets)} фото | Уникальных классов: {local_unique_classes}/100")
-        
-        # Дополнительно: покажем дисбаланс (Топ-3 самых частых класса в локальной выборке)
-        if len(local_targets) > 0:
-            top_3_classes = Counter(local_targets).most_common(3)
-            top_3_str = ", ".join([f"Класс {c}: {cnt} шт." for c, cnt in top_3_classes])
-            print(f"     Самые частые локальные классы: {top_3_str}")
-            
-        print(f"  -- ИТОГО ДЛЯ ОБУЧЕНИЯ (Лок. + Общ.): {len(local_targets) + len(shared_idx)} фото | Уникальных классов: {combined_unique_classes}/100\n")
+    # assert h == 512 and w == 512, \
+    #     f"{image_path.name}: ожидалось 512×512, получено {w}×{h}"
+    if h != 512 or w != 512:
+        image = cv2.resize(image, (512, 512), interpolation=cv2.INTER_AREA)
 
+    class_name = image_path.stem
 
-if __name__ == "__main__":
-    np.random.seed(42)
-    
-    # Чтобы не скачивать каждый раз, download=False (если уже скачан)
-    cifar100_train = torchvision.datasets.CIFAR100(root='./data', train=True, download=True)
-    
-    shared_ratio = 0.10
-    strategies = ["iid", "quantity_skew", "dirichlet", "pathological"]
-    
-    for strat in strategies:
-        kwargs = {'alpha': 0.1} if strat == "dirichlet" else {} # alpha=0.1 для жесткого дисбаланса
-        
-        # Теперь получаем 3 переменные: готовые датасеты, локальные индексы, общие индексы
-        client_datasets, local_indices, shared_idx = split_cifar100(
-            dataset=cifar100_train, 
-            num_clients=5, 
-            strategy=strat, 
-            shared_ratio=shared_ratio,
-            **kwargs
-        )
-        
-        # Анализатор теперь смотрит внутрь "кухни"
-        analyze_split(local_indices, shared_idx, cifar100_train, strat)
+    blocks = []
+
+    block_id = 0
+
+    for by in range(0, 512, BLOCK_SIZE):
+        for bx in range(0, 512, BLOCK_SIZE):
+
+            block = image[
+                by:by + BLOCK_SIZE,
+                bx:bx + BLOCK_SIZE
+            ]
+
+            blocks.append((block_id, block))
+
+            block_id += 1
+
+    random.shuffle(blocks)
+
+    train_blocks = blocks[:11]
+    val_blocks = blocks[11:13]
+    test_blocks = blocks[13:]
+
+    for bid, block in train_blocks:
+        save_patches(block, class_name, "train", bid)
+
+    for bid, block in val_blocks:
+        save_patches(block, class_name, "val", bid)
+
+    for bid, block in test_blocks:
+        save_patches(block, class_name, "test", bid)
+
+    print(f"{class_name}: OK")
+
+print("Dataset successfully created.")
