@@ -25,11 +25,11 @@ docker run -itd --name fl-experiments --gpus all fl-experiments-image /bin/bash
 ## Запуск экспериментов
 Для запуска эксперимента **с подходом data sharing** выполнить:
 ```shell
-python __main__.py --config_path=configs/config_data_sharing.yaml
+python __main__.py --shared_ratio=0.1
 ```
 Для запуска эксперимента **без использования data sharing** выполнить:
 ```shell
-python __main__.py --config_path=configs/config_0.yaml
+python __main__.py --shared_ratio=0.0
 ```
 Для запуска эксперимента со своими параметрами создать соответствующий конфиг в папке `configs` и выполнить:
 ```shell
