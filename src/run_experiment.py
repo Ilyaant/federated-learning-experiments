@@ -24,7 +24,7 @@ EPOCHS = 25
 LR = 1e-4
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-logging.basicConfig(filename='logs/brodatz.log',
+logging.basicConfig(filename='logs/efficientnet_v2_s.log',
                     filemode='a',
                     format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -82,21 +82,21 @@ train_loader = DataLoader(
     train_dataset,
     batch_size=BATCH_SIZE,
     shuffle=True,
-    num_workers=8
+    num_workers=0
 )
 
 val_loader = DataLoader(
     val_dataset,
     batch_size=BATCH_SIZE,
     shuffle=False,
-    num_workers=8
+    num_workers=0
 )
 
 test_loader = DataLoader(
     test_dataset,
     batch_size=BATCH_SIZE,
     shuffle=False,
-    num_workers=8
+    num_workers=0
 )
 
 NUM_CLASSES = len(train_dataset.classes)
