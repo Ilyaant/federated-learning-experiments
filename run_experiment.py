@@ -9,7 +9,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
 from torch.utils.data import DataLoader
-from transformers import ConvNeXTV2Config, ConvNextV2Model
+from transformers import ConvNextV2Config, ConvNextV2Model
 from sklearn.metrics import f1_score
 
 from src.models import ConvNextV2Classifier
@@ -99,7 +99,7 @@ def main(config: Config):
         model.classifier[1] = nn.Linear(in_features, NUM_CLASSES)
 
     if config.model == "ConvNextV2Model":
-        convnext_config = ConvNeXTV2Config(
+        convnext_config = ConvNextV2Config(
             num_channels=3,
             num_labels=NUM_CLASSES
         )
