@@ -19,7 +19,7 @@ docker build -t fl-experiments-image .
 ```
 Запустить контейнер:
 ```shell
-docker run -itd --name fl-experiments --gpus all fl-experiments-image /bin/bash
+docker run -itd --name fl-experiments --ipc=host --gpus all fl-experiments-image /bin/bash
 ```
 Внутрь контейнера клонировать репозиторий и выполнить установку зависимостей (см. предыдущий пункт).
 ## Запуск экспериментов
