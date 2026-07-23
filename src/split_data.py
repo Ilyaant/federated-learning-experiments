@@ -2,109 +2,94 @@ import os
 import cv2
 import random
 from pathlib import Path
+from dataclasses import dataclass
+import pyrallis
 
 
-SOURCE_DIR = "data/brodatz"
-OUTPUT_DIR = "data/brodatz_exp"
+@dataclass
+class Config:
+    source_dir: str = "data/brodatz"
+    output_dir: str = "data/brodatz_exp"
+    block_size: int = 128
+    patch_size: int = 64
+    stride: int = 32
+    random_seed: int = 42
 
-# Размер блока
-BLOCK_SIZE = 128
-
-# Размер патча
-PATCH_SIZE = 64
-
-# Шаг окна
-STRIDE = 32
-
-# Для воспроизводимости
-RANDOM_SEED = 42
-
-random.seed(RANDOM_SEED)
+    def __post_init__(self):
+        random.seed(self.random_seed)
 
 
-for split in ("train", "val", "test"):
-    os.makedirs(os.path.join(OUTPUT_DIR, split), exist_ok=True)
-
-
-def save_patches(block, class_name, split, block_id):
+def save_patches(config, block, class_name, split, block_id):
     """Сохранение патчей одного блока."""
 
     out_dir = os.path.join(
-        OUTPUT_DIR,
+        config.output_dir,
         split,
         class_name
     )
-
     os.makedirs(out_dir, exist_ok=True)
-
     h, w = block.shape[:2]
-
     idx = 0
-
-    for y in range(0, h - PATCH_SIZE + 1, STRIDE):
-        for x in range(0, w - PATCH_SIZE + 1, STRIDE):
-
+    for y in range(0, h - config.patch_size + 1, config.stride):
+        for x in range(0, w - config.patch_size + 1, config.stride):
             patch = block[
-                y:y + PATCH_SIZE,
-                x:x + PATCH_SIZE
+                y:y + config.patch_size,
+                x:x + config.patch_size
             ]
-
             filename = os.path.join(
                 out_dir,
                 f"block{block_id:02d}_{idx:03d}.png"
             )
-
             cv2.imwrite(filename, patch)
-
             idx += 1
 
-for image_path in sorted(Path(SOURCE_DIR).glob("*")):
 
-    image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
+@pyrallis.wrap()
+def main(config: Config):
 
-    if image is None:
-        continue
+    for split in ("train", "val", "test"):
+        os.makedirs(os.path.join(config.output_dir, split), exist_ok=True)
 
-    h, w = image.shape
+    for image_path in sorted(Path(config.source_dir).glob("*")):
+        image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
+        if image is None:
+            continue
 
-    # assert h == 512 and w == 512, \
-    #     f"{image_path.name}: ожидалось 512×512, получено {w}×{h}"
-    if h != 512 or w != 512:
-        image = cv2.resize(image, (512, 512), interpolation=cv2.INTER_AREA)
+        h, w = image.shape
+        if h != 512 or w != 512:
+            image = cv2.resize(image, (512, 512), interpolation=cv2.INTER_AREA)
 
-    class_name = image_path.stem
+        class_name = image_path.stem
+        blocks = []
+        block_id = 0
+        for by in range(0, 512, config.block_size):
+            for bx in range(0, 512, config.block_size):
+                block = image[
+                    by:by + config.block_size,
+                    bx:bx + config.block_size
+                ]
+                blocks.append((block_id, block))
+                block_id += 1
 
-    blocks = []
+        random.shuffle(blocks)
 
-    block_id = 0
+        train_blocks = blocks[:11]
+        val_blocks = blocks[11:13]
+        test_blocks = blocks[13:]
 
-    for by in range(0, 512, BLOCK_SIZE):
-        for bx in range(0, 512, BLOCK_SIZE):
+        for bid, block in train_blocks:
+            save_patches(config, block, class_name, "train", bid)
 
-            block = image[
-                by:by + BLOCK_SIZE,
-                bx:bx + BLOCK_SIZE
-            ]
+        for bid, block in val_blocks:
+            save_patches(config, block, class_name, "val", bid)
 
-            blocks.append((block_id, block))
+        for bid, block in test_blocks:
+            save_patches(config, block, class_name, "test", bid)
 
-            block_id += 1
+        print(f"{class_name}: OK")
 
-    random.shuffle(blocks)
+    print("Dataset successfully created.")
 
-    train_blocks = blocks[:11]
-    val_blocks = blocks[11:13]
-    test_blocks = blocks[13:]
 
-    for bid, block in train_blocks:
-        save_patches(block, class_name, "train", bid)
-
-    for bid, block in val_blocks:
-        save_patches(block, class_name, "val", bid)
-
-    for bid, block in test_blocks:
-        save_patches(block, class_name, "test", bid)
-
-    print(f"{class_name}: OK")
-
-print("Dataset successfully created.")
+if __name__ == "__main__":
+    main()
