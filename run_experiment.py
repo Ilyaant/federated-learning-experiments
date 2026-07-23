@@ -178,6 +178,7 @@ def main(config: Config):
 
         scheduler.step()
 
+        logging.info(f"Epoch: {epoch}")
         logging.info(f"Train Loss: {train_loss:.4f}")
         logging.info(f"Train Acc : {train_acc:.4f}")
         logging.info(f"Train F1  : {train_f1:.4f}")
