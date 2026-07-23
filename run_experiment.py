@@ -75,19 +75,19 @@ def main(config: Config):
         train_dataset,
         batch_size=config.batch_size,
         shuffle=True,
-        num_workers=0
+        num_workers=4
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=config.batch_size,
         shuffle=False,
-        num_workers=0
+        num_workers=4
     )
     test_loader = DataLoader(
         test_dataset,
         batch_size=config.batch_size,
         shuffle=False,
-        num_workers=0
+        num_workers=4
     )
 
     NUM_CLASSES = len(train_dataset.classes)
