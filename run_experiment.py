@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 import pyrallis
 import torch
+import timm
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
@@ -23,7 +24,7 @@ class Config:
     epochs: int = 25
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model: str = 'ConvNextV2Model'
+    model: str = 'faster_vit_0_224'
 
 
 @pyrallis.wrap()
@@ -105,6 +106,13 @@ def main(config: Config):
         )
         backbone = ConvNextV2Model(convnext_config)
         model = ConvNextV2Classifier(backbone, NUM_CLASSES)
+
+    if config.model == 'faster_vit_0_224':
+        model = timm.create_model(
+            "faster_vit_0_224",
+            pretrained=True,
+            num_classes=NUM_CLASSES
+        )
 
     model = model.to(config.device)
 
