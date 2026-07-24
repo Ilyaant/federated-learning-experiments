@@ -4,7 +4,8 @@
 На данный момент сравниваются следующие архитектуры:
 - efficientnet_v2_s
 - ConvNextV2Model
-- faster_vit_0_224
+- fastvit_t8
+- fastvit_s12
 ## Подготовка данных
 Для подготовки датасета Brodatz, расположенного в папке `data/brodatz`, выполнить:
 ```bash
