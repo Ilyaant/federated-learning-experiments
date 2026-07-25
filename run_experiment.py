@@ -5,6 +5,9 @@ from dataclasses import dataclass
 import pyrallis
 import torch
 import timm
+import fastervit
+import argparse
+import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
@@ -24,7 +27,7 @@ class Config:
     epochs: int = 25
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model: str = 'fastvit_s12'
+    model: str = 'faster_vit_0_224'
 
 
 @pyrallis.wrap()
@@ -120,6 +123,13 @@ def main(config: Config):
             pretrained=True,
             num_classes=NUM_CLASSES
         )
+
+    if config.model == 'faster_vit_0_224':
+        with torch.serialization.safe_globals([argparse.Namespace]):
+            model = fastervit.create_model(
+                'faster_vit_0_224',
+                pretrained=True,
+            )
 
     model = model.to(config.device)
 
