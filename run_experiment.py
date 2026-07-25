@@ -24,7 +24,7 @@ class Config:
     epochs: int = 25
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model: str = 'fastvit_t8'
+    model: str = 'fastvit_s12'
 
 
 @pyrallis.wrap()
@@ -110,6 +110,13 @@ def main(config: Config):
     if config.model == 'fastvit_t8':
         model = timm.create_model(
             "fastvit_t8",
+            pretrained=True,
+            num_classes=NUM_CLASSES
+        )
+    
+    if config.model == 'fastvit_s12':
+        model = timm.create_model(
+            "fastvit_s12",
             pretrained=True,
             num_classes=NUM_CLASSES
         )
