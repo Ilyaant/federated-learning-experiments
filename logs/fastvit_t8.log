@@ -1,0 +1,184 @@
+2026-07-24 18:19:30,100 timm.models._builder INFO Loading pretrained weights from Hugging Face hub (timm/fastvit_t8.apple_in1k)
+2026-07-24 18:19:30,448 httpx INFO HTTP Request: GET https://huggingface.co/api/agent-harnesses "HTTP/1.1 200 OK"
+2026-07-24 18:19:30,673 httpx INFO HTTP Request: HEAD https://huggingface.co/timm/fastvit_t8.apple_in1k/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+2026-07-24 18:19:33,340 timm.models._hub INFO [timm/fastvit_t8.apple_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+2026-07-24 18:19:33,840 timm.models._builder INFO Missing keys (head.fc.weight, head.fc.bias) discovered while loading pretrained weights. This is expected if model is being adapted.
+2026-07-24 18:31:40,654 root INFO Epoch: 0
+2026-07-24 18:31:40,655 root INFO Train Loss: 2.0776
+2026-07-24 18:31:40,655 root INFO Train Acc : 0.5878
+2026-07-24 18:31:40,656 root INFO Train F1  : 0.5853
+2026-07-24 18:31:40,656 root INFO Val Loss  : 0.7313
+2026-07-24 18:31:40,656 root INFO Val Acc   : 0.8229
+2026-07-24 18:31:40,656 root INFO Val F1    : 0.8044
+2026-07-24 18:43:53,300 root INFO Epoch: 1
+2026-07-24 18:43:53,301 root INFO Train Loss: 0.4709
+2026-07-24 18:43:53,301 root INFO Train Acc : 0.8853
+2026-07-24 18:43:53,301 root INFO Train F1  : 0.8692
+2026-07-24 18:43:53,301 root INFO Val Loss  : 0.5304
+2026-07-24 18:43:53,302 root INFO Val Acc   : 0.8472
+2026-07-24 18:43:53,302 root INFO Val F1    : 0.8335
+2026-07-24 18:55:12,876 root INFO Epoch: 2
+2026-07-24 18:55:12,876 root INFO Train Loss: 0.3183
+2026-07-24 18:55:12,877 root INFO Train Acc : 0.9104
+2026-07-24 18:55:12,877 root INFO Train F1  : 0.8967
+2026-07-24 18:55:12,877 root INFO Val Loss  : 0.3720
+2026-07-24 18:55:12,877 root INFO Val Acc   : 0.8950
+2026-07-24 18:55:12,877 root INFO Val F1    : 0.8824
+2026-07-24 19:06:23,220 root INFO Epoch: 3
+2026-07-24 19:06:23,220 root INFO Train Loss: 0.2596
+2026-07-24 19:06:23,220 root INFO Train Acc : 0.9219
+2026-07-24 19:06:23,220 root INFO Train F1  : 0.9095
+2026-07-24 19:06:23,220 root INFO Val Loss  : 0.2545
+2026-07-24 19:06:23,221 root INFO Val Acc   : 0.9253
+2026-07-24 19:06:23,221 root INFO Val F1    : 0.9141
+2026-07-24 19:17:47,518 root INFO Epoch: 4
+2026-07-24 19:17:47,519 root INFO Train Loss: 0.2415
+2026-07-24 19:17:47,519 root INFO Train Acc : 0.9235
+2026-07-24 19:17:47,519 root INFO Train F1  : 0.9128
+2026-07-24 19:17:47,519 root INFO Val Loss  : 0.4962
+2026-07-24 19:17:47,519 root INFO Val Acc   : 0.8472
+2026-07-24 19:17:47,519 root INFO Val F1    : 0.8207
+2026-07-24 19:29:10,281 root INFO Epoch: 5
+2026-07-24 19:29:10,282 root INFO Train Loss: 0.2156
+2026-07-24 19:29:10,282 root INFO Train Acc : 0.9288
+2026-07-24 19:29:10,282 root INFO Train F1  : 0.9184
+2026-07-24 19:29:10,282 root INFO Val Loss  : 0.2437
+2026-07-24 19:29:10,282 root INFO Val Acc   : 0.9175
+2026-07-24 19:29:10,282 root INFO Val F1    : 0.9077
+2026-07-24 19:40:45,486 root INFO Epoch: 6
+2026-07-24 19:40:45,486 root INFO Train Loss: 0.2066
+2026-07-24 19:40:45,487 root INFO Train Acc : 0.9298
+2026-07-24 19:40:45,487 root INFO Train F1  : 0.9210
+2026-07-24 19:40:45,487 root INFO Val Loss  : 0.2918
+2026-07-24 19:40:45,487 root INFO Val Acc   : 0.9106
+2026-07-24 19:40:45,487 root INFO Val F1    : 0.8994
+2026-07-24 19:52:28,222 root INFO Epoch: 7
+2026-07-24 19:52:28,223 root INFO Train Loss: 0.1858
+2026-07-24 19:52:28,223 root INFO Train Acc : 0.9343
+2026-07-24 19:52:28,223 root INFO Train F1  : 0.9273
+2026-07-24 19:52:28,223 root INFO Val Loss  : 0.4566
+2026-07-24 19:52:28,223 root INFO Val Acc   : 0.8516
+2026-07-24 19:52:28,223 root INFO Val F1    : 0.8356
+2026-07-24 20:04:01,963 root INFO Epoch: 8
+2026-07-24 20:04:01,963 root INFO Train Loss: 0.1783
+2026-07-24 20:04:01,964 root INFO Train Acc : 0.9340
+2026-07-24 20:04:01,964 root INFO Train F1  : 0.9284
+2026-07-24 20:04:01,964 root INFO Val Loss  : 0.2627
+2026-07-24 20:04:01,964 root INFO Val Acc   : 0.9227
+2026-07-24 20:04:01,964 root INFO Val F1    : 0.9121
+2026-07-24 20:15:25,334 root INFO Epoch: 9
+2026-07-24 20:15:25,334 root INFO Train Loss: 0.1594
+2026-07-24 20:15:25,335 root INFO Train Acc : 0.9364
+2026-07-24 20:15:25,335 root INFO Train F1  : 0.9309
+2026-07-24 20:15:25,335 root INFO Val Loss  : 0.2302
+2026-07-24 20:15:25,335 root INFO Val Acc   : 0.9366
+2026-07-24 20:15:25,335 root INFO Val F1    : 0.9289
+2026-07-24 20:26:59,242 root INFO Epoch: 10
+2026-07-24 20:26:59,242 root INFO Train Loss: 0.1433
+2026-07-24 20:26:59,242 root INFO Train Acc : 0.9446
+2026-07-24 20:26:59,242 root INFO Train F1  : 0.9399
+2026-07-24 20:26:59,242 root INFO Val Loss  : 0.2601
+2026-07-24 20:26:59,242 root INFO Val Acc   : 0.9245
+2026-07-24 20:26:59,243 root INFO Val F1    : 0.9160
+2026-07-24 20:38:39,251 root INFO Epoch: 11
+2026-07-24 20:38:39,251 root INFO Train Loss: 0.1354
+2026-07-24 20:38:39,251 root INFO Train Acc : 0.9433
+2026-07-24 20:38:39,251 root INFO Train F1  : 0.9396
+2026-07-24 20:38:39,252 root INFO Val Loss  : 0.2753
+2026-07-24 20:38:39,252 root INFO Val Acc   : 0.9106
+2026-07-24 20:38:39,252 root INFO Val F1    : 0.9059
+2026-07-24 20:50:04,754 root INFO Epoch: 12
+2026-07-24 20:50:04,754 root INFO Train Loss: 0.1321
+2026-07-24 20:50:04,754 root INFO Train Acc : 0.9484
+2026-07-24 20:50:04,754 root INFO Train F1  : 0.9450
+2026-07-24 20:50:04,755 root INFO Val Loss  : 0.2647
+2026-07-24 20:50:04,755 root INFO Val Acc   : 0.9158
+2026-07-24 20:50:04,755 root INFO Val F1    : 0.9082
+2026-07-24 21:01:52,311 root INFO Epoch: 13
+2026-07-24 21:01:52,311 root INFO Train Loss: 0.1220
+2026-07-24 21:01:52,311 root INFO Train Acc : 0.9495
+2026-07-24 21:01:52,311 root INFO Train F1  : 0.9469
+2026-07-24 21:01:52,311 root INFO Val Loss  : 0.2284
+2026-07-24 21:01:52,312 root INFO Val Acc   : 0.9349
+2026-07-24 21:01:52,312 root INFO Val F1    : 0.9303
+2026-07-24 21:13:12,902 root INFO Epoch: 14
+2026-07-24 21:13:12,904 root INFO Train Loss: 0.1120
+2026-07-24 21:13:12,904 root INFO Train Acc : 0.9506
+2026-07-24 21:13:12,904 root INFO Train F1  : 0.9486
+2026-07-24 21:13:12,904 root INFO Val Loss  : 0.2579
+2026-07-24 21:13:12,904 root INFO Val Acc   : 0.9358
+2026-07-24 21:13:12,904 root INFO Val F1    : 0.9314
+2026-07-24 21:25:09,834 root INFO Epoch: 15
+2026-07-24 21:25:09,834 root INFO Train Loss: 0.1037
+2026-07-24 21:25:09,834 root INFO Train Acc : 0.9527
+2026-07-24 21:25:09,834 root INFO Train F1  : 0.9508
+2026-07-24 21:25:09,835 root INFO Val Loss  : 0.2382
+2026-07-24 21:25:09,835 root INFO Val Acc   : 0.9358
+2026-07-24 21:25:09,835 root INFO Val F1    : 0.9293
+2026-07-24 21:37:01,267 root INFO Epoch: 16
+2026-07-24 21:37:01,267 root INFO Train Loss: 0.0977
+2026-07-24 21:37:01,267 root INFO Train Acc : 0.9555
+2026-07-24 21:37:01,268 root INFO Train F1  : 0.9532
+2026-07-24 21:37:01,268 root INFO Val Loss  : 0.2215
+2026-07-24 21:37:01,268 root INFO Val Acc   : 0.9358
+2026-07-24 21:37:01,268 root INFO Val F1    : 0.9317
+2026-07-24 21:48:56,037 root INFO Epoch: 17
+2026-07-24 21:48:56,038 root INFO Train Loss: 0.0943
+2026-07-24 21:48:56,038 root INFO Train Acc : 0.9552
+2026-07-24 21:48:56,038 root INFO Train F1  : 0.9537
+2026-07-24 21:48:56,038 root INFO Val Loss  : 0.2275
+2026-07-24 21:48:56,038 root INFO Val Acc   : 0.9358
+2026-07-24 21:48:56,038 root INFO Val F1    : 0.9315
+2026-07-24 22:01:01,805 root INFO Epoch: 18
+2026-07-24 22:01:01,806 root INFO Train Loss: 0.0908
+2026-07-24 22:01:01,806 root INFO Train Acc : 0.9580
+2026-07-24 22:01:01,806 root INFO Train F1  : 0.9560
+2026-07-24 22:01:01,806 root INFO Val Loss  : 0.2277
+2026-07-24 22:01:01,807 root INFO Val Acc   : 0.9288
+2026-07-24 22:01:01,807 root INFO Val F1    : 0.9225
+2026-07-24 22:12:42,662 root INFO Epoch: 19
+2026-07-24 22:12:42,663 root INFO Train Loss: 0.0930
+2026-07-24 22:12:42,663 root INFO Train Acc : 0.9560
+2026-07-24 22:12:42,663 root INFO Train F1  : 0.9547
+2026-07-24 22:12:42,663 root INFO Val Loss  : 0.2472
+2026-07-24 22:12:42,663 root INFO Val Acc   : 0.9323
+2026-07-24 22:12:42,663 root INFO Val F1    : 0.9279
+2026-07-24 22:24:39,339 root INFO Epoch: 20
+2026-07-24 22:24:39,339 root INFO Train Loss: 0.0846
+2026-07-24 22:24:39,339 root INFO Train Acc : 0.9575
+2026-07-24 22:24:39,339 root INFO Train F1  : 0.9560
+2026-07-24 22:24:39,339 root INFO Val Loss  : 0.2374
+2026-07-24 22:24:39,339 root INFO Val Acc   : 0.9323
+2026-07-24 22:24:39,340 root INFO Val F1    : 0.9284
+2026-07-24 22:36:04,676 root INFO Epoch: 21
+2026-07-24 22:36:04,676 root INFO Train Loss: 0.0831
+2026-07-24 22:36:04,676 root INFO Train Acc : 0.9620
+2026-07-24 22:36:04,676 root INFO Train F1  : 0.9606
+2026-07-24 22:36:04,676 root INFO Val Loss  : 0.2427
+2026-07-24 22:36:04,677 root INFO Val Acc   : 0.9366
+2026-07-24 22:36:04,677 root INFO Val F1    : 0.9320
+2026-07-24 22:47:25,487 root INFO Epoch: 22
+2026-07-24 22:47:25,488 root INFO Train Loss: 0.0814
+2026-07-24 22:47:25,488 root INFO Train Acc : 0.9602
+2026-07-24 22:47:25,488 root INFO Train F1  : 0.9588
+2026-07-24 22:47:25,488 root INFO Val Loss  : 0.2481
+2026-07-24 22:47:25,488 root INFO Val Acc   : 0.9314
+2026-07-24 22:47:25,488 root INFO Val F1    : 0.9271
+2026-07-24 22:58:40,890 root INFO Epoch: 23
+2026-07-24 22:58:40,890 root INFO Train Loss: 0.0835
+2026-07-24 22:58:40,890 root INFO Train Acc : 0.9604
+2026-07-24 22:58:40,891 root INFO Train F1  : 0.9591
+2026-07-24 22:58:40,891 root INFO Val Loss  : 0.2501
+2026-07-24 22:58:40,891 root INFO Val Acc   : 0.9358
+2026-07-24 22:58:40,891 root INFO Val F1    : 0.9316
+2026-07-24 23:09:53,698 root INFO Epoch: 24
+2026-07-24 23:09:53,699 root INFO Train Loss: 0.0842
+2026-07-24 23:09:53,699 root INFO Train Acc : 0.9601
+2026-07-24 23:09:53,699 root INFO Train F1  : 0.9585
+2026-07-24 23:09:53,699 root INFO Val Loss  : 0.2427
+2026-07-24 23:09:53,699 root INFO Val Acc   : 0.9358
+2026-07-24 23:09:53,699 root INFO Val F1    : 0.9316
+2026-07-24 23:10:42,138 root INFO 
+Best validation accuracy: 0.9366
+2026-07-24 23:10:42,139 root INFO Test accuracy: 0.9311
+2026-07-24 23:10:42,139 root INFO Test F1-score: 0.9256
