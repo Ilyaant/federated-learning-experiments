@@ -7,6 +7,7 @@
 - fastvit_t8
 - fastvit_s12
 - faster_vit_0_224
+- mobilenetv5
 ## Подготовка данных
 Для подготовки датасета Brodatz, расположенного в папке `data/brodatz`, выполнить:
 ```bash

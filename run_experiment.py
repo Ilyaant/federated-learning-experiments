@@ -27,7 +27,7 @@ class Config:
     epochs: int = 25
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model: str = 'efficientnet_v2_s'
+    model: str = 'mobilenetv5'
 
 
 @pyrallis.wrap()
@@ -130,6 +130,13 @@ def main(config: Config):
                 'faster_vit_0_224',
                 pretrained=True,
             )
+    
+    if config.model == 'mobilenetv5':
+        model = timm.create_model(
+            "hf_hub:timm/mobilenetv5_300m.gemma3n",
+            pretrained=True,
+            num_classes=NUM_CLASSES
+        )
 
     model = model.to(config.device)
 
