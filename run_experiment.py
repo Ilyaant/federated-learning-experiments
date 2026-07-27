@@ -27,7 +27,7 @@ class Config:
     epochs: int = 25
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model: str = 'faster_vit_0_224'
+    model: str = 'efficientnet_v2_s'
 
 
 @pyrallis.wrap()
