@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict
 
 import torch
 from torch import nn
@@ -15,85 +15,50 @@ class LocalTrainer:
 
     def __init__(
         self,
-        model: nn.Module,
-        optimizer: torch.optim.Optimizer,
-        criterion: nn.Module,
         device: torch.device,
         num_classes: int,
-        aggregation: str = "majority_vote",
-        scheduler: Optional[torch.optim.lr_scheduler._LRScheduler] = None,
+        aggregation: str = "average_probability",
     ):
 
-        self.model = model
-        self.optimizer = optimizer
-        self.criterion = criterion
-        self.scheduler = scheduler
         self.device = device
-
         self.num_classes = num_classes
         self.aggregation = aggregation
 
     ####################################################################
-    # TRAIN
+    # Train
     ####################################################################
 
-    def fit(
+    def train_epoch(
         self,
-        train_loader: DataLoader,
-        epochs: int,
+        model: nn.Module,
+        optimizer: torch.optim.Optimizer,
+        criterion: nn.Module,
+        loader: DataLoader,
     ) -> Dict[str, float]:
 
-        train_dataset = train_loader.dataset
-
-        epoch_metrics = None
-
-        for epoch in range(epochs):
-
-            if hasattr(train_dataset, "set_epoch"):
-                train_dataset.set_epoch(epoch)
-
-            epoch_metrics = self._train_epoch(train_loader)
-
-            if self.scheduler is not None:
-                self.scheduler.step()
-
-        return epoch_metrics
-
-    ####################################################################
-    # ONE TRAIN EPOCH
-    ####################################################################
-
-    def _train_epoch(
-        self,
-        loader: DataLoader,
-    ):
-
-        self.model.train()
+        model.train()
 
         metrics = MetricAccumulator()
 
-        progress = tqdm(
-            loader,
-            leave=False,
-        )
+        progress = tqdm(loader, leave=False)
 
         for batch in progress:
 
             images = batch["image"].to(self.device)
             labels = batch["label"].to(self.device)
 
-            self.optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
 
-            logits = self.model(images)
+            logits = model(images)
 
-            loss = self.criterion(
+            loss = criterion(
                 logits,
                 labels,
             )
 
             loss.backward()
 
-            self.optimizer.step()
+            optimizer.step()
 
             metrics.update(
                 logits,
@@ -101,26 +66,64 @@ class LocalTrainer:
                 loss,
             )
 
-            result = metrics.compute()
+            current = metrics.compute()
 
             progress.set_postfix(
-                loss=f"{result.loss:.4f}",
-                acc=f"{100*result.accuracy:.2f}",
+                loss=f"{current.loss:.4f}",
+                acc=f"{100*current.accuracy:.2f}",
             )
 
         return metrics.compute().to_dict()
 
     ####################################################################
-    # VALIDATION / TEST
+    # Validation
     ####################################################################
 
     @torch.no_grad()
-    def evaluate(
+    def validate(
         self,
+        model: nn.Module,
+        criterion: nn.Module,
         loader: DataLoader,
     ):
 
-        self.model.eval()
+        return self._evaluate(
+            model,
+            criterion,
+            loader,
+        )
+
+    ####################################################################
+    # Test
+    ####################################################################
+
+    @torch.no_grad()
+    def test(
+        self,
+        model: nn.Module,
+        criterion: nn.Module,
+        loader: DataLoader,
+    ):
+
+        return self._evaluate(
+            model,
+            criterion,
+            loader,
+        )
+
+    ####################################################################
+    # Shared evaluation
+    ####################################################################
+
+    @torch.no_grad()
+    def _evaluate(
+        self,
+        model,
+        criterion,
+        loader,
+    ):
+
+        model.eval()
 
         patch_metrics = MetricAccumulator()
 
@@ -129,17 +132,14 @@ class LocalTrainer:
             self.num_classes,
         )
 
-        for batch in tqdm(
-            loader,
-            leave=False,
-        ):
+        for batch in tqdm(loader, leave=False):
 
             images = batch["image"].to(self.device)
             labels = batch["label"].to(self.device)
 
-            logits = self.model(images)
+            logits = model(images)
 
-            loss = self.criterion(
+            loss = criterion(
                 logits,
                 labels,
             )
@@ -156,19 +156,19 @@ class LocalTrainer:
                 labels,
             )
 
-        patch_result = patch_metrics.compute()
+        patch = patch_metrics.compute()
 
-        image_result = aggregator.compute()
+        image = aggregator.compute()
 
         return {
-            "loss": patch_result.loss,
-            "patch_accuracy": patch_result.accuracy,
-            "patch_precision": patch_result.precision,
-            "patch_recall": patch_result.recall,
-            "patch_f1": patch_result.f1,
-            "accuracy": image_result["accuracy"],
-            "precision": image_result["precision"],
-            "recall": image_result["recall"],
-            "f1": image_result["f1"],
-            "confusion_matrix": image_result["confusion_matrix"],
+            "loss": patch.loss,
+            "patch_accuracy": patch.accuracy,
+            "patch_precision": patch.precision,
+            "patch_recall": patch.recall,
+            "patch_f1": patch.f1,
+            "accuracy": image["accuracy"],
+            "precision": image["precision"],
+            "recall": image["recall"],
+            "f1": image["f1"],
+            "confusion_matrix": image["confusion_matrix"],
         }

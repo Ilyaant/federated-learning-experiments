@@ -127,29 +127,25 @@ class FlowerClient(fl.client.NumPyClient):
         history = []
 
         for epoch in range(self.local_epochs):
-
-            if hasattr(
-                self.train_dataset,
-                "set_epoch",
-            ):
+        
+            if hasattr(self.train_dataset, "set_epoch"):
                 self.train_dataset.set_epoch(epoch)
 
-            metrics = self.trainer.train_epoch(
+            epoch_metrics = self.trainer.train_epoch(
                 self._train_loader()
             )
 
-            metrics["epoch"] = epoch + 1
+            epoch_metrics["epoch"] = epoch + 1
 
-            history.append(metrics)
+            history.append(epoch_metrics)
 
-        last_metrics = history[-1]
-
-        last_metrics["client_id"] = self.cid
+        metrics = self._aggregate_history(history)
+        metrics["client_id"] = self.cid
 
         return (
             self.get_parameters({}),
             len(self.train_dataset),
-            last_metrics,
+            metrics,
         )
 
     ####################################################################
@@ -187,3 +183,32 @@ class FlowerClient(fl.client.NumPyClient):
             "_history",
             [],
         )
+
+
+    def _aggregate_history(self, history):
+
+        keys = [
+            "loss",
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+        ]
+
+        result = {}
+
+        for key in keys:
+
+            values = [
+                h[key]
+                for h in history
+            ]
+
+            result[f"{key}_last"] = values[-1]
+            result[f"{key}_mean"] = sum(values) / len(values)
+            result[f"{key}_min"] = min(values)
+            result[f"{key}_max"] = max(values)
+
+        result["epochs"] = len(history)
+
+        return result
