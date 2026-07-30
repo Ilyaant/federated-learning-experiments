@@ -1,120 +1,88 @@
 from __future__ import annotations
 
-from collections import OrderedDict
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Sequence, Tuple, Union
 
 import torch
+import torch.nn.functional as F
 from PIL import Image
-from torchvision.transforms.functional import pil_to_tensor
+from torchvision.transforms import functional as TF
 
 
 class PatchExtractor:
-
     def __init__(
         self,
         patch_size: int = 224,
         overlap: float = 0.5,
         grayscale: bool = True,
         normalize: bool = True,
-        cache_size: int = 64,
+        pad_mode: str = "replicate",
     ):
+        if not 0 <= overlap < 1:
+            raise ValueError("overlap must satisfy 0 <= overlap < 1")
 
         self.patch_size = patch_size
         self.overlap = overlap
         self.grayscale = grayscale
         self.normalize = normalize
+        self.pad_mode = pad_mode
 
-        self.stride = int(
-            patch_size * (1.0 - overlap)
-        )
+        self.stride = int(patch_size * (1 - overlap))
+        self.stride = max(1, self.stride)
 
-        if self.stride <= 0:
-            raise ValueError("Invalid overlap.")
-
-        self.cache_size = cache_size
-        self.tensor_cache = OrderedDict()
-
-    ####################################################################
-    # Tensor cache
-    ####################################################################
-
-    def load_tensor(
+    def load_image(
         self,
         image: Union[str, Path, Image.Image],
     ) -> torch.Tensor:
-
-        if isinstance(image, Image.Image):
-            return self._pil_to_tensor(image)
-
-        key = str(image)
-
-        if key in self.tensor_cache:
-
-            tensor = self.tensor_cache.pop(key)
-            self.tensor_cache[key] = tensor
-
-            return tensor
-
-        img = Image.open(key)
+        if isinstance(image, (str, Path)):
+            image = Image.open(image)
 
         if self.grayscale:
-            img = img.convert("L")
-
-        tensor = self._pil_to_tensor(img)
-
-        self.tensor_cache[key] = tensor
-
-        if len(self.tensor_cache) > self.cache_size:
-            self.tensor_cache.popitem(last=False)
-
-        return tensor
-
-    ####################################################################
-    # Internal
-    ####################################################################
-
-    def _pil_to_tensor(
-        self,
-        image: Image.Image,
-    ) -> torch.Tensor:
-
-        tensor = pil_to_tensor(image)
-
-        if self.normalize:
-            tensor = tensor.float() / 255.0
-
-        return tensor
-
-    ####################################################################
-    # Coordinates
-    ####################################################################
-
-    def get_patch_coordinates(
-        self,
-        image: Union[str, Path, Image.Image],
-    ) -> List[Tuple[int, int]]:
-
-        if isinstance(image, Image.Image):
-            width, height = image.size
+            image = image.convert("L")
         else:
-            tensor = self.load_tensor(image)
-            _, height, width = tensor.shape
+            image = image.convert("RGB")
 
-        xs = self._positions(width)
-        ys = self._positions(height)
+        tensor = TF.to_tensor(image)
 
-        coords = []
+        if not self.normalize:
+            tensor = tensor * 255.0
 
-        for y in ys:
-            for x in xs:
-                coords.append((x, y))
+        return tensor
 
-        return coords
+    def _positions(
+        self,
+        size: int,
+    ) -> List[int]:
+        if size <= self.patch_size:
+            return [0]
 
-    ####################################################################
-    # Extract one patch
-    ####################################################################
+        positions = list(
+            range(
+                0,
+                size - self.patch_size + 1,
+                self.stride,
+            )
+        )
+
+        if positions[-1] != size - self.patch_size:
+            positions.append(size - self.patch_size)
+
+        return positions
+
+    def coordinates(
+        self,
+        image: Union[str, Path, Image.Image, torch.Tensor],
+    ) -> List[Tuple[int, int]]:
+        if torch.is_tensor(image):
+            _, h, w = image.shape
+        else:
+            tensor = self.load_image(image)
+            _, h, w = tensor.shape
+
+        xs = self._positions(w)
+        ys = self._positions(h)
+
+        return [(x, y) for y in ys for x in xs]
 
     def extract_patch(
         self,
@@ -122,70 +90,95 @@ class PatchExtractor:
         x: int,
         y: int,
     ) -> torch.Tensor:
-
         if torch.is_tensor(image):
             tensor = image
         else:
-            tensor = self.load_tensor(image)
+            tensor = self.load_image(image)
 
-        return tensor[
+        _, h, w = tensor.shape
+
+        pad_h = max(0, self.patch_size - h)
+        pad_w = max(0, self.patch_size - w)
+
+        if pad_h or pad_w:
+            tensor = F.pad(
+                tensor,
+                (0, pad_w, 0, pad_h),
+                mode=self.pad_mode,
+            )
+
+        patch = tensor[
             :,
-            y:y + self.patch_size,
-            x:x + self.patch_size,
+            y : y + self.patch_size,
+            x : x + self.patch_size,
         ]
 
-    ####################################################################
-    # Extract all patches
-    ####################################################################
+        if (
+            patch.shape[1] != self.patch_size
+            or patch.shape[2] != self.patch_size
+        ):
+            patch = F.pad(
+                patch,
+                (
+                    0,
+                    self.patch_size - patch.shape[2],
+                    0,
+                    self.patch_size - patch.shape[1],
+                ),
+                mode=self.pad_mode,
+            )
 
-    def extract_all(
+        return patch
+
+    def extract(
         self,
-        image,
-    ):
+        image: Union[str, Path, Image.Image, torch.Tensor],
+    ) -> List[torch.Tensor]:
+        if torch.is_tensor(image):
+            tensor = image
+        else:
+            tensor = self.load_image(image)
 
-        tensor = self.load_tensor(image)
+        patches = []
 
-        coords = self.get_patch_coordinates(image)
-
-        return [
-            (
+        for x, y in self.coordinates(tensor):
+            patches.append(
                 self.extract_patch(
                     tensor,
                     x,
                     y,
-                ),
-                (x, y),
+                )
             )
-            for x, y in coords
-        ]
 
-    ####################################################################
-    # Helpers
-    ####################################################################
+        return patches
 
-    def _positions(
+    def extract_with_coordinates(
         self,
-        length: int,
-    ):
+        image: Union[str, Path, Image.Image, torch.Tensor],
+    ) -> List[Tuple[torch.Tensor, Tuple[int, int]]]:
+        if torch.is_tensor(image):
+            tensor = image
+        else:
+            tensor = self.load_image(image)
 
-        if length <= self.patch_size:
-            return [0]
+        output = []
 
-        pos = list(
-            range(
-                0,
-                length - self.patch_size + 1,
-                self.stride,
+        for x, y in self.coordinates(tensor):
+            output.append(
+                (
+                    self.extract_patch(
+                        tensor,
+                        x,
+                        y,
+                    ),
+                    (x, y),
+                )
             )
-        )
 
-        last = length - self.patch_size
+        return output
 
-        if pos[-1] != last:
-            pos.append(last)
-
-        return pos
-
-    def clear_cache(self):
-
-        self.tensor_cache.clear()
+    def num_patches(
+        self,
+        image: Union[str, Path, Image.Image, torch.Tensor],
+    ) -> int:
+        return len(self.coordinates(image))

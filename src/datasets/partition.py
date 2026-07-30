@@ -1,218 +1,178 @@
 from __future__ import annotations
 
-import json
+import random
 from collections import defaultdict
-from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
 
 
-class DatasetPartitioner:
+Sample = Tuple[str, int]
+
+
+class FederatedPartitioner:
     """
-    Partition training dataset between federated clients.
-    Supports:
-        - IID
-        - Dirichlet Non-IID
+    Creates image-level partitions for federated learning.
+
+    Each client receives its own set of source images.
+    Patch extraction is performed locally on each client.
     """
 
     def __init__(
         self,
-        samples: List[dict],
+        samples: Sequence[Sample],
         num_clients: int,
         seed: int = 42,
     ):
-        self.samples = samples
+        self.samples = list(samples)
         self.num_clients = num_clients
-        self.seed = seed
-
+        self.random = random.Random(seed)
         self.rng = np.random.default_rng(seed)
 
-    ####################################################################
-    # IID
-    ####################################################################
+    def iid(self) -> Dict[int, List[Sample]]:
+        samples = self.samples.copy()
 
-    def iid(self) -> Dict[int, List[dict]]:
+        self.random.shuffle(samples)
 
-        indices = np.arange(len(self.samples))
-        self.rng.shuffle(indices)
+        partitions = {
+            i: []
+            for i in range(self.num_clients)
+        }
 
-        splits = np.array_split(indices, self.num_clients)
+        for idx, sample in enumerate(samples):
+            partitions[idx % self.num_clients].append(sample)
 
-        clients = {}
+        return partitions
 
-        for cid, split in enumerate(splits):
+    def stratified(self) -> Dict[int, List[Sample]]:
+        grouped = defaultdict(list)
 
-            clients[cid] = [
-                self.samples[i]
-                for i in split
-            ]
+        for sample in self.samples:
+            grouped[sample[1]].append(sample)
 
-        return clients
+        partitions = {
+            i: []
+            for i in range(self.num_clients)
+        }
 
-    ####################################################################
-    # DIRICHLET
-    ####################################################################
+        for class_samples in grouped.values():
+            self.random.shuffle(class_samples)
+
+            for idx, sample in enumerate(class_samples):
+                partitions[idx % self.num_clients].append(sample)
+
+        for client in partitions:
+            self.random.shuffle(partitions[client])
+
+        return partitions
 
     def dirichlet(
         self,
         alpha: float = 0.5,
-        min_samples: int = 1,
-    ) -> Dict[int, List[dict]]:
-
-        labels = np.array(
-            [s["label"] for s in self.samples]
+        min_size: int = 10,
+    ) -> Dict[int, List[Sample]]:
+        labels = sorted(
+            {
+                label
+                for _, label in self.samples
+            }
         )
 
-        num_classes = len(np.unique(labels))
+        grouped = defaultdict(list)
+
+        for sample in self.samples:
+            grouped[sample[1]].append(sample)
 
         while True:
+            partitions = {
+                i: []
+                for i in range(self.num_clients)
+            }
 
-            client_indices = [
-                []
-                for _ in range(self.num_clients)
-            ]
+            for label in labels:
+                class_samples = grouped[label].copy()
 
-            for cls in range(num_classes):
-
-                cls_idx = np.where(labels == cls)[0]
-
-                self.rng.shuffle(cls_idx)
+                self.random.shuffle(class_samples)
 
                 proportions = self.rng.dirichlet(
-                    np.repeat(alpha, self.num_clients)
+                    np.repeat(
+                        alpha,
+                        self.num_clients,
+                    )
                 )
 
                 split_points = (
-                    np.cumsum(proportions)[:-1]
-                    * len(cls_idx)
-                ).astype(int)
+                    np.cumsum(proportions)
+                    * len(class_samples)
+                ).astype(int)[:-1]
 
-                split = np.split(
-                    cls_idx,
+                chunks = np.split(
+                    np.array(class_samples, dtype=object),
                     split_points,
                 )
 
-                for cid in range(self.num_clients):
-
-                    client_indices[cid].extend(
-                        split[cid].tolist()
+                for client, chunk in enumerate(chunks):
+                    partitions[client].extend(
+                        chunk.tolist()
                     )
 
             sizes = [
-                len(x)
-                for x in client_indices
+                len(v)
+                for v in partitions.values()
             ]
 
-            if min(sizes) >= min_samples:
+            if min(sizes) >= min_size:
                 break
 
-        clients = {}
+        for client in partitions:
+            self.random.shuffle(
+                partitions[client]
+            )
 
-        for cid in range(self.num_clients):
-
-            self.rng.shuffle(client_indices[cid])
-
-            clients[cid] = [
-                self.samples[i]
-                for i in client_indices[cid]
-            ]
-
-        return clients
-
-    ####################################################################
-    # SAVE / LOAD
-    ####################################################################
+        return partitions
 
     @staticmethod
-    def save(
-        clients: Dict[int, List[dict]],
-        filename: str | Path,
+    def statistics(
+        partitions: Dict[int, List[Sample]],
     ):
+        stats = {}
 
-        filename = Path(filename)
+        for client, samples in partitions.items():
+            distribution = defaultdict(int)
 
-        filename.parent.mkdir(
-            parents=True,
-            exist_ok=True,
+            for _, label in samples:
+                distribution[label] += 1
+
+            stats[client] = {
+                "num_images": len(samples),
+                "class_distribution": dict(distribution),
+            }
+
+        return stats
+
+    @staticmethod
+    def print_statistics(
+        partitions: Dict[int, List[Sample]],
+    ):
+        stats = FederatedPartitioner.statistics(
+            partitions
         )
 
-        obj = {}
+        print("-" * 70)
 
-        for cid, samples in clients.items():
+        for client, info in stats.items():
+            print(
+                f"Client {client}: "
+                f"{info['num_images']} images"
+            )
 
-            obj[str(cid)] = [
-                str(s["path"])
-                for s in samples
-            ]
-
-        with open(filename, "w") as f:
-            json.dump(obj, f, indent=4)
-
-    @staticmethod
-    def load(
-        filename: str | Path,
-        all_samples: List[dict],
-    ) -> Dict[int, List[dict]]:
-
-        with open(filename) as f:
-            obj = json.load(f)
-
-        mapping = {
-            str(s["path"]): s
-            for s in all_samples
-        }
-
-        clients = {}
-
-        for cid, paths in obj.items():
-
-            clients[int(cid)] = [
-                mapping[p]
-                for p in paths
-            ]
-
-        return clients
-
-    ####################################################################
-    # INFO
-    ####################################################################
-
-    @staticmethod
-    def distribution(
-        samples: List[dict],
-    ):
-
-        d = defaultdict(int)
-
-        for sample in samples:
-
-            d[sample["class_name"]] += 1
-
-        return dict(d)
-
-    @staticmethod
-    def summary(
-        clients: Dict[int, List[dict]]
-    ):
-
-        print()
-
-        print("=" * 70)
-        print("CLIENT PARTITIONS")
-        print("=" * 70)
-
-        for cid in sorted(clients):
+            for cls, count in sorted(
+                info["class_distribution"].items()
+            ):
+                print(
+                    f"  class {cls}: {count}"
+                )
 
             print()
 
-            print(
-                f"Client {cid:02d} "
-                f"({len(clients[cid])} images)"
-            )
-
-            print(
-                DatasetPartitioner.distribution(
-                    clients[cid]
-                )
-            )
+        print("-" * 70)

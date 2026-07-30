@@ -1,255 +1,175 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Callable, List, Optional, Sequence, Tuple
 
-import numpy as np
-from sklearn.model_selection import StratifiedShuffleSplit
+from PIL import Image
+from torch.utils.data import Dataset
+from torchvision import transforms
 
 
-CLASS_TO_IDX = {
-    "clear": 0,
-    "G": 1,
-    "GP": 2,
-    "M": 3,
-    "T": 4,
+VALID_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".bmp",
+    ".tif",
+    ".tiff",
 }
 
 
-class TextureDataset:
-    """
-    Reads texture images and performs train/val/test split.
-
-    Dataset structure:
-
-    root/
-        clear/
-        G/
-        GP/
-        M/
-        T/
-    """
-
-    IMG_EXTENSIONS = {
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".bmp",
-        ".tif",
-        ".tiff",
-    }
-
+class TextureDataset(Dataset):
     def __init__(
         self,
         root: str | Path,
-        train_ratio: float = 0.70,
-        val_ratio: float = 0.15,
-        test_ratio: float = 0.15,
-        seed: int = 42,
-        split_file: Optional[str | Path] = None,
+        split: str = "train",
+        transform: Optional[Callable] = None,
+        grayscale: bool = True,
     ):
-
         self.root = Path(root)
-        self.seed = seed
+        self.split = split
+        self.grayscale = grayscale
 
-        self.train_ratio = train_ratio
-        self.val_ratio = val_ratio
-        self.test_ratio = test_ratio
+        self.split_dir = self.root / split
 
-        if abs(train_ratio + val_ratio + test_ratio - 1.0) > 1e-6:
-            raise ValueError("Split ratios must sum to 1.")
+        if not self.split_dir.exists():
+            raise FileNotFoundError(self.split_dir)
 
-        self.samples = self._scan()
+        self.classes = sorted(
+            [
+                directory.name
+                for directory in self.split_dir.iterdir()
+                if directory.is_dir()
+            ]
+        )
 
-        if split_file is not None and Path(split_file).exists():
-            self._load_split(split_file)
-        else:
-            self._split()
+        self.class_to_idx = {
+            cls: idx
+            for idx, cls in enumerate(self.classes)
+        }
 
-            if split_file is not None:
-                self.save_split(split_file)
+        self.samples: List[Tuple[Path, int]] = []
 
-    def _scan(self):
+        for cls in self.classes:
+            class_dir = self.split_dir / cls
 
-        samples = []
+            files = [
+                file
+                for file in class_dir.rglob("*")
+                if file.suffix.lower() in VALID_EXTENSIONS
+            ]
 
-        for cls_name, label in CLASS_TO_IDX.items():
+            files.sort()
 
-            cls_dir = self.root / cls_name
-
-            if not cls_dir.exists():
-                raise FileNotFoundError(cls_dir)
-
-            for img in sorted(cls_dir.rglob("*")):
-
-                if img.suffix.lower() not in self.IMG_EXTENSIONS:
-                    continue
-
-                samples.append(
-                    {
-                        "path": img,
-                        "label": label,
-                        "class_name": cls_name,
-                    }
+            for file in files:
+                self.samples.append(
+                    (
+                        file,
+                        self.class_to_idx[cls],
+                    )
                 )
 
-        return samples
+        if transform is None:
+            transform_list = []
 
-    def _split(self):
+            if grayscale:
+                transform_list.append(
+                    transforms.Grayscale(
+                        num_output_channels=1
+                    )
+                )
 
-        labels = np.array([x["label"] for x in self.samples])
-
-        idx = np.arange(len(self.samples))
-
-        splitter = StratifiedShuffleSplit(
-            n_splits=1,
-            train_size=self.train_ratio,
-            random_state=self.seed,
-        )
-
-        train_idx, tmp_idx = next(splitter.split(idx, labels))
-
-        tmp_labels = labels[tmp_idx]
-
-        val_size = self.val_ratio / (self.val_ratio + self.test_ratio)
-
-        splitter = StratifiedShuffleSplit(
-            n_splits=1,
-            train_size=val_size,
-            random_state=self.seed,
-        )
-
-        val_local, test_local = next(
-            splitter.split(tmp_idx, tmp_labels)
-        )
-
-        self.train_samples = [
-            self.samples[i]
-            for i in train_idx
-        ]
-
-        self.val_samples = [
-            self.samples[tmp_idx[i]]
-            for i in val_local
-        ]
-
-        self.test_samples = [
-            self.samples[tmp_idx[i]]
-            for i in test_local
-        ]
-
-    def save_split(self, filename):
-
-        filename = Path(filename)
-
-        filename.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        split = {
-            "train": [
-                str(x["path"])
-                for x in self.train_samples
-            ],
-            "val": [
-                str(x["path"])
-                for x in self.val_samples
-            ],
-            "test": [
-                str(x["path"])
-                for x in self.test_samples
-            ],
-        }
-
-        with open(filename, "w") as f:
-            json.dump(split, f, indent=4)
-
-    def _load_split(self, filename):
-
-        with open(filename) as f:
-            split = json.load(f)
-
-        mapping = {
-            str(x["path"]): x
-            for x in self.samples
-        }
-
-        self.train_samples = [
-            mapping[p]
-            for p in split["train"]
-        ]
-
-        self.val_samples = [
-            mapping[p]
-            for p in split["val"]
-        ]
-
-        self.test_samples = [
-            mapping[p]
-            for p in split["test"]
-        ]
-
-    def class_distribution(self, samples):
-
-        result = {}
-
-        for cls in CLASS_TO_IDX:
-
-            result[cls] = 0
-
-        for sample in samples:
-
-            result[sample["class_name"]] += 1
-
-        return result
-
-    def summary(self):
-
-        print()
-
-        print("========== DATASET ==========")
-
-        print("Total:", len(self.samples))
-        print("Train:", len(self.train_samples))
-        print("Validation:", len(self.val_samples))
-        print("Test:", len(self.test_samples))
-
-        print()
-
-        print("Train distribution")
-
-        print(
-            self.class_distribution(
-                self.train_samples
+            transform_list.extend(
+                [
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=[0.5],
+                        std=[0.5],
+                    ),
+                ]
             )
-        )
 
-        print()
-
-        print("Validation distribution")
-
-        print(
-            self.class_distribution(
-                self.val_samples
+            self.transform = transforms.Compose(
+                transform_list
             )
-        )
-
-        print()
-
-        print("Test distribution")
-
-        print(
-            self.class_distribution(
-                self.test_samples
-            )
-        )
+        else:
+            self.transform = transform
 
     def __len__(self):
-
         return len(self.samples)
 
     def __getitem__(self, index):
+        path, label = self.samples[index]
 
-        return self.samples[index]
+        image = Image.open(path)
+
+        if self.grayscale:
+            image = image.convert("L")
+        else:
+            image = image.convert("RGB")
+
+        image = self.transform(image)
+
+        return image, label
+
+    @property
+    def targets(self):
+        return [
+            label
+            for _, label in self.samples
+        ]
+
+    @property
+    def image_paths(self):
+        return [
+            path
+            for path, _ in self.samples
+        ]
+
+    @property
+    def num_classes(self):
+        return len(self.classes)
+
+    def class_distribution(self):
+        distribution = {
+            cls: 0
+            for cls in self.classes
+        }
+
+        for _, label in self.samples:
+            distribution[
+                self.classes[label]
+            ] += 1
+
+        return distribution
+
+    def subset(
+        self,
+        indices: Sequence[int],
+    ):
+        dataset = TextureDataset.__new__(
+            TextureDataset
+        )
+
+        dataset.root = self.root
+        dataset.split = self.split
+        dataset.split_dir = self.split_dir
+        dataset.grayscale = self.grayscale
+        dataset.transform = self.transform
+        dataset.classes = self.classes
+        dataset.class_to_idx = self.class_to_idx
+
+        dataset.samples = [
+            self.samples[idx]
+            for idx in indices
+        ]
+
+        return dataset
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"split='{self.split}', "
+            f"images={len(self.samples)}, "
+            f"classes={len(self.classes)})"
+        )

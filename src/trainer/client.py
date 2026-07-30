@@ -4,211 +4,193 @@ from collections import OrderedDict
 from typing import Dict, List
 
 import flwr as fl
+import numpy as np
 import torch
-
 from torch.utils.data import DataLoader
 
-from .local_trainer import LocalTrainer
+from .metrics import AverageMeter, evaluate
+from .utils import get_device
 
 
 class FlowerClient(fl.client.NumPyClient):
-
     def __init__(
         self,
-        cid: int,
-        model: torch.nn.Module,
+        model,
         train_dataset,
         val_dataset,
         optimizer,
         criterion,
-        device,
-        config,
-        scheduler=None,
+        batch_size: int = 32,
+        local_epochs: int = 1,
+        num_workers: int = 4,
+        device=None,
     ):
+        self.device = device or get_device()
 
-        self.cid = cid
-
-        self.model = model
-        self.device = device
-
-        self.train_dataset = train_dataset
-        self.val_dataset = val_dataset
+        self.model = model.to(self.device)
 
         self.optimizer = optimizer
         self.criterion = criterion
-        self.scheduler = scheduler
 
-        self.config = config
+        self.local_epochs = local_epochs
 
-        self.batch_size = config.training.batch_size
-        self.num_workers = config.training.num_workers
-
-        self.local_epochs = config.federated.local_epochs
-
-        self.trainer = LocalTrainer(
-            model=model,
-            optimizer=optimizer,
-            criterion=criterion,
-            scheduler=scheduler,
-            device=device,
-            num_classes=config.model.num_classes,
-            aggregation=config.evaluation.aggregation,
-        )
-
-    ####################################################################
-    # DATALOADERS
-    ####################################################################
-
-    def _train_loader(self):
-
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
+        self.train_loader = DataLoader(
+            train_dataset,
+            batch_size=batch_size,
             shuffle=True,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            persistent_workers=self.num_workers > 0,
             drop_last=False,
+            num_workers=num_workers,
+            pin_memory=torch.cuda.is_available(),
+            persistent_workers=num_workers > 0,
         )
 
-    def _val_loader(self):
-
-        return DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
+        self.val_loader = DataLoader(
+            val_dataset,
+            batch_size=batch_size,
             shuffle=False,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            persistent_workers=self.num_workers > 0,
+            drop_last=False,
+            num_workers=num_workers,
+            pin_memory=torch.cuda.is_available(),
+            persistent_workers=num_workers > 0,
         )
 
-    ####################################################################
-    # PARAMETERS
-    ####################################################################
-
-    def get_parameters(self, config):
-
+    def get_parameters(self, config=None):
         return [
-            val.detach().cpu().numpy()
-            for _, val in self.model.state_dict().items()
+            value.detach().cpu().numpy()
+            for value in self.model.state_dict().values()
         ]
 
-    def set_parameters(self, parameters):
-
+    def set_parameters(
+        self,
+        parameters: List[np.ndarray],
+    ):
         params_dict = zip(
             self.model.state_dict().keys(),
             parameters,
         )
 
-        state_dict = OrderedDict(
-            {
-                k: torch.tensor(v)
-                for k, v in params_dict
-            }
-        )
+        state_dict = OrderedDict()
+
+        for key, value in params_dict:
+            tensor = torch.from_numpy(value)
+            state_dict[key] = tensor
 
         self.model.load_state_dict(
             state_dict,
             strict=True,
         )
 
-    ####################################################################
-    # FIT
-    ####################################################################
+    def train_one_epoch(self):
+        self.model.train()
+
+        loss_meter = AverageMeter()
+
+        for images, labels in self.train_loader:
+            images = images.to(
+                self.device,
+                non_blocking=True,
+            )
+
+            labels = labels.to(
+                self.device,
+                non_blocking=True,
+            )
+
+            self.optimizer.zero_grad(set_to_none=True)
+
+            logits = self.model(images)
+
+            loss = self.criterion(
+                logits,
+                labels,
+            )
+
+            loss.backward()
+
+            self.optimizer.step()
+
+            loss_meter.update(
+                loss.item(),
+                images.size(0),
+            )
+
+        return loss_meter.avg
 
     def fit(
         self,
         parameters,
         config,
     ):
-
         self.set_parameters(parameters)
 
-        history = []
+        train_loss = 0.0
 
-        for epoch in range(self.local_epochs):
-        
-            if hasattr(self.train_dataset, "set_epoch"):
-                self.train_dataset.set_epoch(epoch)
+        for _ in range(self.local_epochs):
+            train_loss = self.train_one_epoch()
 
-            epoch_metrics = self.trainer.train_epoch(
-                self._train_loader()
-            )
-
-            epoch_metrics["epoch"] = epoch + 1
-
-            history.append(epoch_metrics)
-
-        metrics = self._aggregate_history(history)
-        metrics["client_id"] = self.cid
-
-        return (
-            self.get_parameters({}),
-            len(self.train_dataset),
-            metrics,
+        metrics = evaluate(
+            self.model,
+            self.val_loader,
+            self.criterion,
+            self.device,
         )
 
-    ####################################################################
-    # EVALUATE
-    ####################################################################
+        return (
+            self.get_parameters(),
+            len(self.train_loader.dataset),
+            {
+                "train_loss": float(train_loss),
+                "loss": float(metrics["loss"]),
+                "accuracy": float(metrics["accuracy"]),
+                "precision": float(metrics["precision"]),
+                "recall": float(metrics["recall"]),
+                "f1": float(metrics["f1"]),
+            },
+        )
 
     def evaluate(
         self,
         parameters,
         config,
     ):
-
         self.set_parameters(parameters)
 
-        metrics = self.trainer.validate(
-            self._val_loader()
+        metrics = evaluate(
+            self.model,
+            self.val_loader,
+            self.criterion,
+            self.device,
         )
-
-        metrics["client_id"] = self.cid
 
         return (
             float(metrics["loss"]),
-            len(self.val_dataset),
-            metrics,
-        )
-
-    ####################################################################
-    # OPTIONAL
-    ####################################################################
-
-    def get_history(self):
-
-        return getattr(
-            self,
-            "_history",
-            [],
+            len(self.val_loader.dataset),
+            {
+                "accuracy": float(metrics["accuracy"]),
+                "precision": float(metrics["precision"]),
+                "recall": float(metrics["recall"]),
+                "f1": float(metrics["f1"]),
+            },
         )
 
 
-    def _aggregate_history(self, history):
-
-        keys = [
-            "loss",
-            "accuracy",
-            "precision",
-            "recall",
-            "f1",
-        ]
-
-        result = {}
-
-        for key in keys:
-
-            values = [
-                h[key]
-                for h in history
-            ]
-
-            result[f"{key}_last"] = values[-1]
-            result[f"{key}_mean"] = sum(values) / len(values)
-            result[f"{key}_min"] = min(values)
-            result[f"{key}_max"] = max(values)
-
-        result["epochs"] = len(history)
-
-        return result
+def create_client(
+    model,
+    train_dataset,
+    val_dataset,
+    optimizer,
+    criterion,
+    batch_size=32,
+    local_epochs=1,
+    num_workers=4,
+):
+    return FlowerClient(
+        model=model,
+        train_dataset=train_dataset,
+        val_dataset=val_dataset,
+        optimizer=optimizer,
+        criterion=criterion,
+        batch_size=batch_size,
+        local_epochs=local_epochs,
+        num_workers=num_workers,
+    )
