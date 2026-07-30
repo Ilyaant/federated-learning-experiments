@@ -34,3 +34,4 @@ python run_experiment.py --model=<model_name>
 | FastViT T8 (2023)       | 0.9311   | 0.9256   | 4:39                   |
 | FastViT S12 (2023)      | 0.9277   | 0.9266   | 7:13                   |
 | FasterViT 0 (2023)      | 0.9259   | 0.9245   | 7:18                   |
+| MobileNet V5 (2025)     | 0.9005   | 0.9013   | 49:46                  |
