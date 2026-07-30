@@ -1,153 +1,211 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, List
 
 import numpy as np
 import torch
-from sklearn.metrics import (
-    accuracy_score,
-    confusion_matrix,
-    precision_recall_fscore_support,
-)
 
 
-@dataclass
-class ClassificationMetrics:
-    loss: float
-    accuracy: float
-    precision: float
-    recall: float
-    f1: float
-    confusion_matrix: np.ndarray
-
-    def to_dict(self):
-
-        return {
-            "loss": float(self.loss),
-            "accuracy": float(self.accuracy),
-            "precision": float(self.precision),
-            "recall": float(self.recall),
-            "f1": float(self.f1),
-        }
-
-
-class MetricAccumulator:
-
+class AverageMeter:
     def __init__(self):
-
         self.reset()
 
-    ####################################################################
-    # Update
-    ####################################################################
+    def reset(self):
+        self.value = 0.0
+        self.sum = 0.0
+        self.count = 0
+        self.avg = 0.0
 
+    def update(
+        self,
+        value: float,
+        n: int = 1,
+    ):
+        self.value = value
+        self.sum += value * n
+        self.count += n
+        self.avg = self.sum / max(1, self.count)
+
+
+class ClassificationMetrics:
+    def __init__(
+        self,
+        num_classes: int,
+    ):
+        self.num_classes = num_classes
+        self.reset()
+
+    def reset(self):
+        self.targets: List[int] = []
+        self.predictions: List[int] = []
+
+    @torch.no_grad()
     def update(
         self,
         logits: torch.Tensor,
         targets: torch.Tensor,
-        loss: torch.Tensor,
     ):
-
-        self.loss_sum += (
-            loss.item() * targets.size(0)
-        )
-
-        self.num_samples += targets.size(0)
-
-        preds = torch.argmax(
-            logits,
-            dim=1,
-        )
+        preds = torch.argmax(logits, dim=1)
 
         self.targets.extend(
-            targets.detach().cpu().tolist()
+            targets.cpu().tolist()
         )
 
         self.predictions.extend(
-            preds.detach().cpu().tolist()
+            preds.cpu().tolist()
         )
 
-    ####################################################################
-    # Compute
-    ####################################################################
+    def confusion_matrix(self):
+        cm = np.zeros(
+            (
+                self.num_classes,
+                self.num_classes,
+            ),
+            dtype=np.int64,
+        )
 
-    def compute(self) -> ClassificationMetrics:
+        for target, pred in zip(
+            self.targets,
+            self.predictions,
+        ):
+            cm[target, pred] += 1
 
-        if self.num_samples == 0:
+        return cm
 
-            raise RuntimeError(
-                "No samples accumulated."
+    def accuracy(self):
+        if len(self.targets) == 0:
+            return 0.0
+
+        return float(
+            np.mean(
+                np.asarray(self.targets)
+                == np.asarray(self.predictions)
+            )
+        )
+
+    def precision(self):
+        cm = self.confusion_matrix()
+
+        scores = []
+
+        for cls in range(self.num_classes):
+            tp = cm[cls, cls]
+            fp = cm[:, cls].sum() - tp
+
+            scores.append(
+                tp / (tp + fp)
+                if tp + fp > 0
+                else 0.0
             )
 
-        precision, recall, f1, _ = (
-            precision_recall_fscore_support(
-                self.targets,
-                self.predictions,
-                average="macro",
-                zero_division=0,
+        return float(np.mean(scores))
+
+    def recall(self):
+        cm = self.confusion_matrix()
+
+        scores = []
+
+        for cls in range(self.num_classes):
+            tp = cm[cls, cls]
+            fn = cm[cls, :].sum() - tp
+
+            scores.append(
+                tp / (tp + fn)
+                if tp + fn > 0
+                else 0.0
             )
-        )
 
-        return ClassificationMetrics(
-            loss=self.loss_sum / self.num_samples,
-            accuracy=accuracy_score(
-                self.targets,
-                self.predictions,
-            ),
-            precision=precision,
-            recall=recall,
-            f1=f1,
-            confusion_matrix=confusion_matrix(
-                self.targets,
-                self.predictions,
-            ),
-        )
+        return float(np.mean(scores))
 
-    ####################################################################
-    # Reset
-    ####################################################################
+    def f1(self):
+        p = self.precision()
+        r = self.recall()
 
-    def reset(self):
+        if p + r == 0:
+            return 0.0
 
-        self.loss_sum = 0.0
-        self.num_samples = 0
+        return 2 * p * r / (p + r)
 
-        self.targets = []
-        self.predictions = []
+    def per_class_accuracy(self):
+        cm = self.confusion_matrix()
+
+        scores = {}
+
+        for cls in range(self.num_classes):
+            total = cm[cls].sum()
+
+            if total == 0:
+                scores[cls] = 0.0
+            else:
+                scores[cls] = float(
+                    cm[cls, cls] / total
+                )
+
+        return scores
+
+    def summary(self):
+        return {
+            "accuracy": self.accuracy(),
+            "precision": self.precision(),
+            "recall": self.recall(),
+            "f1": self.f1(),
+        }
 
 
-########################################################################
-# Utilities
-########################################################################
+@torch.no_grad()
+def evaluate(
+    model,
+    dataloader,
+    criterion,
+    device,
+):
+    model.eval()
 
-def merge_metrics(metrics_list):
+    loss_meter = AverageMeter()
 
-    """
-    Weighted average of metrics from several clients.
-    """
-
-    total = sum(
-        n
-        for _, n in metrics_list
+    num_classes = (
+        model.num_classes
+        if hasattr(model, "num_classes")
+        else 5
     )
 
-    result = {}
+    metrics = ClassificationMetrics(
+        num_classes=num_classes,
+    )
 
-    for key in [
-        "loss",
-        "accuracy",
-        "precision",
-        "recall",
-        "f1",
-    ]:
+    for images, labels in dataloader:
+        images = images.to(
+            device,
+            non_blocking=True,
+        )
 
-        value = 0.0
+        labels = labels.to(
+            device,
+            non_blocking=True,
+        )
 
-        for metrics, n in metrics_list:
+        outputs = model(images)
 
-            value += metrics[key] * n
+        loss = criterion(
+            outputs,
+            labels,
+        )
 
-        result[key] = value / total
+        loss_meter.update(
+            loss.item(),
+            images.size(0),
+        )
+
+        metrics.update(
+            outputs,
+            labels,
+        )
+
+    result = metrics.summary()
+
+    result["loss"] = loss_meter.avg
+    result["per_class_accuracy"] = (
+        metrics.per_class_accuracy()
+    )
 
     return result
