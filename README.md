@@ -16,6 +16,14 @@ prepare_dataset('data/raw', 'data/texture')
 
 ## Запуск
 
+### Локальная симуляция (один процесс, Ray)
+
+```shell
+python main.py --mode simulation
+```
+
+### Распределённый запуск (server + clients)
+
 ```shell
 # терминал 1
 python main.py --mode server

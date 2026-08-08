@@ -36,3 +36,9 @@ server:
 
 logging:
   save_dir: experiments/texture
+
+simulation:
+  num_workers: 0
+  client_resources:
+    num_cpus: 1
+    num_gpus: 0.0

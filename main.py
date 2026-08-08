@@ -10,6 +10,8 @@ sys.path.insert(0, str(ROOT / "src"))
 import flwr as fl
 import torch
 import yaml
+from flwr.common import Context
+from flwr.common.constant import PARTITION_ID_KEY
 
 from datasets.partition import FederatedPartitioner
 from datasets.preprocessing import load_split
@@ -17,6 +19,7 @@ from datasets.texture_patch_dataset import TexturePatchDataset
 from models import create_model
 from trainer.client import FlowerClient
 from trainer.server import start_server
+from trainer.strategy import create_strategy
 from trainer.utils import get_device, seed_everything
 
 
@@ -36,7 +39,7 @@ def parse_args():
     )
     parser.add_argument(
         "--mode",
-        choices=["server", "client"],
+        choices=["server", "client", "simulation"],
         required=True,
     )
     parser.add_argument("--client-id", type=int, default=0)
@@ -121,20 +124,16 @@ def build_model(cfg: dict):
     )
 
 
-def run_server(cfg: dict):
-    start_server(
-        server_address=cfg["server"]["address"],
-        num_rounds=cfg["federated"]["rounds"],
-        num_clients=cfg["federated"]["num_clients"],
-    )
-
-
-def run_client(cfg: dict, client_id: int):
+def build_flower_client(
+    cfg: dict,
+    client_id: int,
+    num_workers: int | None = None,
+) -> FlowerClient:
     device = get_device()
     train_dataset, val_dataset, test_dataset = build_datasets(cfg, client_id)
     model = build_model(cfg).to(device)
 
-    client = FlowerClient(
+    return FlowerClient(
         model=model,
         train_dataset=train_dataset,
         val_dataset=val_dataset,
@@ -147,15 +146,64 @@ def run_client(cfg: dict, client_id: int):
         criterion=torch.nn.CrossEntropyLoss(),
         batch_size=cfg["train"]["batch_size"],
         local_epochs=cfg["train"]["local_epochs"],
-        num_workers=cfg["train"]["num_workers"],
+        num_workers=(
+            num_workers
+            if num_workers is not None
+            else cfg["train"]["num_workers"]
+        ),
         num_classes=cfg["model"]["num_classes"],
         aggregation=cfg["train"].get("aggregation", "average_probability"),
         device=device,
     )
 
+
+def run_server(cfg: dict):
+    start_server(
+        server_address=cfg["server"]["address"],
+        num_rounds=cfg["federated"]["rounds"],
+        num_clients=cfg["federated"]["num_clients"],
+    )
+
+
+def run_client(cfg: dict, client_id: int):
+    client = build_flower_client(cfg, client_id)
+
     fl.client.start_numpy_client(
         server_address=cfg["server"]["address"],
         client=client,
+    )
+
+
+def run_simulation(cfg: dict):
+    num_clients = cfg["federated"]["num_clients"]
+    sim_cfg = cfg.get("simulation", {})
+    client_cache: dict[int, FlowerClient] = {}
+
+    def client_fn(context: Context):
+        client_id = int(context.node_config[PARTITION_ID_KEY])
+        if client_id not in client_cache:
+            client_cache[client_id] = build_flower_client(
+                cfg,
+                client_id,
+                num_workers=sim_cfg.get("num_workers", 0),
+            )
+        return client_cache[client_id].to_client()
+
+    return fl.simulation.start_simulation(
+        client_fn=client_fn,
+        num_clients=num_clients,
+        config=fl.server.ServerConfig(
+            num_rounds=cfg["federated"]["rounds"],
+        ),
+        strategy=create_strategy(num_clients=num_clients),
+        client_resources=sim_cfg.get(
+            "client_resources",
+            {"num_cpus": 1, "num_gpus": 0.0},
+        ),
+        ray_init_args=sim_cfg.get(
+            "ray_init_args",
+            {"ignore_reinit_error": True, "include_dashboard": False},
+        ),
     )
 
 
@@ -168,6 +216,8 @@ def main():
 
     if args.mode == "server":
         run_server(cfg)
+    elif args.mode == "simulation":
+        run_simulation(cfg)
     else:
         run_client(cfg, args.client_id)
 
