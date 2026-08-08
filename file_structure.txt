@@ -1,27 +1,22 @@
 federated-learning-experiments/
-│
 ├── configs/
-│   ├── texture.yaml
-│   └── ...
-│
-├── datasets/
-│   ├── patch_extractor.py
-│   ├── texture_dataset.py
-│   ├── texture_patch_dataset.py
-│   ├── partition.py
-│   └── preprocessing.py
-│
-├── models/
-│   ├── fastvit_t8.py
-│   └── __init__.py
-│
-├── trainer/
-│   ├── client.py
-│   ├── server.py
-│   ├── strategy.py
-│   ├── metrics.py
-│   └── utils.py
-│
-├── experiments/
-│
-└── main.py
+│   └── texture.yaml
+├── src/
+│   ├── datasets/
+│   │   ├── constants.py
+│   │   ├── patch_extractor.py
+│   │   ├── texture_patch_dataset.py
+│   │   ├── partition.py
+│   │   └── preprocessing.py
+│   ├── models/
+│   │   ├── fastvit_t8.py
+│   │   └── __init__.py
+│   └── trainer/
+│       ├── client.py
+│       ├── server.py
+│       ├── strategy.py
+│       ├── metrics.py
+│       ├── aggregation.py
+│       └── utils.py
+├── main.py
+└── requirements.txt

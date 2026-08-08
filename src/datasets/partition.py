@@ -6,17 +6,37 @@ from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
 
-
 Sample = Tuple[str, int]
 
 
-class FederatedPartitioner:
-    """
-    Creates image-level partitions for federated learning.
+def _empty_partitions(num_clients: int) -> Dict[int, List[Sample]]:
+    return {i: [] for i in range(num_clients)}
 
-    Each client receives its own set of source images.
-    Patch extraction is performed locally on each client.
-    """
+
+def _round_robin(
+    samples: Sequence[Sample],
+    num_clients: int,
+    rng: random.Random,
+) -> Dict[int, List[Sample]]:
+    shuffled = list(samples)
+    rng.shuffle(shuffled)
+
+    partitions = _empty_partitions(num_clients)
+    for idx, sample in enumerate(shuffled):
+        partitions[idx % num_clients].append(sample)
+
+    return partitions
+
+
+def _group_by_label(samples: Sequence[Sample]) -> Dict[int, List[Sample]]:
+    grouped: Dict[int, List[Sample]] = defaultdict(list)
+    for sample in samples:
+        grouped[sample[1]].append(sample)
+    return grouped
+
+
+class FederatedPartitioner:
+    """Assigns source images to federated clients; patches are extracted locally."""
 
     def __init__(
         self,
@@ -26,43 +46,22 @@ class FederatedPartitioner:
     ):
         self.samples = list(samples)
         self.num_clients = num_clients
-        self.random = random.Random(seed)
-        self.rng = np.random.default_rng(seed)
+        self.rng = random.Random(seed)
+        self.np_rng = np.random.default_rng(seed)
 
     def iid(self) -> Dict[int, List[Sample]]:
-        samples = self.samples.copy()
-
-        self.random.shuffle(samples)
-
-        partitions = {
-            i: []
-            for i in range(self.num_clients)
-        }
-
-        for idx, sample in enumerate(samples):
-            partitions[idx % self.num_clients].append(sample)
-
-        return partitions
+        return _round_robin(self.samples, self.num_clients, self.rng)
 
     def stratified(self) -> Dict[int, List[Sample]]:
-        grouped = defaultdict(list)
+        partitions = _empty_partitions(self.num_clients)
 
-        for sample in self.samples:
-            grouped[sample[1]].append(sample)
-
-        partitions = {
-            i: []
-            for i in range(self.num_clients)
-        }
-
-        for class_samples in grouped.values():
-            self.random.shuffle(class_samples)
-
-            for idx, sample in enumerate(class_samples):
-                partitions[idx % self.num_clients].append(sample)
-
-        for client in partitions:
-            self.random.shuffle(partitions[client])
+        for class_samples in _group_by_label(self.samples).values():
+            for client, chunk in _round_robin(
+                class_samples,
+                self.num_clients,
+                self.rng,
+            ).items():
+                partitions[client].extend(chunk)
 
         return partitions
 
@@ -70,76 +69,49 @@ class FederatedPartitioner:
         self,
         alpha: float = 0.5,
         min_size: int = 10,
+        max_attempts: int = 1000,
     ) -> Dict[int, List[Sample]]:
-        labels = sorted(
-            {
-                label
-                for _, label in self.samples
-            }
-        )
+        grouped = _group_by_label(self.samples)
+        labels = sorted(grouped)
 
-        grouped = defaultdict(list)
-
-        for sample in self.samples:
-            grouped[sample[1]].append(sample)
-
-        while True:
-            partitions = {
-                i: []
-                for i in range(self.num_clients)
-            }
+        for _ in range(max_attempts):
+            partitions = _empty_partitions(self.num_clients)
 
             for label in labels:
                 class_samples = grouped[label].copy()
+                self.rng.shuffle(class_samples)
 
-                self.random.shuffle(class_samples)
-
-                proportions = self.rng.dirichlet(
-                    np.repeat(
-                        alpha,
-                        self.num_clients,
-                    )
+                proportions = self.np_rng.dirichlet(
+                    np.full(self.num_clients, alpha)
                 )
-
                 split_points = (
-                    np.cumsum(proportions)
-                    * len(class_samples)
+                    np.cumsum(proportions) * len(class_samples)
                 ).astype(int)[:-1]
 
-                chunks = np.split(
-                    np.array(class_samples, dtype=object),
-                    split_points,
-                )
-
-                for client, chunk in enumerate(chunks):
-                    partitions[client].extend(
-                        chunk.tolist()
+                for client, chunk in enumerate(
+                    np.split(
+                        np.array(class_samples, dtype=object),
+                        split_points,
                     )
+                ):
+                    partitions[client].extend(chunk.tolist())
 
-            sizes = [
-                len(v)
-                for v in partitions.values()
-            ]
+            if min(len(p) for p in partitions.values()) >= min_size:
+                for client in partitions:
+                    self.rng.shuffle(partitions[client])
+                return partitions
 
-            if min(sizes) >= min_size:
-                break
-
-        for client in partitions:
-            self.random.shuffle(
-                partitions[client]
-            )
-
-        return partitions
+        raise ValueError(
+            f"Could not satisfy min_size={min_size} "
+            f"for {self.num_clients} clients after {max_attempts} attempts"
+        )
 
     @staticmethod
-    def statistics(
-        partitions: Dict[int, List[Sample]],
-    ):
+    def statistics(partitions: Dict[int, List[Sample]]) -> Dict[int, dict]:
         stats = {}
 
         for client, samples in partitions.items():
-            distribution = defaultdict(int)
-
+            distribution: Dict[int, int] = defaultdict(int)
             for _, label in samples:
                 distribution[label] += 1
 
@@ -151,28 +123,14 @@ class FederatedPartitioner:
         return stats
 
     @staticmethod
-    def print_statistics(
-        partitions: Dict[int, List[Sample]],
-    ):
-        stats = FederatedPartitioner.statistics(
-            partitions
-        )
-
+    def print_statistics(partitions: Dict[int, List[Sample]]) -> None:
+        stats = FederatedPartitioner.statistics(partitions)
         print("-" * 70)
 
         for client, info in stats.items():
-            print(
-                f"Client {client}: "
-                f"{info['num_images']} images"
-            )
-
-            for cls, count in sorted(
-                info["class_distribution"].items()
-            ):
-                print(
-                    f"  class {cls}: {count}"
-                )
-
+            print(f"Client {client}: {info['num_images']} images")
+            for cls, count in sorted(info["class_distribution"].items()):
+                print(f"  class {cls}: {count}")
             print()
 
         print("-" * 70)

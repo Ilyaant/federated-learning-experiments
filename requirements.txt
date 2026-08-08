@@ -108,6 +108,7 @@ SQLAlchemy==2.0.47
 stack-data==0.6.3
 sympy==1.14.0
 threadpoolctl==3.6.0
+timm==1.0.28
 tomli==2.4.0
 tomli_w==1.2.0
 torch==2.8.0

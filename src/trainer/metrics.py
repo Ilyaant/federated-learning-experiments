@@ -5,6 +5,8 @@ from typing import Dict, List
 import numpy as np
 import torch
 
+from .aggregation import build_aggregator
+
 
 class AverageMeter:
     def __init__(self):
@@ -16,11 +18,7 @@ class AverageMeter:
         self.count = 0
         self.avg = 0.0
 
-    def update(
-        self,
-        value: float,
-        n: int = 1,
-    ):
+    def update(self, value: float, n: int = 1):
         self.value = value
         self.sum += value * n
         self.count += n
@@ -28,10 +26,7 @@ class AverageMeter:
 
 
 class ClassificationMetrics:
-    def __init__(
-        self,
-        num_classes: int,
-    ):
+    def __init__(self, num_classes: int):
         self.num_classes = num_classes
         self.reset()
 
@@ -40,110 +35,52 @@ class ClassificationMetrics:
         self.predictions: List[int] = []
 
     @torch.no_grad()
-    def update(
-        self,
-        logits: torch.Tensor,
-        targets: torch.Tensor,
-    ):
+    def update(self, logits: torch.Tensor, targets: torch.Tensor):
         preds = torch.argmax(logits, dim=1)
-
-        self.targets.extend(
-            targets.cpu().tolist()
-        )
-
-        self.predictions.extend(
-            preds.cpu().tolist()
-        )
+        self.targets.extend(targets.cpu().tolist())
+        self.predictions.extend(preds.cpu().tolist())
 
     def confusion_matrix(self):
         cm = np.zeros(
-            (
-                self.num_classes,
-                self.num_classes,
-            ),
+            (self.num_classes, self.num_classes),
             dtype=np.int64,
         )
-
-        for target, pred in zip(
-            self.targets,
-            self.predictions,
-        ):
+        for target, pred in zip(self.targets, self.predictions):
             cm[target, pred] += 1
-
         return cm
 
-    def accuracy(self):
-        if len(self.targets) == 0:
+    def accuracy(self) -> float:
+        if not self.targets:
             return 0.0
-
         return float(
             np.mean(
-                np.asarray(self.targets)
-                == np.asarray(self.predictions)
+                np.asarray(self.targets) == np.asarray(self.predictions)
             )
         )
 
-    def precision(self):
+    def precision(self) -> float:
         cm = self.confusion_matrix()
-
         scores = []
-
         for cls in range(self.num_classes):
             tp = cm[cls, cls]
             fp = cm[:, cls].sum() - tp
-
-            scores.append(
-                tp / (tp + fp)
-                if tp + fp > 0
-                else 0.0
-            )
-
+            scores.append(tp / (tp + fp) if tp + fp > 0 else 0.0)
         return float(np.mean(scores))
 
-    def recall(self):
+    def recall(self) -> float:
         cm = self.confusion_matrix()
-
         scores = []
-
         for cls in range(self.num_classes):
             tp = cm[cls, cls]
             fn = cm[cls, :].sum() - tp
-
-            scores.append(
-                tp / (tp + fn)
-                if tp + fn > 0
-                else 0.0
-            )
-
+            scores.append(tp / (tp + fn) if tp + fn > 0 else 0.0)
         return float(np.mean(scores))
 
-    def f1(self):
-        p = self.precision()
-        r = self.recall()
+    def f1(self) -> float:
+        p, r = self.precision(), self.recall()
+        return 0.0 if p + r == 0 else 2 * p * r / (p + r)
 
-        if p + r == 0:
-            return 0.0
-
-        return 2 * p * r / (p + r)
-
-    def per_class_accuracy(self):
-        cm = self.confusion_matrix()
-
-        scores = {}
-
-        for cls in range(self.num_classes):
-            total = cm[cls].sum()
-
-            if total == 0:
-                scores[cls] = 0.0
-            else:
-                scores[cls] = float(
-                    cm[cls, cls] / total
-                )
-
-        return scores
-
-    def summary(self):
+    def summary(self) -> Dict[str, float]:
         return {
             "accuracy": self.accuracy(),
             "precision": self.precision(),
@@ -158,54 +95,38 @@ def evaluate(
     dataloader,
     criterion,
     device,
-):
+    num_classes: int,
+    aggregation: str = "average_probability",
+) -> Dict[str, float]:
     model.eval()
 
     loss_meter = AverageMeter()
+    patch_metrics = ClassificationMetrics(num_classes)
+    image_aggregator = build_aggregator(aggregation, num_classes)
 
-    num_classes = (
-        model.num_classes
-        if hasattr(model, "num_classes")
-        else 5
-    )
+    for batch in dataloader:
+        images = batch["image"].to(device, non_blocking=True)
+        labels = batch["label"].to(device, non_blocking=True)
+        image_ids = batch["image_id"]
 
-    metrics = ClassificationMetrics(
-        num_classes=num_classes,
-    )
+        logits = model(images)
+        loss = criterion(logits, labels)
 
-    for images, labels in dataloader:
-        images = images.to(
-            device,
-            non_blocking=True,
-        )
+        loss_meter.update(loss.item(), images.size(0))
+        patch_metrics.update(logits, labels)
+        image_aggregator.update(image_ids, logits, labels)
 
-        labels = labels.to(
-            device,
-            non_blocking=True,
-        )
+    patch = patch_metrics.summary()
+    image = image_aggregator.compute()
 
-        outputs = model(images)
-
-        loss = criterion(
-            outputs,
-            labels,
-        )
-
-        loss_meter.update(
-            loss.item(),
-            images.size(0),
-        )
-
-        metrics.update(
-            outputs,
-            labels,
-        )
-
-    result = metrics.summary()
-
-    result["loss"] = loss_meter.avg
-    result["per_class_accuracy"] = (
-        metrics.per_class_accuracy()
-    )
-
-    return result
+    return {
+        "loss": loss_meter.avg,
+        "patch_accuracy": patch["accuracy"],
+        "patch_precision": patch["precision"],
+        "patch_recall": patch["recall"],
+        "patch_f1": patch["f1"],
+        "accuracy": image["accuracy"],
+        "precision": image["precision"],
+        "recall": image["recall"],
+        "f1": image["f1"],
+    }

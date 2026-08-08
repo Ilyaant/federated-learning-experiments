@@ -1,0 +1,38 @@
+seed: 42
+
+dataset:
+  root: data/texture
+  patch_size: 224
+  overlap: 0.5
+  grayscale: true
+  normalize: true
+  cache_size: 64
+
+model:
+  num_classes: 5
+  pretrained: true
+  freeze_backbone: false
+  dropout: 0.0
+  drop_path_rate: 0.1
+
+train:
+  lr: 0.0001
+  weight_decay: 0.01
+  batch_size: 32
+  local_epochs: 1
+  num_workers: 4
+  epoch_fraction: 1.0
+  balanced_per_image: true
+  with_replacement: false
+  aggregation: average_probability
+
+federated:
+  num_clients: 2
+  rounds: 10
+  partition: stratified
+
+server:
+  address: 127.0.0.1:8080
+
+logging:
+  save_dir: experiments/texture
