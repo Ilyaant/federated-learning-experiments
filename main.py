@@ -84,6 +84,12 @@ def build_datasets(cfg: dict, client_id: int):
         seed,
         strategy,
     )
+    test_partitions = partition_split(
+        load_split(root, "test"),
+        num_clients,
+        seed,
+        strategy,
+    )
 
     train_dataset = TexturePatchDataset(
         train_partitions[client_id],
@@ -96,8 +102,12 @@ def build_datasets(cfg: dict, client_id: int):
         val_partitions[client_id],
         **patch_kwargs,
     )
+    test_dataset = TexturePatchDataset(
+        test_partitions[client_id],
+        **patch_kwargs,
+    )
 
-    return train_dataset, val_dataset
+    return train_dataset, val_dataset, test_dataset
 
 
 def build_model(cfg: dict):
@@ -121,13 +131,14 @@ def run_server(cfg: dict):
 
 def run_client(cfg: dict, client_id: int):
     device = get_device()
-    train_dataset, val_dataset = build_datasets(cfg, client_id)
+    train_dataset, val_dataset, test_dataset = build_datasets(cfg, client_id)
     model = build_model(cfg).to(device)
 
     client = FlowerClient(
         model=model,
         train_dataset=train_dataset,
         val_dataset=val_dataset,
+        test_dataset=test_dataset,
         optimizer=torch.optim.AdamW(
             model.parameters(),
             lr=cfg["train"]["lr"],
