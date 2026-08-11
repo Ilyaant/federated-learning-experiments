@@ -13,6 +13,14 @@ def classification_summary(
     y_true,
     y_pred,
 ) -> Dict[str, float]:
+    if len(y_true) == 0:
+        return {
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+        }
+
     precision, recall, f1, _ = precision_recall_fscore_support(
         y_true,
         y_pred,

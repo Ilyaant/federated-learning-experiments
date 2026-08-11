@@ -32,11 +32,32 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return aggregated
 
 
+class TrackingFedAvg(fl.server.strategy.FedAvg):
+    """FedAvg that keeps the latest aggregated parameters, so the
+    final global model can be saved after training."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.latest_parameters = None
+
+    def aggregate_fit(self, server_round, results, failures):
+        parameters, metrics = super().aggregate_fit(
+            server_round,
+            results,
+            failures,
+        )
+
+        if parameters is not None:
+            self.latest_parameters = parameters
+
+        return parameters, metrics
+
+
 def create_strategy(
     num_clients: int,
     initial_parameters: Optional[NDArrays] = None,
-) -> fl.server.strategy.FedAvg:
-    return fl.server.strategy.FedAvg(
+) -> TrackingFedAvg:
+    return TrackingFedAvg(
         fraction_fit=1.0,
         fraction_evaluate=1.0,
         min_fit_clients=num_clients,

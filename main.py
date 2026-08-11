@@ -14,6 +14,7 @@ from src.datasets.preprocessing import load_split
 from src.datasets.texture_patch_dataset import TexturePatchDataset
 from src.models import create_model
 from src.trainer.client import FlowerClient
+from src.trainer.history import save_global_model, save_history
 from src.trainer.strategy import create_strategy
 from src.trainer.utils import get_device, seed_everything
 
@@ -152,16 +153,37 @@ def build_flower_client(
     )
 
 
+def save_results(cfg: dict, history, strategy) -> None:
+    save_dir = Path(cfg["logging"]["save_dir"])
+
+    save_history(history, save_dir)
+    print(f"Saved history.json and metrics.csv to {save_dir}")
+
+    if strategy.latest_parameters is not None:
+        save_global_model(
+            strategy.latest_parameters,
+            build_model(cfg),
+            save_dir / "model_final.pt",
+        )
+        print(f"Saved final global model to {save_dir / 'model_final.pt'}")
+    else:
+        print("No aggregated parameters available; model not saved")
+
+
 def run_server(cfg: dict):
-    fl.server.start_server(
+    strategy = create_strategy(
+        num_clients=cfg["federated"]["num_clients"],
+    )
+
+    history = fl.server.start_server(
         server_address=cfg["server"]["address"],
         config=fl.server.ServerConfig(
             num_rounds=cfg["federated"]["rounds"],
         ),
-        strategy=create_strategy(
-            num_clients=cfg["federated"]["num_clients"],
-        ),
+        strategy=strategy,
     )
+
+    save_results(cfg, history, strategy)
 
 
 def run_client(cfg: dict, client_id: int):
@@ -188,13 +210,15 @@ def run_simulation(cfg: dict):
             )
         return client_cache[client_id].to_client()
 
-    return fl.simulation.start_simulation(
+    strategy = create_strategy(num_clients=num_clients)
+
+    history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=num_clients,
         config=fl.server.ServerConfig(
             num_rounds=cfg["federated"]["rounds"],
         ),
-        strategy=create_strategy(num_clients=num_clients),
+        strategy=strategy,
         client_resources=sim_cfg.get(
             "client_resources",
             {"num_cpus": 1, "num_gpus": 0.0},
@@ -204,6 +228,9 @@ def run_simulation(cfg: dict):
             {"ignore_reinit_error": True, "include_dashboard": False},
         ),
     )
+
+    save_results(cfg, history, strategy)
+    return history
 
 
 def main():

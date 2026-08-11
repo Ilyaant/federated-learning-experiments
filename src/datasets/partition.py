@@ -17,13 +17,14 @@ def _round_robin(
     samples: Sequence[Sample],
     num_clients: int,
     rng: random.Random,
+    offset: int = 0,
 ) -> Dict[int, List[Sample]]:
     shuffled = list(samples)
     rng.shuffle(shuffled)
 
     partitions = _empty_partitions(num_clients)
     for idx, sample in enumerate(shuffled):
-        partitions[idx % num_clients].append(sample)
+        partitions[(idx + offset) % num_clients].append(sample)
 
     return partitions
 
@@ -55,11 +56,16 @@ class FederatedPartitioner:
     def stratified(self) -> Dict[int, List[Sample]]:
         partitions = _empty_partitions(self.num_clients)
 
-        for class_samples in _group_by_label(self.samples).values():
+        # Rotate the starting client per class so that leftover
+        # samples do not all pile up on client 0.
+        for class_idx, class_samples in enumerate(
+            _group_by_label(self.samples).values()
+        ):
             for client, chunk in _round_robin(
                 class_samples,
                 self.num_clients,
                 self.rng,
+                offset=class_idx,
             ).items():
                 partitions[client].extend(chunk)
 
