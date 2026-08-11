@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
-from PIL import Image
+import torch
 from torch.utils.data import Dataset
 
 from .patch_extractor import PatchExtractor
@@ -56,7 +56,7 @@ class TexturePatchDataset(Dataset):
 
         self._all_patches: List[PatchEntry] = []
         self._active_patches: List[PatchEntry] = []
-        self._image_cache: OrderedDict[str, Image.Image] = OrderedDict()
+        self._image_cache: OrderedDict[str, torch.Tensor] = OrderedDict()
 
         self._build_patch_index()
         self.set_epoch(0)
@@ -102,21 +102,22 @@ class TexturePatchDataset(Dataset):
         rng.shuffle(active)
         self._active_patches = active
 
-    def _load_image(self, path: Path) -> Image.Image:
+    def _load_image(self, path: Path) -> torch.Tensor:
+        """Load, normalize and cache the full image tensor, so that
+        extracting each of its patches is a cheap slicing operation."""
         key = str(path)
 
         if key in self._image_cache:
             self._image_cache.move_to_end(key)
             return self._image_cache[key]
 
-        mode = "L" if self.extractor.grayscale else "RGB"
-        image = Image.open(path).convert(mode)
-        self._image_cache[key] = image
+        tensor = self.extractor.load_image(path)
+        self._image_cache[key] = tensor
 
         if len(self._image_cache) > self.cache_size:
             self._image_cache.popitem(last=False)
 
-        return image
+        return tensor
 
     def __len__(self) -> int:
         return len(self._active_patches)

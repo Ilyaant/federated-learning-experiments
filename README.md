@@ -4,15 +4,15 @@
 
 ## Подготовка данных
 
+Исходные изображения лежат в папках-классах (clear, G, GP, M, T).
+Скрипт конвертирует их в grayscale и делит на train/val/test:
+
 ```shell
-python -c "
-from pathlib import Path
-import sys
-sys.path.insert(0, 'src')
-from datasets.preprocessing import prepare_dataset
-prepare_dataset('data/raw', 'data/texture')
-"
+python -m src.datasets.preprocessing
 ```
+
+Пути по умолчанию: `data/dataset2_exp` -> `data/dataset2_exp_prepared`
+(совпадают с `dataset.root` в конфиге).
 
 ## Запуск
 

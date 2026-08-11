@@ -61,11 +61,12 @@ class FlowerClient(fl.client.NumPyClient):
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
 
+        # persistent_workers is intentionally off: workers must be
+        # re-forked each epoch to pick up set_epoch() resampling.
         loader_kwargs = {
             "batch_size": batch_size,
             "num_workers": num_workers,
             "pin_memory": torch.cuda.is_available(),
-            "persistent_workers": num_workers > 0,
         }
 
         self.train_loader = DataLoader(
@@ -157,9 +158,10 @@ class FlowerClient(fl.client.NumPyClient):
         for epoch in range(self.local_epochs):
             train_loss = self.train_one_epoch(epoch)
 
+        # Test metrics are reported from evaluate(), which Flower
+        # calls every round anyway; no need to compute them twice.
         train_metrics = self._evaluate_train()
         val_metrics = self._run_evaluation(self.val_loader)
-        test_metrics = self._run_evaluation(self.test_loader)
 
         train_prefixed = _prefixed_metrics(train_metrics, "train_")
         train_prefixed.pop("train_loss", None)
@@ -167,8 +169,7 @@ class FlowerClient(fl.client.NumPyClient):
         fit_metrics = {
             "train_loss": float(train_loss),
             **train_prefixed,
-            **_prefixed_metrics(val_metrics, ""),
-            **_prefixed_metrics(test_metrics, "test_"),
+            **_prefixed_metrics(val_metrics, "val_"),
         }
 
         return (
@@ -180,17 +181,13 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
 
-        val_metrics = self._run_evaluation(self.val_loader)
         test_metrics = self._run_evaluation(self.test_loader)
 
-        test_prefixed = _prefixed_metrics(test_metrics, "")
-        test_prefixed.pop("loss", None)
+        test_prefixed = _prefixed_metrics(test_metrics, "test_")
+        test_prefixed.pop("test_loss", None)
 
         return (
             float(test_metrics["loss"]),
             self.test_dataset.num_images,
-            {
-                **test_prefixed,
-                **_prefixed_metrics(val_metrics, "val_"),
-            },
+            test_prefixed,
         )

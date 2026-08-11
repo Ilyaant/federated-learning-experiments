@@ -7,7 +7,14 @@ from typing import Dict, List, Tuple
 
 from PIL import Image
 
-from src.datasets.constants import VALID_EXTENSIONS
+VALID_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".bmp",
+    ".tif",
+    ".tiff",
+}
 
 
 def find_classes(dataset_root: Path) -> List[str]:

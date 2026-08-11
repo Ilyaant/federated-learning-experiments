@@ -59,18 +59,29 @@ class PatchExtractor:
 
         return positions
 
+    def coordinates_for_size(
+        self,
+        width: int,
+        height: int,
+    ) -> List[Tuple[int, int]]:
+        xs = self._positions(width)
+        ys = self._positions(height)
+        return [(x, y) for y in ys for x in xs]
+
     def coordinates(
         self,
         image: Union[str, Path, Image.Image, torch.Tensor],
     ) -> List[Tuple[int, int]]:
         if torch.is_tensor(image):
             _, h, w = image.shape
+        elif isinstance(image, Image.Image):
+            w, h = image.size
         else:
-            _, h, w = self.load_image(image).shape
+            # Reads only the image header, without decoding pixels.
+            with Image.open(image) as opened:
+                w, h = opened.size
 
-        xs = self._positions(w)
-        ys = self._positions(h)
-        return [(x, y) for y in ys for x in xs]
+        return self.coordinates_for_size(w, h)
 
     def extract_patch(
         self,

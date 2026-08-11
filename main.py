@@ -1,11 +1,7 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT / "src"))
 
 import flwr as fl
 import torch
@@ -18,7 +14,6 @@ from src.datasets.preprocessing import load_split
 from src.datasets.texture_patch_dataset import TexturePatchDataset
 from src.models import create_model
 from src.trainer.client import FlowerClient
-from src.trainer.server import start_server
 from src.trainer.strategy import create_strategy
 from src.trainer.utils import get_device, seed_everything
 
@@ -158,10 +153,14 @@ def build_flower_client(
 
 
 def run_server(cfg: dict):
-    start_server(
+    fl.server.start_server(
         server_address=cfg["server"]["address"],
-        num_rounds=cfg["federated"]["rounds"],
-        num_clients=cfg["federated"]["num_clients"],
+        config=fl.server.ServerConfig(
+            num_rounds=cfg["federated"]["rounds"],
+        ),
+        strategy=create_strategy(
+            num_clients=cfg["federated"]["num_clients"],
+        ),
     )
 
 

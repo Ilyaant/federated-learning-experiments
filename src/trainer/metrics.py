@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-import numpy as np
 import torch
 
-from .aggregation import build_aggregator
+from .aggregation import build_aggregator, classification_summary
 
 
 class AverageMeter:
@@ -25,70 +24,6 @@ class AverageMeter:
         self.avg = self.sum / max(1, self.count)
 
 
-class ClassificationMetrics:
-    def __init__(self, num_classes: int):
-        self.num_classes = num_classes
-        self.reset()
-
-    def reset(self):
-        self.targets: List[int] = []
-        self.predictions: List[int] = []
-
-    @torch.no_grad()
-    def update(self, logits: torch.Tensor, targets: torch.Tensor):
-        preds = torch.argmax(logits, dim=1)
-        self.targets.extend(targets.cpu().tolist())
-        self.predictions.extend(preds.cpu().tolist())
-
-    def confusion_matrix(self):
-        cm = np.zeros(
-            (self.num_classes, self.num_classes),
-            dtype=np.int64,
-        )
-        for target, pred in zip(self.targets, self.predictions):
-            cm[target, pred] += 1
-        return cm
-
-    def accuracy(self) -> float:
-        if not self.targets:
-            return 0.0
-        return float(
-            np.mean(
-                np.asarray(self.targets) == np.asarray(self.predictions)
-            )
-        )
-
-    def precision(self) -> float:
-        cm = self.confusion_matrix()
-        scores = []
-        for cls in range(self.num_classes):
-            tp = cm[cls, cls]
-            fp = cm[:, cls].sum() - tp
-            scores.append(tp / (tp + fp) if tp + fp > 0 else 0.0)
-        return float(np.mean(scores))
-
-    def recall(self) -> float:
-        cm = self.confusion_matrix()
-        scores = []
-        for cls in range(self.num_classes):
-            tp = cm[cls, cls]
-            fn = cm[cls, :].sum() - tp
-            scores.append(tp / (tp + fn) if tp + fn > 0 else 0.0)
-        return float(np.mean(scores))
-
-    def f1(self) -> float:
-        p, r = self.precision(), self.recall()
-        return 0.0 if p + r == 0 else 2 * p * r / (p + r)
-
-    def summary(self) -> Dict[str, float]:
-        return {
-            "accuracy": self.accuracy(),
-            "precision": self.precision(),
-            "recall": self.recall(),
-            "f1": self.f1(),
-        }
-
-
 @torch.no_grad()
 def evaluate(
     model,
@@ -101,7 +36,8 @@ def evaluate(
     model.eval()
 
     loss_meter = AverageMeter()
-    patch_metrics = ClassificationMetrics(num_classes)
+    patch_targets: List[int] = []
+    patch_predictions: List[int] = []
     image_aggregator = build_aggregator(aggregation, num_classes)
 
     for batch in dataloader:
@@ -113,10 +49,13 @@ def evaluate(
         loss = criterion(logits, labels)
 
         loss_meter.update(loss.item(), images.size(0))
-        patch_metrics.update(logits, labels)
+        patch_targets.extend(labels.cpu().tolist())
+        patch_predictions.extend(
+            torch.argmax(logits, dim=1).cpu().tolist()
+        )
         image_aggregator.update(image_ids, logits, labels)
 
-    patch = patch_metrics.summary()
+    patch = classification_summary(patch_targets, patch_predictions)
     image = image_aggregator.compute()
 
     # Primary metrics are patch-level; image-level metrics are
