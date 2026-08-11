@@ -13,14 +13,14 @@ import yaml
 from flwr.common import Context
 from flwr.common.constant import PARTITION_ID_KEY
 
-from datasets.partition import FederatedPartitioner
-from datasets.preprocessing import load_split
-from datasets.texture_patch_dataset import TexturePatchDataset
-from models import create_model
-from trainer.client import FlowerClient
-from trainer.server import start_server
-from trainer.strategy import create_strategy
-from trainer.utils import get_device, seed_everything
+from src.datasets.partition import FederatedPartitioner
+from src.datasets.preprocessing import load_split
+from src.datasets.texture_patch_dataset import TexturePatchDataset
+from src.models import create_model
+from src.trainer.client import FlowerClient
+from src.trainer.server import start_server
+from src.trainer.strategy import create_strategy
+from src.trainer.utils import get_device, seed_everything
 
 
 def load_config(path: str) -> dict:

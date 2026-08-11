@@ -119,14 +119,16 @@ def evaluate(
     patch = patch_metrics.summary()
     image = image_aggregator.compute()
 
+    # Primary metrics are patch-level; image-level metrics are
+    # kept under the "image_" prefix for reference.
     return {
         "loss": loss_meter.avg,
-        "patch_accuracy": patch["accuracy"],
-        "patch_precision": patch["precision"],
-        "patch_recall": patch["recall"],
-        "patch_f1": patch["f1"],
-        "accuracy": image["accuracy"],
-        "precision": image["precision"],
-        "recall": image["recall"],
-        "f1": image["f1"],
+        "accuracy": patch["accuracy"],
+        "precision": patch["precision"],
+        "recall": patch["recall"],
+        "f1": patch["f1"],
+        "image_accuracy": image["accuracy"],
+        "image_precision": image["precision"],
+        "image_recall": image["recall"],
+        "image_f1": image["f1"],
     }

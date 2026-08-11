@@ -41,19 +41,7 @@ class FastViTT8(nn.Module):
         if freeze_backbone:
             self.freeze_backbone()
 
-    def _adapt_input_layer(self):
-        conv = None
-
-        for module in self.backbone.modules():
-            if isinstance(module, nn.Conv2d):
-                conv = module
-                break
-
-        if conv is None:
-            raise RuntimeError(
-                "Unable to locate first Conv2d layer."
-            )
-
+    def _make_grayscale_conv(self, conv: nn.Conv2d) -> nn.Conv2d:
         new_conv = nn.Conv2d(
             in_channels=1,
             out_channels=conv.out_channels,
@@ -61,7 +49,7 @@ class FastViTT8(nn.Module):
             stride=conv.stride,
             padding=conv.padding,
             dilation=conv.dilation,
-            groups=conv.groups,
+            groups=1 if conv.in_channels == conv.groups else conv.groups,
             bias=conv.bias is not None,
         )
 
@@ -73,15 +61,40 @@ class FastViTT8(nn.Module):
             if conv.bias is not None:
                 new_conv.bias.copy_(conv.bias)
 
-        for name, module in self.backbone.named_modules():
-            for child_name, child in module.named_children():
-                if child is conv:
-                    setattr(module, child_name, new_conv)
-                    return
+        return new_conv
 
-        raise RuntimeError(
-            "Unable to replace first Conv2d layer."
-        )
+    @staticmethod
+    def _replace_module(
+        root: nn.Module,
+        qualified_name: str,
+        new_module: nn.Module,
+    ) -> None:
+        parts = qualified_name.split(".")
+        parent = root
+
+        for part in parts[:-1]:
+            parent = getattr(parent, part)
+
+        setattr(parent, parts[-1], new_module)
+
+    def _adapt_input_layer(self):
+        input_convs = [
+            (name, module)
+            for name, module in self.backbone.named_modules()
+            if isinstance(module, nn.Conv2d) and module.in_channels == 3
+        ]
+
+        if not input_convs:
+            raise RuntimeError(
+                "Unable to locate input Conv2d layers."
+            )
+
+        for name, conv in input_convs:
+            self._replace_module(
+                self.backbone,
+                name,
+                self._make_grayscale_conv(conv),
+            )
 
     def freeze_backbone(self):
         for parameter in self.backbone.parameters():

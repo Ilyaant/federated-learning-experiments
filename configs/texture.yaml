@@ -1,7 +1,7 @@
 seed: 42
 
 dataset:
-  root: data/texture
+  root: data/dataset2_exp_prepared
   patch_size: 224
   overlap: 0.5
   grayscale: true

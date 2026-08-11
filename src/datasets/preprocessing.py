@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 
 from PIL import Image
 
-from .constants import VALID_EXTENSIONS
+from src.datasets.constants import VALID_EXTENSIONS
 
 
 def find_classes(dataset_root: Path) -> List[str]:
@@ -150,3 +150,10 @@ def load_split(
             samples.append((file, class_to_idx[cls]))
 
     return samples
+
+
+if __name__ == "__main__":
+    prepare_dataset(
+        raw_root="data/dataset2_exp",
+        output_root="data/dataset2_exp_prepared"
+    )

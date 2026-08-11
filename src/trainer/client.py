@@ -12,19 +12,24 @@ from .metrics import AverageMeter, evaluate
 from .utils import get_device
 
 
+_REPORTED_METRICS = {
+    "loss",
+    "accuracy",
+    "precision",
+    "recall",
+    "f1",
+    "image_accuracy",
+    "image_precision",
+    "image_recall",
+    "image_f1",
+}
+
+
 def _prefixed_metrics(metrics: Dict[str, float], prefix: str) -> Dict[str, float]:
     return {
         f"{prefix}{key}": float(value)
         for key, value in metrics.items()
-        if key
-        in {
-            "loss",
-            "patch_accuracy",
-            "accuracy",
-            "precision",
-            "recall",
-            "f1",
-        }
+        if key in _REPORTED_METRICS
     }
 
 
@@ -162,12 +167,7 @@ class FlowerClient(fl.client.NumPyClient):
         fit_metrics = {
             "train_loss": float(train_loss),
             **train_prefixed,
-            "loss": float(val_metrics["loss"]),
-            "patch_accuracy": float(val_metrics["patch_accuracy"]),
-            "accuracy": float(val_metrics["accuracy"]),
-            "precision": float(val_metrics["precision"]),
-            "recall": float(val_metrics["recall"]),
-            "f1": float(val_metrics["f1"]),
+            **_prefixed_metrics(val_metrics, ""),
             **_prefixed_metrics(test_metrics, "test_"),
         }
 
@@ -183,15 +183,14 @@ class FlowerClient(fl.client.NumPyClient):
         val_metrics = self._run_evaluation(self.val_loader)
         test_metrics = self._run_evaluation(self.test_loader)
 
+        test_prefixed = _prefixed_metrics(test_metrics, "")
+        test_prefixed.pop("loss", None)
+
         return (
             float(test_metrics["loss"]),
             self.test_dataset.num_images,
             {
-                "patch_accuracy": float(test_metrics["patch_accuracy"]),
-                "accuracy": float(test_metrics["accuracy"]),
-                "precision": float(test_metrics["precision"]),
-                "recall": float(test_metrics["recall"]),
-                "f1": float(test_metrics["f1"]),
+                **test_prefixed,
                 **_prefixed_metrics(val_metrics, "val_"),
             },
         )
