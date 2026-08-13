@@ -19,7 +19,7 @@ train:
   lr: 0.0001
   weight_decay: 0.01
   batch_size: 32
-  local_epochs: 1
+  local_epochs: 3
   num_workers: 4
   epoch_fraction: 1.0
   balanced_per_image: true
@@ -27,8 +27,8 @@ train:
   aggregation: average_probability
 
 federated:
-  num_clients: 2
-  rounds: 10
+  num_clients: 10
+  rounds: 100
   partition: stratified
 
 server:
@@ -40,5 +40,5 @@ logging:
 simulation:
   num_workers: 0
   client_resources:
-    num_cpus: 1
+    num_cpus: 7
     num_gpus: 0.0
