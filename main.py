@@ -69,6 +69,7 @@ def build_datasets(cfg: dict, client_id: int):
         "normalize": cfg["dataset"]["normalize"],
         "cache_size": cfg["dataset"].get("cache_size", 64),
         "seed": seed,
+        "augmentation": cfg["dataset"].get("augmentation"),
     }
 
     train_partitions = partition_split(

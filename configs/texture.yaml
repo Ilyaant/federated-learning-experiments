@@ -7,6 +7,17 @@ dataset:
   grayscale: true
   normalize: true
   cache_size: 64
+  augmentation:
+    enabled: true
+    include_original: true
+    rotation_angles: [-15.0, 15.0]
+    blur:
+      enabled: true
+      kernel_size: 5
+      sigma: 1.0
+    noise:
+      enabled: true
+      std: 0.05
 
 model:
   num_classes: 5
