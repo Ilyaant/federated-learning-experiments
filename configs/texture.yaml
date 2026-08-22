@@ -47,6 +47,7 @@ server:
 
 logging:
   save_dir: logs
+  log_file: experiment.log
 
 simulation:
   num_workers: 0

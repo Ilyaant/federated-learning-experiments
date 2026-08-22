@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 from pathlib import Path
 
 import flwr as fl
@@ -14,9 +15,16 @@ from src.datasets.preprocessing import load_split
 from src.datasets.texture_patch_dataset import TexturePatchDataset
 from src.models import create_model
 from src.trainer.client import FlowerClient
-from src.trainer.history import save_global_model, save_history
+from src.trainer.history import (
+    configure_file_logging,
+    save_global_model,
+    save_history,
+)
 from src.trainer.strategy import create_strategy
 from src.trainer.utils import get_device, seed_everything
+
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(path: str) -> dict:
@@ -151,6 +159,8 @@ def build_flower_client(
         num_classes=cfg["model"]["num_classes"],
         aggregation=cfg["train"].get("aggregation", "average_probability"),
         device=device,
+        client_id=client_id,
+        log_dir=cfg["logging"]["save_dir"],
     )
 
 
@@ -158,7 +168,7 @@ def save_results(cfg: dict, history, strategy) -> None:
     save_dir = Path(cfg["logging"]["save_dir"])
 
     save_history(history, save_dir)
-    print(f"Saved history.json and metrics.csv to {save_dir}")
+    logger.info("Saved final history.json and metrics.csv to %s", save_dir)
 
     if strategy.latest_parameters is not None:
         save_global_model(
@@ -166,14 +176,18 @@ def save_results(cfg: dict, history, strategy) -> None:
             build_model(cfg),
             save_dir / "model_final.pt",
         )
-        print(f"Saved final global model to {save_dir / 'model_final.pt'}")
+        logger.info(
+            "Saved final global model to %s",
+            save_dir / "model_final.pt",
+        )
     else:
-        print("No aggregated parameters available; model not saved")
+        logger.warning("No aggregated parameters available; model not saved")
 
 
 def run_server(cfg: dict):
     strategy = create_strategy(
         num_clients=cfg["federated"]["num_clients"],
+        save_dir=cfg["logging"]["save_dir"],
     )
 
     history = fl.server.start_server(
@@ -211,7 +225,10 @@ def run_simulation(cfg: dict):
             )
         return client_cache[client_id].to_client()
 
-    strategy = create_strategy(num_clients=num_clients)
+    strategy = create_strategy(
+        num_clients=num_clients,
+        save_dir=cfg["logging"]["save_dir"],
+    )
 
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
@@ -239,7 +256,22 @@ def main():
     cfg = load_config(args.config)
 
     seed_everything(cfg["seed"])
-    Path(cfg["logging"]["save_dir"]).mkdir(parents=True, exist_ok=True)
+    save_dir = Path(cfg["logging"]["save_dir"])
+    save_dir.mkdir(parents=True, exist_ok=True)
+    log_filename = cfg["logging"].get("log_file", "experiment.log")
+    if args.mode == "client":
+        log_filename = f"client_{args.client_id}.log"
+    configure_file_logging(
+        save_dir,
+        filename=log_filename,
+        identifier=f"{args.mode}-{args.client_id}",
+    )
+    logger.info(
+        "Starting mode=%s client_id=%s with config=%s",
+        args.mode,
+        args.client_id,
+        args.config,
+    )
 
     if args.mode == "server":
         run_server(cfg)

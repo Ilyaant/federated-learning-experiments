@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 from collections import OrderedDict
+from pathlib import Path
 from typing import Dict, List
 
 import flwr as fl
@@ -10,6 +12,41 @@ from torch.utils.data import DataLoader
 
 from .metrics import AverageMeter, evaluate
 from .utils import get_device
+
+
+logger = logging.getLogger(__name__)
+
+
+def _create_client_logger(
+    client_id: int | None,
+    log_dir: str | Path | None,
+) -> logging.Logger:
+    if client_id is None or log_dir is None:
+        return logger
+
+    client_logger = logging.getLogger(f"{__name__}.client_{client_id}")
+    client_logger.setLevel(logging.INFO)
+    client_logger.propagate = False
+
+    log_dir = Path(log_dir)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = (log_dir / f"client_{client_id}.log").resolve()
+
+    if not any(
+        isinstance(handler, logging.FileHandler)
+        and Path(handler.baseFilename).resolve() == log_path
+        for handler in client_logger.handlers
+    ):
+        handler = logging.FileHandler(log_path, encoding="utf-8")
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(
+            logging.Formatter(
+                "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+            )
+        )
+        client_logger.addHandler(handler)
+
+    return client_logger
 
 
 _REPORTED_METRICS = {
@@ -48,7 +85,10 @@ class FlowerClient(fl.client.NumPyClient):
         num_classes: int = 5,
         aggregation: str = "average_probability",
         device=None,
+        client_id: int | None = None,
+        log_dir: str | Path | None = None,
     ):
+        self.logger = _create_client_logger(client_id, log_dir)
         self.device = device or get_device()
         self.model = model.to(self.device)
         self.optimizer = optimizer
@@ -153,10 +193,19 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
+        server_round = config.get("server_round", "unknown")
+        self.logger.info("Starting local training for round %s", server_round)
 
         train_loss = 0.0
         for epoch in range(self.local_epochs):
             train_loss = self.train_one_epoch(epoch)
+            self.logger.info(
+                "Round %s local epoch %s/%s: train_loss=%.6f",
+                server_round,
+                epoch + 1,
+                self.local_epochs,
+                train_loss,
+            )
 
         # Test metrics are reported from evaluate(), which Flower
         # calls every round anyway; no need to compute them twice.
@@ -171,6 +220,11 @@ class FlowerClient(fl.client.NumPyClient):
             **train_prefixed,
             **_prefixed_metrics(val_metrics, "val_"),
         }
+        self.logger.info(
+            "Round %s local fit metrics: %s",
+            server_round,
+            fit_metrics,
+        )
 
         return (
             self.get_parameters(),
@@ -180,11 +234,18 @@ class FlowerClient(fl.client.NumPyClient):
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
+        server_round = config.get("server_round", "unknown")
 
         test_metrics = self._run_evaluation(self.test_loader)
 
         test_prefixed = _prefixed_metrics(test_metrics, "test_")
         test_prefixed.pop("test_loss", None)
+        self.logger.info(
+            "Round %s local test metrics: loss=%.6f metrics=%s",
+            server_round,
+            test_metrics["loss"],
+            test_prefixed,
+        )
 
         return (
             float(test_metrics["loss"]),
