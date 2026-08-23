@@ -266,11 +266,13 @@ def main():
         filename=log_filename,
         identifier=f"{args.mode}-{args.client_id}",
     )
+    device = get_device()
     logger.info(
-        "Starting mode=%s client_id=%s with config=%s",
+        "Starting mode=%s client_id=%s with config=%s device=%s",
         args.mode,
         args.client_id,
         args.config,
+        device,
     )
 
     if args.mode == "server":
