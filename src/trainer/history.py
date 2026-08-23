@@ -4,6 +4,7 @@ import csv
 import json
 import logging
 from collections import OrderedDict, defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Mapping
 
@@ -67,8 +68,9 @@ class LiveHistoryWriter:
         self.fit_metrics[server_round].update(self._as_float_metrics(metrics))
         self.flush()
         logger.info(
-            "Round %s fit metrics saved: %s",
+            "Round %s fit metrics saved at %s: %s",
             server_round,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             dict(self.fit_metrics[server_round]),
         )
 
@@ -85,8 +87,9 @@ class LiveHistoryWriter:
         )
         self.flush()
         logger.info(
-            "Round %s evaluation metrics saved: loss=%s metrics=%s",
+            "Round %s evaluation metrics saved at %s: loss=%s metrics=%s",
             server_round,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             loss,
             dict(self.evaluate_metrics[server_round]),
         )

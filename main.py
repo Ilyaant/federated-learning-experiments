@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from datetime import datetime
 from pathlib import Path
 
 import flwr as fl
@@ -265,6 +266,10 @@ def main():
         save_dir,
         filename=log_filename,
         identifier=f"{args.mode}-{args.client_id}",
+    )
+    logger.info(
+        "Experiment started at %s",
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     )
     device = get_device()
     logger.info(
