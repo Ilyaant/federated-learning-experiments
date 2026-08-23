@@ -240,7 +240,7 @@ def run_simulation(cfg: dict):
         strategy=strategy,
         client_resources=sim_cfg.get(
             "client_resources",
-            {"num_cpus": 1, "num_gpus": 0.0},
+            {"num_cpus": 2, "num_gpus": 0.5},
         ),
         ray_init_args=sim_cfg.get(
             "ray_init_args",
