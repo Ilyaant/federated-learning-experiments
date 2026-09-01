@@ -52,7 +52,7 @@ python main.py --mode client --client-id 1
 
 В данном эксперименте используются все тренировочные данные.
 
-Результаты: `logs/draft_exp_aug`
+Результаты: `logs/exp_no_aug`
 
 Анализ результатов: `notebooks/results_no_aug.ipynb`
 
@@ -65,4 +65,8 @@ python main.py --mode client --client-id 1
 - **Шум**: Аддитивный гауссов шум `patch + N(0,1) * 0.05`
 
 Таким образом, на каждый патч приходится 5 итоговых сэмплов: оригинальный, повороты на 15 градусов, размытие, зашумление.
+
+Результаты: `logs/draft_exp_aug`
+
+Анализ результатов: `notebooks/results_aug.ipynb`
 
