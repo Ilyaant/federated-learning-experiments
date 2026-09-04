@@ -61,6 +61,7 @@ _REPORTED_METRICS = {
     "image_precision",
     "image_recall",
     "image_f1",
+    "lr",
 }
 
 
@@ -99,6 +100,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.min_lr = min_lr
         self.total_rounds = total_rounds
         self.max_grad_norm = max_grad_norm
+        self.current_lr = initial_lr
         self.device = device or get_device()
         self.model = model.to(self.device)
         self.optimizer = optimizer
@@ -213,15 +215,19 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         self.optimizer.state.clear()
-        server_round = config.get("server_round", 1)
         
-        if self.total_rounds > 1 and isinstance(server_round, int):
+        try:
+            server_round = int(config.get("server_round", 1))
+        except (ValueError, TypeError):
+            server_round = 1
+        
+        if self.total_rounds > 1:
             progress = (server_round - 1) / (self.total_rounds - 1)
             progress = min(1.0, max(0.0, progress))
-            current_lr = self.min_lr + 0.5 * (self.initial_lr - self.min_lr) * (1 + math.cos(math.pi * progress))
+            self.current_lr = self.min_lr + 0.5 * (self.initial_lr - self.min_lr) * (1 + math.cos(math.pi * progress))
             for g in self.optimizer.param_groups:
-                g['lr'] = current_lr
-            self.logger.info("Round %s learning rate set to %.6f", server_round, current_lr)
+                g['lr'] = self.current_lr
+            self.logger.info("Round %s learning rate set to %.6g", server_round, self.current_lr)
 
         self.logger.info("Starting local training for round %s", server_round)
 
@@ -246,6 +252,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         fit_metrics = {
             "train_loss": float(train_loss),
+            "lr": float(self.current_lr),
             **train_prefixed,
             **_prefixed_metrics(val_metrics, "val_"),
         }
