@@ -190,21 +190,29 @@ class FlowerClient(fl.client.NumPyClient):
     def _evaluate_train(self):
         dataset = self.train_dataset
         restored_fraction = None
+        restored_transform = getattr(dataset, "transform", None)
 
         if hasattr(dataset, "epoch_fraction") and dataset.epoch_fraction < 1.0:
             restored_fraction = dataset.epoch_fraction
             dataset.epoch_fraction = 1.0
             dataset.set_epoch(0)
 
-        metrics = self._run_evaluation(self.train_loader)
+        if hasattr(dataset, "transform"):
+            dataset.transform = None
 
-        if restored_fraction is not None:
-            dataset.epoch_fraction = restored_fraction
+        try:
+            metrics = self._run_evaluation(self.train_loader)
+        finally:
+            if hasattr(dataset, "transform"):
+                dataset.transform = restored_transform
+            if restored_fraction is not None:
+                dataset.epoch_fraction = restored_fraction
 
         return metrics
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
+        self.optimizer.state.clear()
         server_round = config.get("server_round", 1)
         
         if self.total_rounds > 1 and isinstance(server_round, int):
