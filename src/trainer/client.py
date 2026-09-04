@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Dict, List
 
 import flwr as fl
+import math
 import numpy as np
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from .metrics import AverageMeter, evaluate
@@ -87,8 +89,16 @@ class FlowerClient(fl.client.NumPyClient):
         device=None,
         client_id: int | None = None,
         log_dir: str | Path | None = None,
+        initial_lr: float = 0.0001,
+        min_lr: float = 1e-6,
+        total_rounds: int = 100,
+        max_grad_norm: float | None = 1.0,
     ):
         self.logger = _create_client_logger(client_id, log_dir)
+        self.initial_lr = initial_lr
+        self.min_lr = min_lr
+        self.total_rounds = total_rounds
+        self.max_grad_norm = max_grad_norm
         self.device = device or get_device()
         self.model = model.to(self.device)
         self.optimizer = optimizer
@@ -159,6 +169,8 @@ class FlowerClient(fl.client.NumPyClient):
             logits = self.model(images)
             loss = self.criterion(logits, labels)
             loss.backward()
+            if self.max_grad_norm is not None:
+                nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
             self.optimizer.step()
 
             loss_meter.update(loss.item(), images.size(0))
@@ -193,7 +205,16 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        server_round = config.get("server_round", "unknown")
+        server_round = config.get("server_round", 1)
+        
+        if self.total_rounds > 1 and isinstance(server_round, int):
+            progress = (server_round - 1) / (self.total_rounds - 1)
+            progress = min(1.0, max(0.0, progress))
+            current_lr = self.min_lr + 0.5 * (self.initial_lr - self.min_lr) * (1 + math.cos(math.pi * progress))
+            for g in self.optimizer.param_groups:
+                g['lr'] = current_lr
+            self.logger.info("Round %s learning rate set to %.6f", server_round, current_lr)
+
         self.logger.info("Starting local training for round %s", server_round)
 
         train_loss = 0.0

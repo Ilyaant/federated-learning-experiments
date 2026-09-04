@@ -195,6 +195,10 @@ def build_flower_client(
         device=device,
         client_id=client_id,
         log_dir=cfg["logging"]["save_dir"],
+        initial_lr=cfg["train"]["lr"],
+        min_lr=cfg["train"].get("min_lr", 1e-6),
+        total_rounds=cfg["federated"]["rounds"],
+        max_grad_norm=cfg["train"].get("max_grad_norm", 1.0),
     )
 
 

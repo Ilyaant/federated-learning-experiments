@@ -26,7 +26,9 @@ model:
 
 train:
   lr: 0.0001
+  min_lr: 0.000001
   weight_decay: 0.01
+  max_grad_norm: 1.0
   batch_size: 32
   local_epochs: 3
   num_workers: 4
