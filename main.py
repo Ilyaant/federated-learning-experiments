@@ -66,6 +66,19 @@ def partition_split(
     return partitioner.stratified()
 
 
+import torchvision.transforms as T
+
+class AddGaussianNoise:
+    def __init__(self, std=0.05, p=0.2):
+        self.std = std
+        self.p = p
+
+    def __call__(self, tensor):
+        if torch.rand(1).item() < self.p:
+            noise = torch.randn_like(tensor) * self.std
+            return torch.clamp(tensor + noise, -1.0, 1.0)
+        return tensor
+
 def build_datasets(cfg: dict, client_id: int):
     root = cfg["dataset"]["root"]
     num_clients = cfg["federated"]["num_clients"]
@@ -78,8 +91,25 @@ def build_datasets(cfg: dict, client_id: int):
         "normalize": cfg["dataset"]["normalize"],
         "cache_size": cfg["dataset"].get("cache_size", 64),
         "seed": seed,
-        "augmentation": cfg["dataset"].get("augmentation"),
     }
+
+    train_transform = None
+    aug_cfg = cfg["dataset"].get("augmentation", {})
+    if aug_cfg.get("enabled", False):
+        transforms_list = []
+        if aug_cfg.get("hflip_prob", 0.0) > 0:
+            transforms_list.append(T.RandomHorizontalFlip(p=aug_cfg["hflip_prob"]))
+        if aug_cfg.get("vflip_prob", 0.0) > 0:
+            transforms_list.append(T.RandomVerticalFlip(p=aug_cfg["vflip_prob"]))
+        if aug_cfg.get("rotation_degrees", 0.0) > 0:
+            transforms_list.append(T.RandomRotation(degrees=aug_cfg["rotation_degrees"]))
+        if aug_cfg.get("blur_prob", 0.0) > 0:
+            transforms_list.append(T.RandomApply([T.GaussianBlur(kernel_size=aug_cfg.get("blur_kernel_size", 5))], p=aug_cfg["blur_prob"]))
+        if aug_cfg.get("noise_prob", 0.0) > 0:
+            transforms_list.append(AddGaussianNoise(std=aug_cfg.get("noise_std", 0.05), p=aug_cfg["noise_prob"]))
+        
+        if transforms_list:
+            train_transform = T.Compose(transforms_list)
 
     train_partitions = partition_split(
         load_split(root, "train"),
@@ -105,14 +135,17 @@ def build_datasets(cfg: dict, client_id: int):
         epoch_fraction=cfg["train"].get("epoch_fraction", 1.0),
         balanced_per_image=cfg["train"].get("balanced_per_image", True),
         with_replacement=cfg["train"].get("with_replacement", False),
+        transform=train_transform,
         **patch_kwargs,
     )
     val_dataset = TexturePatchDataset(
         val_partitions[client_id],
+        transform=None,
         **patch_kwargs,
     )
     test_dataset = TexturePatchDataset(
         test_partitions[client_id],
+        transform=None,
         **patch_kwargs,
     )
 

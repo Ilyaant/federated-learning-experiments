@@ -9,15 +9,13 @@ dataset:
   cache_size: 64
   augmentation:
     enabled: true
-    include_original: true
-    rotation_angles: [-15.0, 15.0]
-    blur:
-      enabled: true
-      kernel_size: 5
-      sigma: 1.0
-    noise:
-      enabled: true
-      std: 0.05
+    hflip_prob: 0.5
+    vflip_prob: 0.5
+    rotation_degrees: 45.0
+    blur_prob: 0.2
+    blur_kernel_size: 5
+    noise_prob: 0.2
+    noise_std: 0.05
 
 model:
   num_classes: 5
@@ -32,7 +30,7 @@ train:
   batch_size: 32
   local_epochs: 3
   num_workers: 4
-  epoch_fraction: 1.0
+  epoch_fraction: 0.3
   balanced_per_image: true
   with_replacement: false
   aggregation: average_probability
