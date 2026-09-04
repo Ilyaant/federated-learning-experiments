@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 VALID_EXTENSIONS = {
     ".jpg",
@@ -67,7 +67,9 @@ def convert_to_grayscale(
             rel = image_path.relative_to(class_dir)
             dst = dst_root / cls / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
-            Image.open(image_path).convert("L").save(dst)
+            img = Image.open(image_path).convert("L")
+            img = ImageOps.autocontrast(img, cutoff=1)
+            img.save(dst)
 
 
 def split_dataset(
