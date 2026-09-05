@@ -214,7 +214,6 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        self.optimizer.state.clear()
         
         try:
             server_round = int(config.get("server_round", 1))
