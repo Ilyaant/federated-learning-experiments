@@ -82,6 +82,7 @@ class FlowerClient(fl.client.NumPyClient):
         test_dataset,
         optimizer,
         criterion,
+        eval_criterion=None,
         batch_size: int = 32,
         local_epochs: int = 1,
         num_workers: int = 4,
@@ -105,6 +106,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.model = model.to(self.device)
         self.optimizer = optimizer
         self.criterion = criterion
+        self.eval_criterion = eval_criterion if eval_criterion is not None else criterion
         self.local_epochs = local_epochs
         self.num_classes = num_classes
         self.aggregation = aggregation
@@ -183,7 +185,7 @@ class FlowerClient(fl.client.NumPyClient):
         return evaluate(
             self.model,
             dataloader,
-            self.criterion,
+            self.eval_criterion,
             self.device,
             num_classes=self.num_classes,
             aggregation=self.aggregation,
@@ -209,11 +211,13 @@ class FlowerClient(fl.client.NumPyClient):
                 dataset.transform = restored_transform
             if restored_fraction is not None:
                 dataset.epoch_fraction = restored_fraction
+                dataset.set_epoch(0)
 
         return metrics
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
+        self.optimizer.state.clear()
         
         try:
             server_round = int(config.get("server_round", 1))
@@ -232,12 +236,14 @@ class FlowerClient(fl.client.NumPyClient):
 
         train_loss = 0.0
         for epoch in range(self.local_epochs):
-            train_loss = self.train_one_epoch(epoch)
+            global_epoch = (server_round - 1) * self.local_epochs + epoch
+            train_loss = self.train_one_epoch(global_epoch)
             self.logger.info(
-                "Round %s local epoch %s/%s: train_loss=%.6f",
+                "Round %s local epoch %s/%s (global_epoch %s): train_loss=%.6f",
                 server_round,
                 epoch + 1,
                 self.local_epochs,
+                global_epoch,
                 train_loss,
             )
 

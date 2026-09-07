@@ -68,6 +68,18 @@ def partition_split(
 
 import torchvision.transforms as T
 
+
+class RandomRotation90:
+    def __init__(self, p: float = 0.75):
+        self.p = p
+
+    def __call__(self, tensor: torch.Tensor) -> torch.Tensor:
+        if torch.rand(1).item() < self.p:
+            k = int(torch.randint(1, 4, (1,)).item())
+            return torch.rot90(tensor, k, [-2, -1])
+        return tensor
+
+
 class AddGaussianNoise:
     def __init__(self, std=0.05, p=0.2):
         self.std = std
@@ -101,6 +113,8 @@ def build_datasets(cfg: dict, client_id: int):
             transforms_list.append(T.RandomHorizontalFlip(p=aug_cfg["hflip_prob"]))
         if aug_cfg.get("vflip_prob", 0.0) > 0:
             transforms_list.append(T.RandomVerticalFlip(p=aug_cfg["vflip_prob"]))
+        if aug_cfg.get("rot90_prob", 0.0) > 0:
+            transforms_list.append(RandomRotation90(p=aug_cfg["rot90_prob"]))
         if aug_cfg.get("rotation_degrees", 0.0) > 0:
             transforms_list.append(T.RandomRotation(degrees=aug_cfg["rotation_degrees"]))
         if aug_cfg.get("blur_prob", 0.0) > 0:
@@ -172,6 +186,25 @@ def build_flower_client(
     train_dataset, val_dataset, test_dataset = build_datasets(cfg, client_id)
     model = build_model(cfg).to(device)
 
+    num_classes = cfg["model"]["num_classes"]
+    weights = None
+    if cfg["train"].get("weighted_loss", True):
+        dist = train_dataset.class_distribution()
+        total = sum(dist.values())
+        if total > 0:
+            raw_weights = [
+                total / (num_classes * max(1, dist.get(c, 0)))
+                for c in range(num_classes)
+            ]
+            weights = torch.tensor(raw_weights, dtype=torch.float, device=device)
+            weights = weights / weights.mean()
+
+    criterion = torch.nn.CrossEntropyLoss(
+        weight=weights,
+        label_smoothing=cfg["train"].get("label_smoothing", 0.0),
+    )
+    eval_criterion = torch.nn.CrossEntropyLoss()
+
     return FlowerClient(
         model=model,
         train_dataset=train_dataset,
@@ -182,7 +215,8 @@ def build_flower_client(
             lr=cfg["train"]["lr"],
             weight_decay=cfg["train"]["weight_decay"],
         ),
-        criterion=torch.nn.CrossEntropyLoss(),
+        criterion=criterion,
+        eval_criterion=eval_criterion,
         batch_size=cfg["train"]["batch_size"],
         local_epochs=cfg["train"]["local_epochs"],
         num_workers=(
@@ -190,7 +224,7 @@ def build_flower_client(
             if num_workers is not None
             else cfg["train"]["num_workers"]
         ),
-        num_classes=cfg["model"]["num_classes"],
+        num_classes=num_classes,
         aggregation=cfg["train"].get("aggregation", "average_probability"),
         device=device,
         client_id=client_id,
@@ -221,11 +255,25 @@ def save_results(cfg: dict, history, strategy) -> None:
     else:
         logger.warning("No aggregated parameters available; model not saved")
 
+    if getattr(strategy, "best_parameters", None) is not None:
+        save_global_model(
+            strategy.best_parameters,
+            build_model(cfg),
+            save_dir / "model_best.pt",
+        )
+        logger.info(
+            "Saved best global model (round %s, val_score=%.4f) to %s",
+            strategy.best_round,
+            strategy.best_score,
+            save_dir / "model_best.pt",
+        )
+
 
 def run_server(cfg: dict):
     strategy = create_strategy(
         num_clients=cfg["federated"]["num_clients"],
         save_dir=cfg["logging"]["save_dir"],
+        model_fn=lambda: build_model(cfg),
     )
 
     history = fl.server.start_server(
@@ -266,6 +314,7 @@ def run_simulation(cfg: dict):
     strategy = create_strategy(
         num_clients=num_clients,
         save_dir=cfg["logging"]["save_dir"],
+        model_fn=lambda: build_model(cfg),
     )
 
     history = fl.simulation.start_simulation(
