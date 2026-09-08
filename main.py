@@ -22,6 +22,7 @@ from src.trainer.history import (
     save_history,
 )
 from src.trainer.losses import compute_class_weights
+from src.trainer.metrics import evaluate
 from src.trainer.strategy import create_strategy
 from src.trainer.utils import get_device, seed_everything
 
@@ -92,39 +93,48 @@ class AddGaussianNoise:
             return torch.clamp(tensor + noise, -1.0, 1.0)
         return tensor
 
-def build_datasets(cfg: dict, client_id: int):
-    root = cfg["dataset"]["root"]
-    num_clients = cfg["federated"]["num_clients"]
-    seed = cfg["seed"]
-    strategy = cfg["federated"].get("partition", "stratified")
-    patch_kwargs = {
+def patch_kwargs_from_config(cfg: dict) -> dict:
+    """Patch extraction settings shared by every dataset in the run."""
+    return {
         "patch_size": cfg["dataset"]["patch_size"],
         "overlap": cfg["dataset"]["overlap"],
         "grayscale": cfg["dataset"]["grayscale"],
         "normalize": cfg["dataset"]["normalize"],
         "cache_size": cfg["dataset"].get("cache_size", 64),
-        "seed": seed,
+        "downscale": cfg["dataset"].get("downscale", 1.0),
+        "seed": cfg["seed"],
     }
 
-    train_transform = None
+
+def build_train_transform(cfg: dict):
     aug_cfg = cfg["dataset"].get("augmentation", {})
-    if aug_cfg.get("enabled", False):
-        transforms_list = []
-        if aug_cfg.get("hflip_prob", 0.0) > 0:
-            transforms_list.append(T.RandomHorizontalFlip(p=aug_cfg["hflip_prob"]))
-        if aug_cfg.get("vflip_prob", 0.0) > 0:
-            transforms_list.append(T.RandomVerticalFlip(p=aug_cfg["vflip_prob"]))
-        if aug_cfg.get("rot90_prob", 0.0) > 0:
-            transforms_list.append(RandomRotation90(p=aug_cfg["rot90_prob"]))
-        if aug_cfg.get("rotation_degrees", 0.0) > 0:
-            transforms_list.append(T.RandomRotation(degrees=aug_cfg["rotation_degrees"]))
-        if aug_cfg.get("blur_prob", 0.0) > 0:
-            transforms_list.append(T.RandomApply([T.GaussianBlur(kernel_size=aug_cfg.get("blur_kernel_size", 5))], p=aug_cfg["blur_prob"]))
-        if aug_cfg.get("noise_prob", 0.0) > 0:
-            transforms_list.append(AddGaussianNoise(std=aug_cfg.get("noise_std", 0.05), p=aug_cfg["noise_prob"]))
-        
-        if transforms_list:
-            train_transform = T.Compose(transforms_list)
+    if not aug_cfg.get("enabled", False):
+        return None
+
+    transforms_list = []
+    if aug_cfg.get("hflip_prob", 0.0) > 0:
+        transforms_list.append(T.RandomHorizontalFlip(p=aug_cfg["hflip_prob"]))
+    if aug_cfg.get("vflip_prob", 0.0) > 0:
+        transforms_list.append(T.RandomVerticalFlip(p=aug_cfg["vflip_prob"]))
+    if aug_cfg.get("rot90_prob", 0.0) > 0:
+        transforms_list.append(RandomRotation90(p=aug_cfg["rot90_prob"]))
+    if aug_cfg.get("rotation_degrees", 0.0) > 0:
+        transforms_list.append(T.RandomRotation(degrees=aug_cfg["rotation_degrees"]))
+    if aug_cfg.get("blur_prob", 0.0) > 0:
+        transforms_list.append(T.RandomApply([T.GaussianBlur(kernel_size=aug_cfg.get("blur_kernel_size", 5))], p=aug_cfg["blur_prob"]))
+    if aug_cfg.get("noise_prob", 0.0) > 0:
+        transforms_list.append(AddGaussianNoise(std=aug_cfg.get("noise_std", 0.05), p=aug_cfg["noise_prob"]))
+
+    return T.Compose(transforms_list) if transforms_list else None
+
+
+def build_datasets(cfg: dict, client_id: int):
+    root = cfg["dataset"]["root"]
+    num_clients = cfg["federated"]["num_clients"]
+    seed = cfg["seed"]
+    strategy = cfg["federated"].get("partition", "stratified")
+    patch_kwargs = patch_kwargs_from_config(cfg)
+    train_transform = build_train_transform(cfg)
 
     train_partitions = partition_split(
         load_split(root, "train"),
@@ -241,7 +251,87 @@ def build_flower_client(
         min_lr=cfg["train"].get("min_lr", 1e-6),
         total_rounds=cfg["federated"]["rounds"],
         max_grad_norm=cfg["train"].get("max_grad_norm", 1.0),
+        tta=cfg.get("evaluation", {}).get("tta", False),
     )
+
+
+def build_central_eval_fn(cfg: dict):
+    """Server-side evaluation of a parameter vector on the *full*
+    validation and test splits (all images, no client partitioning).
+
+    Used to score the SWA model; metrics are prefixed ``swa_val_`` /
+    ``swa_test_``. Datasets and the model are built lazily on first call so
+    that server-only modes do not pay for them unless needed.
+    """
+    state: dict = {}
+
+    def _setup():
+        device = get_device()
+        patch_kwargs = patch_kwargs_from_config(cfg)
+        root = cfg["dataset"]["root"]
+        loader_kwargs = {
+            "batch_size": cfg["train"]["batch_size"],
+            "shuffle": False,
+            "num_workers": cfg.get("simulation", {}).get("num_workers", 0),
+            "pin_memory": torch.cuda.is_available(),
+        }
+        state["device"] = device
+        state["model"] = build_model(cfg).to(device)
+        state["loaders"] = {
+            split: torch.utils.data.DataLoader(
+                TexturePatchDataset(load_split(root, split), **patch_kwargs),
+                **loader_kwargs,
+            )
+            for split in ("val", "test")
+        }
+        state["criterion"] = torch.nn.CrossEntropyLoss()
+
+    def central_evaluate(server_round: int, parameters):
+        if not state:
+            _setup()
+        model = state["model"]
+        state_dict = {
+            key: torch.from_numpy(value)
+            for key, value in zip(model.state_dict().keys(), parameters)
+        }
+        model.load_state_dict(state_dict, strict=True)
+
+        metrics: dict[str, float] = {}
+        test_loss = 0.0
+        for split, loader in state["loaders"].items():
+            result = evaluate(
+                model,
+                loader,
+                state["criterion"],
+                state["device"],
+                num_classes=cfg["model"]["num_classes"],
+                aggregation=cfg["train"].get("aggregation", "average_probability"),
+                tta=cfg.get("evaluation", {}).get("tta", False),
+            )
+            for key, value in result.items():
+                if key.endswith("confusion_matrix"):
+                    continue  # strings are not Flower/CSV scalars
+                metrics[f"swa_{split}_{key}"] = float(value)
+            if split == "test":
+                test_loss = float(result["loss"])
+
+        return test_loss, metrics
+
+    return central_evaluate
+
+
+def strategy_kwargs_from_config(cfg: dict) -> dict:
+    eval_cfg = cfg.get("evaluation", {})
+    swa_window = int(eval_cfg.get("swa_window", 0))
+    return {
+        "num_clients": cfg["federated"]["num_clients"],
+        "save_dir": cfg["logging"]["save_dir"],
+        "model_fn": lambda: build_model(cfg),
+        "swa_window": swa_window,
+        "central_eval_fn": build_central_eval_fn(cfg) if swa_window > 0 else None,
+        "swa_eval_every": int(eval_cfg.get("swa_eval_every", 1)),
+        "num_rounds": cfg["federated"]["rounds"],
+    }
 
 
 def save_results(cfg: dict, history, strategy) -> None:
@@ -276,13 +366,21 @@ def save_results(cfg: dict, history, strategy) -> None:
             save_dir / "model_best.pt",
         )
 
+    if getattr(strategy, "swa_parameters", None) is not None:
+        save_global_model(
+            strategy.swa_parameters,
+            build_model(cfg),
+            save_dir / "model_swa.pt",
+        )
+        logger.info(
+            "Saved SWA global model (mean of last %s rounds) to %s",
+            strategy.swa_window,
+            save_dir / "model_swa.pt",
+        )
+
 
 def run_server(cfg: dict):
-    strategy = create_strategy(
-        num_clients=cfg["federated"]["num_clients"],
-        save_dir=cfg["logging"]["save_dir"],
-        model_fn=lambda: build_model(cfg),
-    )
+    strategy = create_strategy(**strategy_kwargs_from_config(cfg))
 
     history = fl.server.start_server(
         server_address=cfg["server"]["address"],
@@ -319,11 +417,7 @@ def run_simulation(cfg: dict):
             )
         return client_cache[client_id].to_client()
 
-    strategy = create_strategy(
-        num_clients=num_clients,
-        save_dir=cfg["logging"]["save_dir"],
-        model_fn=lambda: build_model(cfg),
-    )
+    strategy = create_strategy(**strategy_kwargs_from_config(cfg))
 
     history = fl.simulation.start_simulation(
         client_fn=client_fn,

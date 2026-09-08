@@ -17,16 +17,32 @@ class PatchExtractor:
         grayscale: bool = True,
         normalize: bool = True,
         pad_mode: str = "replicate",
+        downscale: float = 1.0,
     ):
         if not 0 <= overlap < 1:
             raise ValueError("overlap must satisfy 0 <= overlap < 1")
+        if downscale < 1.0:
+            raise ValueError("downscale must be >= 1 (1 keeps native scale)")
 
         self.patch_size = patch_size
         self.overlap = overlap
         self.grayscale = grayscale
         self.normalize = normalize
         self.pad_mode = pad_mode
+        # The whole image is shrunk by ``downscale`` before patching, so a
+        # single ``patch_size`` patch covers ``downscale`` times more of the
+        # original field of view (more texture context per patch).
+        self.downscale = float(downscale)
         self.stride = max(1, int(patch_size * (1 - overlap)))
+
+    def scaled_size(self, width: int, height: int) -> Tuple[int, int]:
+        """Image size after downscaling (never smaller than 1x1)."""
+        if self.downscale == 1.0:
+            return width, height
+        return (
+            max(1, round(width / self.downscale)),
+            max(1, round(height / self.downscale)),
+        )
 
     def load_image(
         self,
@@ -35,7 +51,23 @@ class PatchExtractor:
         if isinstance(image, (str, Path)):
             image = Image.open(image)
 
-        image = image.convert("L" if self.grayscale else "RGB")
+        mode = "L" if self.grayscale else "RGB"
+        scaled = self.scaled_size(*image.size)
+
+        if scaled != image.size and hasattr(image, "draft"):
+            # JPEG-only fast path: ask the decoder for the smallest DCT
+            # scale (1/2, 1/4, 1/8) that is still >= the target size, so
+            # most of the shrinking happens during decoding. The final
+            # LANCZOS resize below brings it to the exact size.
+            image.draft(mode, scaled)
+
+        image = image.convert(mode)
+
+        if scaled != image.size:
+            # LANCZOS anti-aliases when shrinking; nearest/bilinear would
+            # alias the fine fibrous texture we want to classify.
+            image = image.resize(scaled, Image.LANCZOS)
+
         tensor = TF.to_tensor(image)
 
         if self.normalize:
@@ -73,15 +105,18 @@ class PatchExtractor:
         image: Union[str, Path, Image.Image, torch.Tensor],
     ) -> List[Tuple[int, int]]:
         if torch.is_tensor(image):
+            # Tensors come out of load_image() and are already downscaled.
             _, h, w = image.shape
-        elif isinstance(image, Image.Image):
+            return self.coordinates_for_size(w, h)
+
+        if isinstance(image, Image.Image):
             w, h = image.size
         else:
             # Reads only the image header, without decoding pixels.
             with Image.open(image) as opened:
                 w, h = opened.size
 
-        return self.coordinates_for_size(w, h)
+        return self.coordinates_for_size(*self.scaled_size(w, h))
 
     def extract_patch(
         self,

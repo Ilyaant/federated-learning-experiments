@@ -29,6 +29,41 @@ class AverageMeter:
         self.avg = self.sum / max(1, self.count)
 
 
+def dihedral_transforms(images: torch.Tensor):
+    """Yield the 8 symmetries of the square (4 rotations x optional flip).
+
+    The training augmentation (h/v flips + rot90) is exactly this group, so
+    averaging predictions over it is a natural test-time augmentation for
+    orientation-free textures.
+    """
+    for flip in (False, True):
+        base = torch.flip(images, dims=[-1]) if flip else images
+        for k in range(4):
+            yield torch.rot90(base, k, dims=[-2, -1])
+
+
+@torch.no_grad()
+def predict_logits(
+    model,
+    images: torch.Tensor,
+    tta: bool = False,
+) -> torch.Tensor:
+    """Return logits; with ``tta`` they are log-mean-probabilities over the
+    dihedral group, which behave like logits for argmax, softmax and
+    cross-entropy (log_softmax of a normalized log-distribution is itself)."""
+    if not tta:
+        return model(images)
+
+    probs = None
+    count = 0
+    for view in dihedral_transforms(images):
+        view_probs = torch.softmax(model(view), dim=1)
+        probs = view_probs if probs is None else probs + view_probs
+        count += 1
+
+    return torch.log((probs / count).clamp_min(1e-8))
+
+
 @torch.no_grad()
 def evaluate(
     model,
@@ -37,6 +72,7 @@ def evaluate(
     device,
     num_classes: int,
     aggregation: str = "average_probability",
+    tta: bool = False,
 ) -> Dict[str, float | str]:
     model.eval()
 
@@ -50,7 +86,7 @@ def evaluate(
         labels = batch["label"].to(device, non_blocking=True)
         image_ids = batch["image_id"]
 
-        logits = model(images)
+        logits = predict_logits(model, images, tta=tta)
         loss = criterion(logits, labels)
 
         loss_meter.update(loss.item(), images.size(0))

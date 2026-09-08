@@ -103,8 +103,12 @@ class FlowerClient(fl.client.NumPyClient):
         min_lr: float = 1e-6,
         total_rounds: int = 100,
         max_grad_norm: float | None = 1.0,
+        tta: bool = False,
     ):
         self.logger = _create_client_logger(client_id, log_dir)
+        # Test-time augmentation is applied to val/test only; the train
+        # split is evaluated plainly (it is the largest and only a reference).
+        self.tta = tta
         self.initial_lr = initial_lr
         self.min_lr = min_lr
         self.total_rounds = total_rounds
@@ -134,6 +138,15 @@ class FlowerClient(fl.client.NumPyClient):
         self.train_loader = DataLoader(
             train_dataset,
             shuffle=True,
+            drop_last=False,
+            **loader_kwargs,
+        )
+        # Sequential pass over the same dataset for train-split evaluation:
+        # patches of one image are visited together, so the per-image LRU
+        # cache is hit instead of re-decoding the JPEG for every patch.
+        self.train_eval_loader = DataLoader(
+            train_dataset,
+            shuffle=False,
             drop_last=False,
             **loader_kwargs,
         )
@@ -189,7 +202,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         return loss_meter.avg
 
-    def _run_evaluation(self, dataloader):
+    def _run_evaluation(self, dataloader, tta: bool | None = None):
         return evaluate(
             self.model,
             dataloader,
@@ -197,6 +210,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.device,
             num_classes=self.num_classes,
             aggregation=self.aggregation,
+            tta=self.tta if tta is None else tta,
         )
 
     def _evaluate_train(self):
@@ -213,7 +227,7 @@ class FlowerClient(fl.client.NumPyClient):
             dataset.transform = None
 
         try:
-            metrics = self._run_evaluation(self.train_loader)
+            metrics = self._run_evaluation(self.train_eval_loader, tta=False)
         finally:
             if hasattr(dataset, "transform"):
                 dataset.transform = restored_transform

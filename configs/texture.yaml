@@ -4,6 +4,10 @@ dataset:
   root: data/dataset2_exp_prepared
   patch_size: 224
   overlap: 0.5
+  # Shrink the whole image by this factor before cutting patches:
+  # 1.0 = native scale (300 patches/image), 3.0 => a 224 patch spans
+  # ~30% of the image width (~15 patches/image, much more context).
+  downscale: 3.0
   grayscale: true
   normalize: true
   cache_size: 64
@@ -33,13 +37,28 @@ train:
   batch_size: 32
   local_epochs: 1
   num_workers: 4
-  epoch_fraction: 0.4
+  # With downscale=3 there are only ~30 patches/image, so the per-epoch
+  # subsampling that fought redundancy at native scale is not needed.
+  epoch_fraction: 1.0
   balanced_per_image: true
   with_replacement: false
   aggregation: average_probability
   label_smoothing: 0.1
   weighted_loss: true
   class_weight_power: 0.5
+
+evaluation:
+  # Average predictions over the 8 dihedral (flip/rot90) views of each
+  # patch for val/test metrics. Costs 8x eval compute on those splits.
+  tta: true
+  # Server-side weight averaging: keep the mean of the last N aggregated
+  # global models (SWA over rounds). 0 disables. The averaged model is
+  # evaluated centrally on the full val/test splits every round
+  # (metrics prefixed swa_*) and saved as model_swa.pt.
+  swa_window: 10
+  # Evaluate the SWA model centrally every N rounds (always on the last
+  # one). With TTA this costs ~45 s per evaluation.
+  swa_eval_every: 1
 
 federated:
   num_clients: 10
@@ -50,7 +69,7 @@ server:
   address: 127.0.0.1:8080
 
 logging:
-  save_dir: logs/exp_new_aug_20260908
+  save_dir: logs/exp_new_aug_20260910_downscale3
   log_file: experiment.log
 
 simulation:

@@ -36,6 +36,7 @@ class TexturePatchDataset(Dataset):
         with_replacement: bool = False,
         seed: int = 42,
         cache_size: int = 64,
+        downscale: float = 1.0,
     ):
         self.samples: List[Sample] = [
             (Path(path), int(label)) for path, label in samples
@@ -52,6 +53,7 @@ class TexturePatchDataset(Dataset):
             overlap=overlap,
             grayscale=grayscale,
             normalize=normalize,
+            downscale=downscale,
         )
 
         self._all_patches: List[PatchEntry] = []
@@ -172,6 +174,7 @@ class TexturePatchDataset(Dataset):
             with_replacement=self.with_replacement,
             seed=self.seed,
             cache_size=self.cache_size,
+            downscale=self.extractor.downscale,
         )
 
     def __repr__(self) -> str:
@@ -181,5 +184,6 @@ class TexturePatchDataset(Dataset):
             f"patches={self.num_patches}, "
             f"active={len(self)}, "
             f"patch_size={self.extractor.patch_size}, "
-            f"overlap={self.extractor.overlap})"
+            f"overlap={self.extractor.overlap}, "
+            f"downscale={self.extractor.downscale})"
         )

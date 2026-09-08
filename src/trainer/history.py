@@ -57,7 +57,9 @@ class LiveHistoryWriter:
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.fit_metrics: Dict[int, Dict[str, float]] = defaultdict(dict)
         self.evaluate_metrics: Dict[int, Dict[str, float]] = defaultdict(dict)
+        self.centralized_metrics: Dict[int, Dict[str, float]] = defaultdict(dict)
         self.distributed_losses: Dict[int, float] = {}
+        self.centralized_losses: Dict[int, float] = {}
         self.flush()
 
     @staticmethod
@@ -94,6 +96,19 @@ class LiveHistoryWriter:
             dict(self.evaluate_metrics[server_round]),
         )
 
+    def update_centralized(
+        self,
+        server_round: int,
+        loss: float | None,
+        metrics: Mapping,
+    ) -> None:
+        if loss is not None:
+            self.centralized_losses[server_round] = float(loss)
+        self.centralized_metrics[server_round].update(
+            self._as_float_metrics(metrics)
+        )
+        self.flush()
+
     @staticmethod
     def _metric_series(
         rows: Mapping[int, Mapping[str, float]],
@@ -107,12 +122,14 @@ class LiveHistoryWriter:
     def _history_dict(self) -> Dict:
         return {
             "losses_distributed": sorted(self.distributed_losses.items()),
-            "losses_centralized": [],
+            "losses_centralized": sorted(self.centralized_losses.items()),
             "metrics_distributed_fit": self._metric_series(self.fit_metrics),
             "metrics_distributed": self._metric_series(
                 self.evaluate_metrics
             ),
-            "metrics_centralized": {},
+            "metrics_centralized": self._metric_series(
+                self.centralized_metrics
+            ),
         }
 
     def _rows(self) -> Dict[int, Dict[str, float]]:
@@ -120,6 +137,10 @@ class LiveHistoryWriter:
         for server_round, metrics in self.fit_metrics.items():
             rows[server_round].update(metrics)
         for server_round, metrics in self.evaluate_metrics.items():
+            rows[server_round].update(metrics)
+        # Centralized metrics carry their own *_loss keys, so the
+        # centralized loss series is not duplicated into the table.
+        for server_round, metrics in self.centralized_metrics.items():
             rows[server_round].update(metrics)
         for server_round, loss in self.distributed_losses.items():
             rows[server_round]["test_loss"] = loss
@@ -178,6 +199,7 @@ def save_history(history: History, save_dir: str | Path) -> None:
     for metrics in (
         history.metrics_distributed_fit,
         history.metrics_distributed,
+        history.metrics_centralized,
     ):
         for name, series in metrics.items():
             for rnd, value in series:

@@ -35,6 +35,26 @@ python main.py --mode client --client-id 1
 
 Конфигурация: `configs/texture.yaml`.
 
+### Быстрый подбор масштаба патча (централизованно, без Flower)
+
+```shell
+python scripts/centralized_sweep.py --downscale 1 2 3 4 --epochs 30
+```
+
+Обучает одну модель на всех train-изображениях для каждого значения
+`dataset.downscale` и пишет метрики по эпохам в `logs/sweep_downscale/results.csv`.
+Все остальные настройки берутся из того же конфига.
+
+Ключи конфига, относящиеся к patch-level качеству:
+
+- `dataset.downscale` — во сколько раз уменьшить изображение перед нарезкой
+  на патчи (1 = нативный масштаб, 3 = патч 224 покрывает ~30% ширины кадра).
+- `evaluation.tta` — усреднение предсказаний по 8 симметриям квадрата
+  (flip/rot90) на val/test.
+- `evaluation.swa_window` — усреднение весов глобальной модели за последние N
+  раундов; SWA-модель оценивается на полном val/test (`swa_*` в `metrics.csv`,
+  каждые `evaluation.swa_eval_every` раундов) и сохраняется как `model_swa.pt`.
+
 ## Описание экспериментов
 
 
