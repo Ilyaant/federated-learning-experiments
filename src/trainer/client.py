@@ -61,16 +61,24 @@ _REPORTED_METRICS = {
     "image_precision",
     "image_recall",
     "image_f1",
+    "confusion_matrix",
+    "image_confusion_matrix",
     "lr",
 }
 
 
-def _prefixed_metrics(metrics: Dict[str, float], prefix: str) -> Dict[str, float]:
-    return {
-        f"{prefix}{key}": float(value)
-        for key, value in metrics.items()
-        if key in _REPORTED_METRICS
-    }
+def _prefixed_metrics(
+    metrics: Dict[str, float | str],
+    prefix: str,
+) -> Dict[str, float | str]:
+    prefixed: Dict[str, float | str] = {}
+    for key, value in metrics.items():
+        if key not in _REPORTED_METRICS:
+            continue
+        prefixed[f"{prefix}{key}"] = (
+            str(value) if key.endswith("confusion_matrix") else float(value)
+        )
+    return prefixed
 
 
 class FlowerClient(fl.client.NumPyClient):

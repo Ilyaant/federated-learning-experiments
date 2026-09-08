@@ -6,7 +6,11 @@ from typing import Dict, List
 
 import numpy as np
 import torch
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    precision_recall_fscore_support,
+)
 
 
 def classification_summary(
@@ -33,6 +37,87 @@ def classification_summary(
         "precision": float(precision),
         "recall": float(recall),
         "f1": float(f1),
+    }
+
+
+def build_confusion_matrix(
+    y_true,
+    y_pred,
+    num_classes: int,
+) -> np.ndarray:
+    """Return a fixed-size confusion matrix, including absent classes."""
+    return confusion_matrix(
+        y_true,
+        y_pred,
+        labels=list(range(num_classes)),
+    ).astype(np.int64, copy=False)
+
+
+def serialize_confusion_matrix(matrix: np.ndarray) -> str:
+    """Encode a confusion matrix as a Flower-compatible scalar string."""
+    matrix = np.asarray(matrix, dtype=np.int64)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("Confusion matrix must be square")
+    size = matrix.shape[0]
+    values = ",".join(str(int(value)) for value in matrix.ravel())
+    return f"{size}|{values}"
+
+
+def deserialize_confusion_matrix(value: str | bytes) -> np.ndarray:
+    """Decode and validate a matrix produced by serialize_confusion_matrix."""
+    if isinstance(value, bytes):
+        value = value.decode("ascii")
+
+    size_text, separator, values_text = value.partition("|")
+    if not separator:
+        raise ValueError("Invalid serialized confusion matrix")
+
+    size = int(size_text)
+    values = np.fromstring(values_text, sep=",", dtype=np.int64)
+    if size <= 0 or values.size != size * size:
+        raise ValueError("Invalid serialized confusion matrix dimensions")
+    if np.any(values < 0):
+        raise ValueError("Confusion matrix counts cannot be negative")
+    return values.reshape(size, size)
+
+
+def classification_summary_from_confusion(
+    matrix: np.ndarray,
+) -> Dict[str, float]:
+    """Compute exact global macro metrics from summed client counts."""
+    matrix = np.asarray(matrix, dtype=np.float64)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("Confusion matrix must be square")
+
+    total = matrix.sum()
+    true_positive = np.diag(matrix)
+    predicted = matrix.sum(axis=0)
+    actual = matrix.sum(axis=1)
+
+    precision = np.divide(
+        true_positive,
+        predicted,
+        out=np.zeros_like(true_positive),
+        where=predicted != 0,
+    )
+    recall = np.divide(
+        true_positive,
+        actual,
+        out=np.zeros_like(true_positive),
+        where=actual != 0,
+    )
+    f1 = np.divide(
+        2 * precision * recall,
+        precision + recall,
+        out=np.zeros_like(true_positive),
+        where=(precision + recall) != 0,
+    )
+
+    return {
+        "accuracy": float(true_positive.sum() / total) if total else 0.0,
+        "precision": float(precision.mean()),
+        "recall": float(recall.mean()),
+        "f1": float(f1.mean()),
     }
 
 

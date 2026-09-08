@@ -4,7 +4,12 @@ from typing import Dict, List
 
 import torch
 
-from .aggregation import build_aggregator, classification_summary
+from .aggregation import (
+    build_aggregator,
+    build_confusion_matrix,
+    classification_summary,
+    serialize_confusion_matrix,
+)
 
 
 class AverageMeter:
@@ -32,7 +37,7 @@ def evaluate(
     device,
     num_classes: int,
     aggregation: str = "average_probability",
-) -> Dict[str, float]:
+) -> Dict[str, float | str]:
     model.eval()
 
     loss_meter = AverageMeter()
@@ -56,7 +61,18 @@ def evaluate(
         image_aggregator.update(image_ids, logits, labels)
 
     patch = classification_summary(patch_targets, patch_predictions)
-    image = image_aggregator.compute()
+    patch_confusion = build_confusion_matrix(
+        patch_targets,
+        patch_predictions,
+        num_classes,
+    )
+    image_targets, image_predictions = image_aggregator.aggregate()
+    image = classification_summary(image_targets, image_predictions)
+    image_confusion = build_confusion_matrix(
+        image_targets,
+        image_predictions,
+        num_classes,
+    )
 
     # Primary metrics are patch-level; image-level metrics are
     # kept under the "image_" prefix for reference.
@@ -66,8 +82,12 @@ def evaluate(
         "precision": patch["precision"],
         "recall": patch["recall"],
         "f1": patch["f1"],
+        "confusion_matrix": serialize_confusion_matrix(patch_confusion),
         "image_accuracy": image["accuracy"],
         "image_precision": image["precision"],
         "image_recall": image["recall"],
         "image_f1": image["f1"],
+        "image_confusion_matrix": serialize_confusion_matrix(
+            image_confusion
+        ),
     }

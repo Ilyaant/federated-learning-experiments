@@ -21,6 +21,7 @@ from src.trainer.history import (
     save_global_model,
     save_history,
 )
+from src.trainer.losses import compute_class_weights
 from src.trainer.strategy import create_strategy
 from src.trainer.utils import get_device, seed_everything
 
@@ -189,15 +190,22 @@ def build_flower_client(
     num_classes = cfg["model"]["num_classes"]
     weights = None
     if cfg["train"].get("weighted_loss", True):
-        dist = train_dataset.class_distribution()
-        total = sum(dist.values())
-        if total > 0:
-            raw_weights = [
-                total / (num_classes * max(1, dist.get(c, 0)))
-                for c in range(num_classes)
-            ]
-            weights = torch.tensor(raw_weights, dtype=torch.float, device=device)
-            weights = weights / weights.mean()
+        global_distribution: dict[int, int] = {}
+        for _, label in load_split(cfg["dataset"]["root"], "train"):
+            global_distribution[label] = (
+                global_distribution.get(label, 0) + 1
+            )
+        weights = compute_class_weights(
+            global_distribution,
+            num_classes,
+            power=cfg["train"].get("class_weight_power", 0.5),
+            device=device,
+        )
+        logger.info(
+            "Using global class distribution %s with weights %s",
+            global_distribution,
+            [round(value, 4) for value in weights.detach().cpu().tolist()],
+        )
 
     criterion = torch.nn.CrossEntropyLoss(
         weight=weights,

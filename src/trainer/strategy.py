@@ -5,38 +5,78 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 
 import flwr as fl
+import numpy as np
 from flwr.common import (
     Metrics,
     NDArrays,
     ndarrays_to_parameters,
 )
 
+from .aggregation import (
+    classification_summary_from_confusion,
+    deserialize_confusion_matrix,
+)
 from .history import LiveHistoryWriter, save_global_model
 
 
 logger = logging.getLogger(__name__)
 
 
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+def aggregate_metrics(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    """Aggregate scalar metrics and reconstruct exact global macro metrics."""
     if len(metrics) == 0:
         return {}
 
-    total_examples = sum(num_examples for num_examples, _ in metrics)
-
     aggregated: Dict[str, float] = {}
+    scalar_names = {
+        name
+        for _, client_metrics in metrics
+        for name, value in client_metrics.items()
+        if not name.endswith("confusion_matrix")
+        and isinstance(value, (bool, int, float))
+    }
 
-    metric_names = set()
-    for _, metric in metrics:
-        metric_names.update(metric.keys())
+    for name in scalar_names:
+        weighted_sum = 0.0
+        metric_weight = 0
+        for num_examples, client_metrics in metrics:
+            value = client_metrics.get(name)
+            if isinstance(value, (bool, int, float)):
+                weighted_sum += num_examples * float(value)
+                metric_weight += num_examples
+        if metric_weight:
+            aggregated[name] = weighted_sum / metric_weight
 
-    for name in metric_names:
-        value = 0.0
-        for num_examples, metric in metrics:
-            if name in metric:
-                value += num_examples * float(metric[name])
-        aggregated[name] = value / total_examples
+    summed_matrices: Dict[str, np.ndarray] = {}
+    for _, client_metrics in metrics:
+        for name, value in client_metrics.items():
+            if not name.endswith("confusion_matrix"):
+                continue
+            if not isinstance(value, (str, bytes)):
+                raise TypeError(f"{name} must be serialized as str or bytes")
+
+            matrix = deserialize_confusion_matrix(value)
+            if name in summed_matrices:
+                if summed_matrices[name].shape != matrix.shape:
+                    raise ValueError(
+                        f"Inconsistent confusion matrix shape for {name}"
+                    )
+                summed_matrices[name] += matrix
+            else:
+                summed_matrices[name] = matrix.copy()
+
+    for name, matrix in summed_matrices.items():
+        metric_prefix = name.removesuffix("confusion_matrix")
+        summary = classification_summary_from_confusion(matrix)
+        for metric_name, value in summary.items():
+            aggregated[f"{metric_prefix}{metric_name}"] = value
 
     return aggregated
+
+
+def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    """Backward-compatible alias for the project metric aggregator."""
+    return aggregate_metrics(metrics)
 
 
 class TrackingFedAvg(fl.server.strategy.FedAvg):
@@ -73,8 +113,8 @@ class TrackingFedAvg(fl.server.strategy.FedAvg):
             val_score = None
             if metrics:
                 for metric_key in (
-                    "val_image_f1",
                     "val_f1",
+                    "val_image_f1",
                     "val_image_accuracy",
                     "val_accuracy",
                 ):
@@ -136,8 +176,8 @@ def create_strategy(
             if initial_parameters is not None
             else None
         ),
-        fit_metrics_aggregation_fn=weighted_average,
-        evaluate_metrics_aggregation_fn=weighted_average,
+        fit_metrics_aggregation_fn=aggregate_metrics,
+        evaluate_metrics_aggregation_fn=aggregate_metrics,
         on_fit_config_fn=lambda server_round: {
             "server_round": server_round,
         },

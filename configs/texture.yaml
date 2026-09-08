@@ -39,6 +39,7 @@ train:
   aggregation: average_probability
   label_smoothing: 0.1
   weighted_loss: true
+  class_weight_power: 0.5
 
 federated:
   num_clients: 10
