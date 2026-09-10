@@ -17,7 +17,7 @@ PatchEntry = Tuple[int, int, int]
 
 class TexturePatchDataset(Dataset):
     """
-    Lazy patch dataset for federated learning.
+    Lazy patch dataset for texture classification.
 
     Stores image paths and patch coordinates; loads images on demand.
     Supports optional epoch subsampling (training) and LRU image caching.

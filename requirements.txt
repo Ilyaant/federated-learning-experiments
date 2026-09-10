@@ -1,8 +1,6 @@
-flwr==1.26.1
 numpy==2.4.2
 pillow==12.1.1
 PyYAML==6.0.3
-ray==2.51.1
 scikit-learn==1.8.0
 timm==1.0.28
 torch==2.8.0

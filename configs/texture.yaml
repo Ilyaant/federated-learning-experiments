@@ -10,7 +10,7 @@ dataset:
   downscale: 1.0
   grayscale: true
   normalize: true
-  cache_size: 64
+  cache_size: 256
   augmentation:
     enabled: true
     hflip_prob: 0.5
@@ -35,7 +35,7 @@ train:
   weight_decay: 0.05
   max_grad_norm: 1.0
   batch_size: 32
-  local_epochs: 1
+  epochs: 100
   num_workers: 4
   # With downscale=3 there are only ~30 patches/image, so the per-epoch
   # subsampling that fought redundancy at native scale is not needed.
@@ -51,29 +51,15 @@ evaluation:
   # Average predictions over the 8 dihedral (flip/rot90) views of each
   # patch for val/test metrics. Costs 8x eval compute on those splits.
   tta: true
-  # Server-side weight averaging: keep the mean of the last N aggregated
-  # global models (SWA over rounds). 0 disables. The averaged model is
-  # evaluated centrally on the full val/test splits every round
-  # (metrics prefixed swa_*) and saved as model_swa.pt.
+  # Evaluate the train split (without TTA) after every epoch.
+  eval_train: true
+  # Weight averaging over the last N epochs. 0 disables. The averaged
+  # model is evaluated on val/test (metrics prefixed swa_*) and saved
+  # as model_swa.pt.
   swa_window: 10
-  # Evaluate the SWA model centrally every N rounds (always on the last
-  # one). With TTA this costs ~45 s per evaluation.
+  # Evaluate the SWA model every N epochs (always on the last one).
   swa_eval_every: 1
 
-federated:
-  num_clients: 10
-  rounds: 100
-  partition: stratified
-
-server:
-  address: 127.0.0.1:8080
-
 logging:
-  save_dir: logs/exp_new_aug_20260910_downscale1
+  save_dir: logs/centralized
   log_file: experiment.log
-
-simulation:
-  num_workers: 0
-  client_resources:
-    num_cpus: 2
-    num_gpus: 0.5

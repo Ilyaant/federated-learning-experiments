@@ -1,6 +1,6 @@
-# Эксперименты по федеративному обучению
+# Эксперименты по классификации текстур
 
-Код для федеративного обучения классификатора текстур (FastViT-T8 + Flower FedAvg).
+Код для централизованного обучения классификатора текстур (FastViT-T8).
 
 ## Подготовка данных
 
@@ -16,34 +16,25 @@ python -m src.datasets.preprocessing
 
 ## Запуск
 
-### Локальная симуляция (один процесс, Ray)
-
 ```shell
-python main.py --mode simulation
+python main.py --config configs/texture.yaml
 ```
 
-### Распределённый запуск (server + clients)
+Частые переопределения без правки YAML:
 
 ```shell
-# терминал 1
-python main.py --mode server
-
-# терминал 2+
-python main.py --mode client --client-id 0
-python main.py --mode client --client-id 1
+python main.py --epochs 30 --downscale 3 --save-dir logs/run_downscale3
 ```
 
 Конфигурация: `configs/texture.yaml`.
 
-### Быстрый подбор масштаба патча (централизованно, без Flower)
+Результаты пишутся в `logging.save_dir`:
 
-```shell
-python scripts/centralized_sweep.py --downscale 1 2 3 4 --epochs 30
-```
-
-Обучает одну модель на всех train-изображениях для каждого значения
-`dataset.downscale` и пишет метрики по эпохам в `logs/sweep_downscale/results.csv`.
-Все остальные настройки берутся из того же конфига.
+- `metrics.csv` / `history.json` — метрики по эпохам
+- `config.yaml` — итоговый конфиг запуска
+- `model_best.pt` — лучший чекпоинт по `val_f1`
+- `model_final.pt` — веса после последней эпохи
+- `model_swa.pt` — среднее весов за последние `evaluation.swa_window` эпох
 
 Ключи конфига, относящиеся к patch-level качеству:
 
@@ -51,22 +42,20 @@ python scripts/centralized_sweep.py --downscale 1 2 3 4 --epochs 30
   на патчи (1 = нативный масштаб, 3 = патч 224 покрывает ~30% ширины кадра).
 - `evaluation.tta` — усреднение предсказаний по 8 симметриям квадрата
   (flip/rot90) на val/test.
-- `evaluation.swa_window` — усреднение весов глобальной модели за последние N
-  раундов; SWA-модель оценивается на полном val/test (`swa_*` в `metrics.csv`,
-  каждые `evaluation.swa_eval_every` раундов) и сохраняется как `model_swa.pt`.
+- `evaluation.swa_window` — усреднение весов за последние N эпох;
+  SWA-модель оценивается на val/test (`swa_*` в `metrics.csv`) и
+  сохраняется как `model_swa.pt`.
 
 ## Описание экспериментов
-
-
 
 ### Общая конфигурация
 
 Изображения криогелей делятся на train-val-test, а затем нарезаются на патчи размера 224х224 с перекрытием в 50%. Общие параметры экспериментов:
 
 - перевод в оттенки серого + нормализация + автоконтраст с отсечением 1% экстремальных пикселей
-- модель FastViT-T8, агрегация FedAvg
+- модель FastViT-T8
 - lr = 0.0001, batch_size=32
-- 10 клиентов, 100 раундов, 3 локальных эпохи, клиенты одинаковые
+- 100 эпох, cosine schedule до min_lr = 1e-5
 
 ### Эксперимент без аугментаций
 
@@ -89,4 +78,3 @@ python scripts/centralized_sweep.py --downscale 1 2 3 4 --epochs 30
 Результаты: `logs/draft_exp_aug`
 
 Анализ результатов: `notebooks/results_aug.ipynb`
-

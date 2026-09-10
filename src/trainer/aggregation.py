@@ -54,7 +54,7 @@ def build_confusion_matrix(
 
 
 def serialize_confusion_matrix(matrix: np.ndarray) -> str:
-    """Encode a confusion matrix as a Flower-compatible scalar string."""
+    """Encode a confusion matrix as a compact string."""
     matrix = np.asarray(matrix, dtype=np.int64)
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
         raise ValueError("Confusion matrix must be square")
@@ -84,7 +84,7 @@ def deserialize_confusion_matrix(value: str | bytes) -> np.ndarray:
 def classification_summary_from_confusion(
     matrix: np.ndarray,
 ) -> Dict[str, float]:
-    """Compute exact global macro metrics from summed client counts."""
+    """Compute macro metrics from a confusion matrix."""
     matrix = np.asarray(matrix, dtype=np.float64)
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
         raise ValueError("Confusion matrix must be square")

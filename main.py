@@ -5,25 +5,16 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-import flwr as fl
 import torch
 import yaml
-from flwr.common import Context
-from flwr.common.constant import PARTITION_ID_KEY
 
-from src.datasets.partition import FederatedPartitioner
 from src.datasets.preprocessing import load_split
 from src.datasets.texture_patch_dataset import TexturePatchDataset
+from src.datasets.transforms import build_train_transform
 from src.models import create_model
-from src.trainer.client import FlowerClient
-from src.trainer.history import (
-    configure_file_logging,
-    save_global_model,
-    save_history,
-)
+from src.trainer.history import configure_file_logging
 from src.trainer.losses import compute_class_weights
-from src.trainer.metrics import evaluate
-from src.trainer.strategy import create_strategy
+from src.trainer.trainer import Trainer
 from src.trainer.utils import get_device, seed_everything
 
 
@@ -37,61 +28,38 @@ def load_config(path: str) -> dict:
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Federated texture classification with Flower",
+        description="Centralized texture classification",
     )
     parser.add_argument(
         "--config",
         type=str,
         default="configs/texture.yaml",
     )
-    parser.add_argument(
-        "--mode",
-        choices=["server", "client", "simulation"],
-        required=True,
-    )
-    parser.add_argument("--client-id", type=int, default=0)
+    parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--save-dir", type=str, default=None)
+    parser.add_argument("--downscale", type=float, default=None)
+    parser.add_argument("--seed", type=int, default=None)
     return parser.parse_args()
 
 
-def partition_split(
-    samples,
-    num_clients: int,
-    seed: int,
-    strategy: str = "stratified",
-):
-    partitioner = FederatedPartitioner(samples, num_clients, seed=seed)
-
-    if strategy == "iid":
-        return partitioner.iid()
-    if strategy == "dirichlet":
-        return partitioner.dirichlet()
-    return partitioner.stratified()
+def apply_overrides(cfg: dict, args) -> dict:
+    if args.epochs is not None:
+        cfg.setdefault("train", {})["epochs"] = args.epochs
+    if args.save_dir is not None:
+        cfg.setdefault("logging", {})["save_dir"] = args.save_dir
+    if args.downscale is not None:
+        cfg.setdefault("dataset", {})["downscale"] = args.downscale
+    if args.seed is not None:
+        cfg["seed"] = args.seed
+    return cfg
 
 
-import torchvision.transforms as T
+def dump_config(cfg: dict, save_dir: Path) -> None:
+    path = save_dir / "config.yaml"
+    with open(path, "w", encoding="utf-8") as file:
+        yaml.safe_dump(cfg, file, sort_keys=False, allow_unicode=True)
+    logger.info("Wrote resolved config to %s", path)
 
-
-class RandomRotation90:
-    def __init__(self, p: float = 0.75):
-        self.p = p
-
-    def __call__(self, tensor: torch.Tensor) -> torch.Tensor:
-        if torch.rand(1).item() < self.p:
-            k = int(torch.randint(1, 4, (1,)).item())
-            return torch.rot90(tensor, k, [-2, -1])
-        return tensor
-
-
-class AddGaussianNoise:
-    def __init__(self, std=0.05, p=0.2):
-        self.std = std
-        self.p = p
-
-    def __call__(self, tensor):
-        if torch.rand(1).item() < self.p:
-            noise = torch.randn_like(tensor) * self.std
-            return torch.clamp(tensor + noise, -1.0, 1.0)
-        return tensor
 
 def patch_kwargs_from_config(cfg: dict) -> dict:
     """Patch extraction settings shared by every dataset in the run."""
@@ -106,57 +74,13 @@ def patch_kwargs_from_config(cfg: dict) -> dict:
     }
 
 
-def build_train_transform(cfg: dict):
-    aug_cfg = cfg["dataset"].get("augmentation", {})
-    if not aug_cfg.get("enabled", False):
-        return None
-
-    transforms_list = []
-    if aug_cfg.get("hflip_prob", 0.0) > 0:
-        transforms_list.append(T.RandomHorizontalFlip(p=aug_cfg["hflip_prob"]))
-    if aug_cfg.get("vflip_prob", 0.0) > 0:
-        transforms_list.append(T.RandomVerticalFlip(p=aug_cfg["vflip_prob"]))
-    if aug_cfg.get("rot90_prob", 0.0) > 0:
-        transforms_list.append(RandomRotation90(p=aug_cfg["rot90_prob"]))
-    if aug_cfg.get("rotation_degrees", 0.0) > 0:
-        transforms_list.append(T.RandomRotation(degrees=aug_cfg["rotation_degrees"]))
-    if aug_cfg.get("blur_prob", 0.0) > 0:
-        transforms_list.append(T.RandomApply([T.GaussianBlur(kernel_size=aug_cfg.get("blur_kernel_size", 5))], p=aug_cfg["blur_prob"]))
-    if aug_cfg.get("noise_prob", 0.0) > 0:
-        transforms_list.append(AddGaussianNoise(std=aug_cfg.get("noise_std", 0.05), p=aug_cfg["noise_prob"]))
-
-    return T.Compose(transforms_list) if transforms_list else None
-
-
-def build_datasets(cfg: dict, client_id: int):
+def build_datasets(cfg: dict):
     root = cfg["dataset"]["root"]
-    num_clients = cfg["federated"]["num_clients"]
-    seed = cfg["seed"]
-    strategy = cfg["federated"].get("partition", "stratified")
     patch_kwargs = patch_kwargs_from_config(cfg)
-    train_transform = build_train_transform(cfg)
-
-    train_partitions = partition_split(
-        load_split(root, "train"),
-        num_clients,
-        seed,
-        strategy,
-    )
-    val_partitions = partition_split(
-        load_split(root, "val"),
-        num_clients,
-        seed,
-        strategy,
-    )
-    test_partitions = partition_split(
-        load_split(root, "test"),
-        num_clients,
-        seed,
-        strategy,
-    )
+    train_transform = build_train_transform(cfg["dataset"].get("augmentation", {}))
 
     train_dataset = TexturePatchDataset(
-        train_partitions[client_id],
+        load_split(root, "train"),
         epoch_fraction=cfg["train"].get("epoch_fraction", 1.0),
         balanced_per_image=cfg["train"].get("balanced_per_image", True),
         with_replacement=cfg["train"].get("with_replacement", False),
@@ -164,16 +88,15 @@ def build_datasets(cfg: dict, client_id: int):
         **patch_kwargs,
     )
     val_dataset = TexturePatchDataset(
-        val_partitions[client_id],
+        load_split(root, "val"),
         transform=None,
         **patch_kwargs,
     )
     test_dataset = TexturePatchDataset(
-        test_partitions[client_id],
+        load_split(root, "test"),
         transform=None,
         **patch_kwargs,
     )
-
     return train_dataset, val_dataset, test_dataset
 
 
@@ -188,32 +111,28 @@ def build_model(cfg: dict):
     )
 
 
-def build_flower_client(
-    cfg: dict,
-    client_id: int,
-    num_workers: int | None = None,
-) -> FlowerClient:
+def build_trainer(cfg: dict) -> Trainer:
     device = get_device()
-    train_dataset, val_dataset, test_dataset = build_datasets(cfg, client_id)
+    train_dataset, val_dataset, test_dataset = build_datasets(cfg)
     model = build_model(cfg).to(device)
+
+    logger.info("Train %s", train_dataset)
+    logger.info("Val %s", val_dataset)
+    logger.info("Test %s", test_dataset)
 
     num_classes = cfg["model"]["num_classes"]
     weights = None
     if cfg["train"].get("weighted_loss", True):
-        global_distribution: dict[int, int] = {}
-        for _, label in load_split(cfg["dataset"]["root"], "train"):
-            global_distribution[label] = (
-                global_distribution.get(label, 0) + 1
-            )
+        distribution = train_dataset.class_distribution()
         weights = compute_class_weights(
-            global_distribution,
+            distribution,
             num_classes,
             power=cfg["train"].get("class_weight_power", 0.5),
             device=device,
         )
         logger.info(
-            "Using global class distribution %s with weights %s",
-            global_distribution,
+            "Using class distribution %s with weights %s",
+            distribution,
             [round(value, 4) for value in weights.detach().cpu().tolist()],
         )
 
@@ -222,8 +141,9 @@ def build_flower_client(
         label_smoothing=cfg["train"].get("label_smoothing", 0.0),
     )
     eval_criterion = torch.nn.CrossEntropyLoss()
+    eval_cfg = cfg.get("evaluation", {})
 
-    return FlowerClient(
+    return Trainer(
         model=model,
         train_dataset=train_dataset,
         val_dataset=val_dataset,
@@ -236,244 +156,44 @@ def build_flower_client(
         criterion=criterion,
         eval_criterion=eval_criterion,
         batch_size=cfg["train"]["batch_size"],
-        local_epochs=cfg["train"]["local_epochs"],
-        num_workers=(
-            num_workers
-            if num_workers is not None
-            else cfg["train"]["num_workers"]
-        ),
+        epochs=cfg["train"]["epochs"],
+        num_workers=cfg["train"]["num_workers"],
         num_classes=num_classes,
         aggregation=cfg["train"].get("aggregation", "average_probability"),
         device=device,
-        client_id=client_id,
-        log_dir=cfg["logging"]["save_dir"],
         initial_lr=cfg["train"]["lr"],
         min_lr=cfg["train"].get("min_lr", 1e-6),
-        total_rounds=cfg["federated"]["rounds"],
         max_grad_norm=cfg["train"].get("max_grad_norm", 1.0),
-        tta=cfg.get("evaluation", {}).get("tta", False),
+        tta=eval_cfg.get("tta", False),
+        eval_train=eval_cfg.get("eval_train", True),
+        swa_window=int(eval_cfg.get("swa_window", 0)),
+        swa_eval_every=int(eval_cfg.get("swa_eval_every", 1)),
+        save_dir=cfg["logging"]["save_dir"],
     )
-
-
-def build_central_eval_fn(cfg: dict):
-    """Server-side evaluation of a parameter vector on the *full*
-    validation and test splits (all images, no client partitioning).
-
-    Used to score the SWA model; metrics are prefixed ``swa_val_`` /
-    ``swa_test_``. Datasets and the model are built lazily on first call so
-    that server-only modes do not pay for them unless needed.
-    """
-    state: dict = {}
-
-    def _setup():
-        device = get_device()
-        patch_kwargs = patch_kwargs_from_config(cfg)
-        root = cfg["dataset"]["root"]
-        loader_kwargs = {
-            "batch_size": cfg["train"]["batch_size"],
-            "shuffle": False,
-            "num_workers": cfg.get("simulation", {}).get("num_workers", 0),
-            "pin_memory": torch.cuda.is_available(),
-        }
-        state["device"] = device
-        state["model"] = build_model(cfg).to(device)
-        state["loaders"] = {
-            split: torch.utils.data.DataLoader(
-                TexturePatchDataset(load_split(root, split), **patch_kwargs),
-                **loader_kwargs,
-            )
-            for split in ("val", "test")
-        }
-        state["criterion"] = torch.nn.CrossEntropyLoss()
-
-    def central_evaluate(server_round: int, parameters):
-        if not state:
-            _setup()
-        model = state["model"]
-        state_dict = {
-            key: torch.from_numpy(value)
-            for key, value in zip(model.state_dict().keys(), parameters)
-        }
-        model.load_state_dict(state_dict, strict=True)
-
-        metrics: dict[str, float] = {}
-        test_loss = 0.0
-        for split, loader in state["loaders"].items():
-            result = evaluate(
-                model,
-                loader,
-                state["criterion"],
-                state["device"],
-                num_classes=cfg["model"]["num_classes"],
-                aggregation=cfg["train"].get("aggregation", "average_probability"),
-                tta=cfg.get("evaluation", {}).get("tta", False),
-            )
-            for key, value in result.items():
-                if key.endswith("confusion_matrix"):
-                    continue  # strings are not Flower/CSV scalars
-                metrics[f"swa_{split}_{key}"] = float(value)
-            if split == "test":
-                test_loss = float(result["loss"])
-
-        return test_loss, metrics
-
-    return central_evaluate
-
-
-def strategy_kwargs_from_config(cfg: dict) -> dict:
-    eval_cfg = cfg.get("evaluation", {})
-    swa_window = int(eval_cfg.get("swa_window", 0))
-    return {
-        "num_clients": cfg["federated"]["num_clients"],
-        "save_dir": cfg["logging"]["save_dir"],
-        "model_fn": lambda: build_model(cfg),
-        "swa_window": swa_window,
-        "central_eval_fn": build_central_eval_fn(cfg) if swa_window > 0 else None,
-        "swa_eval_every": int(eval_cfg.get("swa_eval_every", 1)),
-        "num_rounds": cfg["federated"]["rounds"],
-    }
-
-
-def save_results(cfg: dict, history, strategy) -> None:
-    save_dir = Path(cfg["logging"]["save_dir"])
-
-    save_history(history, save_dir)
-    logger.info("Saved final history.json and metrics.csv to %s", save_dir)
-
-    if strategy.latest_parameters is not None:
-        save_global_model(
-            strategy.latest_parameters,
-            build_model(cfg),
-            save_dir / "model_final.pt",
-        )
-        logger.info(
-            "Saved final global model to %s",
-            save_dir / "model_final.pt",
-        )
-    else:
-        logger.warning("No aggregated parameters available; model not saved")
-
-    if getattr(strategy, "best_parameters", None) is not None:
-        save_global_model(
-            strategy.best_parameters,
-            build_model(cfg),
-            save_dir / "model_best.pt",
-        )
-        logger.info(
-            "Saved best global model (round %s, val_score=%.4f) to %s",
-            strategy.best_round,
-            strategy.best_score,
-            save_dir / "model_best.pt",
-        )
-
-    if getattr(strategy, "swa_parameters", None) is not None:
-        save_global_model(
-            strategy.swa_parameters,
-            build_model(cfg),
-            save_dir / "model_swa.pt",
-        )
-        logger.info(
-            "Saved SWA global model (mean of last %s rounds) to %s",
-            strategy.swa_window,
-            save_dir / "model_swa.pt",
-        )
-
-
-def run_server(cfg: dict):
-    strategy = create_strategy(**strategy_kwargs_from_config(cfg))
-
-    history = fl.server.start_server(
-        server_address=cfg["server"]["address"],
-        config=fl.server.ServerConfig(
-            num_rounds=cfg["federated"]["rounds"],
-        ),
-        strategy=strategy,
-    )
-
-    save_results(cfg, history, strategy)
-
-
-def run_client(cfg: dict, client_id: int):
-    client = build_flower_client(cfg, client_id)
-
-    fl.client.start_numpy_client(
-        server_address=cfg["server"]["address"],
-        client=client,
-    )
-
-
-def run_simulation(cfg: dict):
-    num_clients = cfg["federated"]["num_clients"]
-    sim_cfg = cfg.get("simulation", {})
-    client_cache: dict[int, FlowerClient] = {}
-
-    def client_fn(context: Context):
-        client_id = int(context.node_config[PARTITION_ID_KEY])
-        if client_id not in client_cache:
-            client_cache[client_id] = build_flower_client(
-                cfg,
-                client_id,
-                num_workers=sim_cfg.get("num_workers", 0),
-            )
-        return client_cache[client_id].to_client()
-
-    strategy = create_strategy(**strategy_kwargs_from_config(cfg))
-
-    history = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=num_clients,
-        config=fl.server.ServerConfig(
-            num_rounds=cfg["federated"]["rounds"],
-        ),
-        strategy=strategy,
-        client_resources=sim_cfg.get(
-            "client_resources",
-            {"num_cpus": 2, "num_gpus": 0.5},
-        ),
-        ray_init_args=sim_cfg.get(
-            "ray_init_args",
-            {"ignore_reinit_error": True, "include_dashboard": False},
-        ),
-    )
-
-    save_results(cfg, history, strategy)
-    return history
 
 
 def main():
     args = parse_args()
-    cfg = load_config(args.config)
+    cfg = apply_overrides(load_config(args.config), args)
 
     seed_everything(cfg["seed"])
     save_dir = Path(cfg["logging"]["save_dir"])
     save_dir.mkdir(parents=True, exist_ok=True)
-    log_filename = cfg["logging"].get("log_file", "experiment.log")
-    if args.mode == "client":
-        log_filename = f"client_{args.client_id}.log"
     configure_file_logging(
         save_dir,
-        filename=log_filename,
-        identifier=f"{args.mode}-{args.client_id}",
+        filename=cfg["logging"].get("log_file", "experiment.log"),
     )
+    dump_config(cfg, save_dir)
     logger.info(
         "Experiment started at %s",
         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     )
     device = get_device()
-    logger.info(
-        "Starting mode=%s client_id=%s with config=%s device=%s",
-        args.mode,
-        args.client_id,
-        args.config,
-        device,
-    )
+    logger.info("Starting training with config=%s device=%s", args.config, device)
 
-    if args.mode == "server":
-        run_server(cfg)
-    elif args.mode == "simulation":
-        run_simulation(cfg)
-    else:
-        run_client(cfg, args.client_id)
+    trainer = build_trainer(cfg)
+    trainer.fit()
+    logger.info("Experiment finished at %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 if __name__ == "__main__":
