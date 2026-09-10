@@ -7,7 +7,7 @@ dataset:
   # Shrink the whole image by this factor before cutting patches:
   # 1.0 = native scale (300 patches/image), 3.0 => a 224 patch spans
   # ~30% of the image width (~15 patches/image, much more context).
-  downscale: 3.0
+  downscale: 1.0
   grayscale: true
   normalize: true
   cache_size: 64
@@ -69,7 +69,7 @@ server:
   address: 127.0.0.1:8080
 
 logging:
-  save_dir: logs/exp_new_aug_20260910_downscale3
+  save_dir: logs/exp_new_aug_20260910_downscale1
   log_file: experiment.log
 
 simulation:
