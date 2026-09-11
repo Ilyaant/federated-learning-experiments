@@ -4,7 +4,7 @@ import logging
 from collections import deque
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Deque, Dict
+from typing import Deque, Dict, Iterable, List, Sequence
 
 import torch
 import torch.nn as nn
@@ -37,6 +37,13 @@ _REPORTED_METRICS = {
     "image_confusion_matrix",
 }
 
+_DEFAULT_SELECTION_FALLBACKS = (
+    "val_f1",
+    "val_accuracy",
+    "val_image_f1",
+    "val_image_accuracy",
+)
+
 
 def prefix_metrics(metrics: Dict[str, float | str], prefix: str) -> Dict[str, float | str]:
     prefixed: Dict[str, float | str] = {}
@@ -45,6 +52,14 @@ def prefix_metrics(metrics: Dict[str, float | str], prefix: str) -> Dict[str, fl
             continue
         prefixed[f"{prefix}{key}"] = value
     return prefixed
+
+
+def numeric_metrics(metrics: Dict[str, float | str]) -> Dict[str, float]:
+    return {
+        key: float(value)
+        for key, value in metrics.items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
 
 
 class Trainer:
@@ -67,11 +82,23 @@ class Trainer:
         min_lr: float = 1e-6,
         max_grad_norm: float | None = 1.0,
         tta: bool = False,
-        eval_train: bool = True,
+        eval_train: bool = False,
+        eval_train_every: int = 1,
+        eval_val_every: int = 1,
+        eval_test: str = "end",
+        selection_metric: str = "val_f1",
+        early_stopping_patience: int = 0,
+        min_delta: float = 0.0,
         swa_window: int = 0,
-        swa_eval_every: int = 1,
+        swa_mode: str = "best",
+        swa_eval_every: int = 0,
         save_dir: str | Path | None = None,
     ):
+        if eval_test not in {"end", "every", "never"}:
+            raise ValueError("eval_test must be 'end', 'every' or 'never'")
+        if swa_mode not in {"best", "last"}:
+            raise ValueError("swa_mode must be 'best' or 'last'")
+
         self.device = device or get_device()
         self.model = model.to(self.device)
         self.optimizer = optimizer
@@ -87,8 +114,15 @@ class Trainer:
         self.max_grad_norm = max_grad_norm
         self.tta = tta
         self.eval_train = eval_train
+        self.eval_train_every = max(1, int(eval_train_every))
+        self.eval_val_every = max(1, int(eval_val_every))
+        self.eval_test = eval_test
+        self.selection_metric = selection_metric
+        self.early_stopping_patience = int(early_stopping_patience)
+        self.min_delta = float(min_delta)
         self.swa_window = int(swa_window)
-        self.swa_eval_every = max(1, int(swa_eval_every))
+        self.swa_mode = swa_mode
+        self.swa_eval_every = max(0, int(swa_eval_every))
         self.current_lr = initial_lr
 
         self.train_dataset = train_dataset
@@ -108,9 +142,6 @@ class Trainer:
             drop_last=False,
             **loader_kwargs,
         )
-        # Sequential pass over the same dataset for train-split evaluation:
-        # patches of one image are visited together, so the per-image LRU
-        # cache is hit instead of re-decoding the JPEG for every patch.
         self.train_eval_loader = DataLoader(
             train_dataset,
             shuffle=False,
@@ -137,10 +168,32 @@ class Trainer:
         self.best_score = -float("inf")
         self.best_epoch = 0
         self.best_state = None
+        self.best_val_metrics: Dict[str, float | str] = {}
         self._swa_snapshots: Deque[dict[str, torch.Tensor]] = deque(
             maxlen=max(1, self.swa_window)
         )
+        self._swa_scored: List[tuple[float, int, dict[str, torch.Tensor]]] = []
         self.swa_state: dict[str, torch.Tensor] | None = None
+        self.stopped_epoch: int | None = None
+
+    def _selection_candidates(self) -> Sequence[str]:
+        seen = set()
+        ordered = []
+        for key in (self.selection_metric, *_DEFAULT_SELECTION_FALLBACKS):
+            if key not in seen:
+                seen.add(key)
+                ordered.append(key)
+        return ordered
+
+    def _selection_score(
+        self,
+        metrics: Dict[str, float | str],
+    ) -> tuple[str | None, float | None]:
+        for key in self._selection_candidates():
+            value = metrics.get(key)
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                return key, float(value)
+        return None, None
 
     def _set_learning_rate(self, epoch: int) -> float:
         self.current_lr = cosine_learning_rate(
@@ -220,57 +273,95 @@ class Trainer:
         finally:
             load_state_dict(self.model, current)
 
-    def _update_swa(self) -> None:
+    def _update_swa(self, score: float, epoch: int) -> None:
         if self.swa_window <= 0:
             return
-        self._swa_snapshots.append(clone_state_dict(self.model.state_dict()))
-        self.swa_state = average_state_dicts(list(self._swa_snapshots))
+        state = clone_state_dict(self.model.state_dict())
+        if self.swa_mode == "last":
+            self._swa_snapshots.append(state)
+            self.swa_state = average_state_dicts(list(self._swa_snapshots))
+            return
 
-    def _should_eval_swa(self, epoch: int) -> bool:
+        self._swa_scored.append((score, epoch, state))
+        self._swa_scored.sort(key=lambda item: item[0], reverse=True)
+        self._swa_scored = self._swa_scored[: self.swa_window]
+        self.swa_state = average_state_dicts(
+            [item[2] for item in self._swa_scored]
+        )
+
+    def _swa_count(self) -> int:
+        if self.swa_mode == "last":
+            return len(self._swa_snapshots)
+        return len(self._swa_scored)
+
+    def _should_eval_swa(self, epoch: int, is_last: bool) -> bool:
         if self.swa_window <= 0 or self.swa_state is None:
             return False
-        is_last = epoch >= self.epochs
-        return is_last or epoch % self.swa_eval_every == 0
+        if is_last or self.swa_eval_every <= 0:
+            return is_last
+        return epoch % self.swa_eval_every == 0
 
-    def _evaluate_swa(self) -> Dict[str, float | str]:
+    def _evaluate_swa(self, splits: Iterable[str]) -> Dict[str, float | str]:
         assert self.swa_state is not None
+        loaders = {"val": self.val_loader, "test": self.test_loader}
         metrics: Dict[str, float | str] = {}
         with self._loaded_weights(self.swa_state):
-            for split, loader in (("val", self.val_loader), ("test", self.test_loader)):
-                result = self._run_evaluation(loader)
+            for split in splits:
+                result = self._run_evaluation(loaders[split])
                 metrics.update(prefix_metrics(result, f"swa_{split}_"))
         return metrics
 
-    def _maybe_save_best(self, epoch: int, metrics: Dict[str, float | str]) -> None:
-        val_score = None
-        selected_metric = "val_f1"
-        for metric_key in ("val_f1", "val_image_f1", "val_image_accuracy", "val_accuracy"):
-            value = metrics.get(metric_key)
-            if isinstance(value, (int, float)):
-                val_score = float(value)
-                selected_metric = metric_key
-                break
-        if val_score is None or val_score <= self.best_score:
-            return
+    def _maybe_save_best(
+        self,
+        epoch: int,
+        metrics: Dict[str, float | str],
+        score: float,
+        metric_name: str,
+    ) -> bool:
+        if not score > self.best_score + self.min_delta:
+            return False
 
-        self.best_score = val_score
+        self.best_score = score
         self.best_epoch = epoch
         self.best_state = clone_state_dict(self.model.state_dict())
+        self.best_val_metrics = {
+            key: value
+            for key, value in metrics.items()
+            if str(key).startswith("val_")
+        }
         if self.history is not None:
-            self.history.set_best(epoch, val_score, selected_metric)
+            self.history.set_best(epoch, score, metric_name)
         if self.save_dir is not None:
             save_model(self.model, self.save_dir / "model_best.pt")
             logger.info(
-                "Epoch %s: new best val score %.4f, saved %s",
+                "Epoch %s: new best %s %.4f, saved %s",
                 epoch,
-                val_score,
+                metric_name,
+                score,
                 self.save_dir / "model_best.pt",
             )
+        return True
+
+    def _should_eval_train(self, epoch: int, is_last: bool) -> bool:
+        if not self.eval_train:
+            return False
+        return is_last or epoch % self.eval_train_every == 0
+
+    def _should_eval_val(self, epoch: int, is_last: bool) -> bool:
+        return is_last or epoch % self.eval_val_every == 0
 
     def fit(self) -> LiveHistoryWriter | None:
-        logger.info("Starting training for %s epochs on %s", self.epochs, self.device)
+        logger.info(
+            "Starting training for %s epochs on %s (selection=%s, eval_test=%s)",
+            self.epochs,
+            self.device,
+            self.selection_metric,
+            self.eval_test,
+        )
+        epochs_without_improve = 0
 
         for epoch in range(1, self.epochs + 1):
+            is_last = epoch >= self.epochs
             lr = self._set_learning_rate(epoch)
             logger.info("Epoch %s/%s learning rate set to %.6g", epoch, self.epochs, lr)
 
@@ -282,46 +373,155 @@ class Trainer:
                 "lr": float(lr),
             }
 
-            if self.eval_train:
+            if self._should_eval_train(epoch, is_last):
                 train_metrics = self._evaluate_train()
                 train_prefixed = prefix_metrics(train_metrics, "train_")
                 train_prefixed.pop("train_loss", None)
                 epoch_metrics.update(train_prefixed)
 
-            val_metrics = self._run_evaluation(self.val_loader)
-            test_metrics = self._run_evaluation(self.test_loader)
-            epoch_metrics.update(prefix_metrics(val_metrics, "val_"))
-            epoch_metrics.update(prefix_metrics(test_metrics, "test_"))
+            improved = False
+            selected_name, selected_score = None, None
+            if self._should_eval_val(epoch, is_last):
+                val_metrics = self._run_evaluation(self.val_loader)
+                epoch_metrics.update(prefix_metrics(val_metrics, "val_"))
+                selected_name, selected_score = self._selection_score(epoch_metrics)
+                if selected_score is not None:
+                    self._update_swa(selected_score, epoch)
+                    improved = self._maybe_save_best(
+                        epoch,
+                        epoch_metrics,
+                        selected_score,
+                        selected_name or self.selection_metric,
+                    )
 
-            self._update_swa()
-            if self._should_eval_swa(epoch):
-                swa_metrics = self._evaluate_swa()
+            if self.eval_test == "every":
+                test_metrics = self._run_evaluation(self.test_loader)
+                epoch_metrics.update(prefix_metrics(test_metrics, "test_"))
+
+            swa_splits = ["val"]
+            if self.eval_test == "every":
+                swa_splits.append("test")
+            if self._should_eval_swa(epoch, is_last=False) and self.swa_state is not None:
+                swa_metrics = self._evaluate_swa(swa_splits)
                 epoch_metrics.update(swa_metrics)
-                logger.info(
-                    "Epoch %s SWA(last %s epochs) metrics: %s",
-                    epoch,
-                    len(self._swa_snapshots),
-                    {
-                        key: value
-                        for key, value in swa_metrics.items()
-                        if not str(key).endswith("confusion_matrix")
-                    },
-                )
 
-            self._maybe_save_best(epoch, epoch_metrics)
             if self.history is not None:
                 self.history.update(epoch, epoch_metrics)
 
             logger.info(
-                "Epoch %s/%s val_f1=%s test_f1=%s",
+                "Epoch %s/%s %s=%s val_image_f1=%s",
                 epoch,
                 self.epochs,
-                epoch_metrics.get("val_f1"),
-                epoch_metrics.get("test_f1"),
+                self.selection_metric,
+                epoch_metrics.get(self.selection_metric),
+                epoch_metrics.get("val_image_f1"),
             )
 
-        self._save_final_models()
+            if selected_score is not None:
+                if improved:
+                    epochs_without_improve = 0
+                else:
+                    epochs_without_improve += 1
+                    if (
+                        self.early_stopping_patience > 0
+                        and epochs_without_improve >= self.early_stopping_patience
+                    ):
+                        self.stopped_epoch = epoch
+                        logger.info(
+                            "Early stopping at epoch %s (%s did not improve for %s evals)",
+                            epoch,
+                            self.selection_metric,
+                            self.early_stopping_patience,
+                        )
+                        break
+
+        self._finalize()
         return self.history
+
+    def _finalize(self) -> None:
+        self._save_final_models()
+        summary = self._held_out_summary()
+        if self.history is not None:
+            self.history.set_summary(summary)
+        logger.info("Run summary: %s", summary)
+
+    def _held_out_summary(self) -> Dict[str, object]:
+        summary: Dict[str, object] = {
+            "selection_metric": self.selection_metric,
+            "best_epoch": self.best_epoch,
+            "best_score": None if self.best_epoch == 0 else float(self.best_score),
+            "stopped_epoch": self.stopped_epoch,
+            "eval_test": self.eval_test,
+        }
+        if self.best_val_metrics:
+            summary["best_val"] = numeric_metrics(self.best_val_metrics)
+
+        chosen = "best"
+        chosen_test: Dict[str, float] = {}
+        best_test: Dict[str, float] = {}
+        swa_val: Dict[str, float] = {}
+        swa_test: Dict[str, float] = {}
+        swa_val_score = None
+
+        if self.best_state is not None and self.eval_test != "never":
+            with self._loaded_weights(self.best_state):
+                best_test = numeric_metrics(
+                    prefix_metrics(self._run_evaluation(self.test_loader), "test_")
+                )
+            summary["best_test"] = best_test
+            chosen_test = best_test
+            logger.info(
+                "Held-out test of best epoch %s: %s",
+                self.best_epoch,
+                {k: v for k, v in best_test.items() if "confusion" not in k},
+            )
+
+        if self.swa_state is not None:
+            swa_splits = ["val"]
+            if self.eval_test != "never":
+                swa_splits.append("test")
+            swa_metrics = self._evaluate_swa(swa_splits)
+            swa_val = numeric_metrics(
+                {k: v for k, v in swa_metrics.items() if k.startswith("swa_val_")}
+            )
+            swa_test = numeric_metrics(
+                {k: v for k, v in swa_metrics.items() if k.startswith("swa_test_")}
+            )
+            summary["swa_val"] = swa_val
+            if swa_test:
+                summary["swa_test"] = swa_test
+            _, swa_val_score = self._selection_score(
+                {k.replace("swa_", "", 1): v for k, v in swa_metrics.items()}
+            )
+            if (
+                swa_val_score is not None
+                and swa_val_score > self.best_score
+                and swa_test
+            ):
+                chosen = "swa"
+                chosen_test = {
+                    key.replace("swa_", "", 1): value
+                    for key, value in swa_test.items()
+                }
+            logger.info(
+                "SWA (%s, %s snapshots) val score=%s",
+                self.swa_mode,
+                self._swa_count(),
+                swa_val_score,
+            )
+
+        summary["selected_weights"] = chosen
+        summary["selected_test"] = chosen_test
+        if chosen_test:
+            summary["test_image_f1"] = chosen_test.get("test_image_f1")
+            summary["test_f1"] = chosen_test.get("test_f1")
+        if self.best_val_metrics:
+            summary["val_image_f1"] = numeric_metrics(self.best_val_metrics).get(
+                "val_image_f1"
+            )
+            summary["val_f1"] = numeric_metrics(self.best_val_metrics).get("val_f1")
+        summary["swa_val_score"] = swa_val_score
+        return summary
 
     def _save_final_models(self) -> None:
         if self.save_dir is None:
@@ -332,8 +532,9 @@ class Trainer:
 
         if self.best_state is not None:
             logger.info(
-                "Best model is from epoch %s (val_score=%.4f)",
+                "Best model is from epoch %s (%s=%.4f)",
                 self.best_epoch,
+                self.selection_metric,
                 self.best_score,
             )
 
@@ -343,7 +544,8 @@ class Trainer:
             save_model(self.model, self.save_dir / "model_swa.pt")
             load_state_dict(self.model, current)
             logger.info(
-                "Saved SWA model (mean of last %s epochs) to %s",
-                len(self._swa_snapshots),
+                "Saved SWA model (%s, %s snapshots) to %s",
+                self.swa_mode,
+                self._swa_count(),
                 self.save_dir / "model_swa.pt",
             )

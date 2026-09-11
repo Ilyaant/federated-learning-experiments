@@ -2,6 +2,15 @@ seed: 42
 
 dataset:
   root: data/dataset2_exp_prepared
+  # Re-split train/val/test by capture group so frames of the same
+  # sample never leak across splits. split_seed is independent of
+  # the training seed so hyperparameter sweeps stay comparable.
+  regroup: true
+  group_by: sample
+  split_seed: 42
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
   patch_size: 224
   overlap: 0.5
   # Shrink the whole image by this factor before cutting patches:
@@ -37,8 +46,6 @@ train:
   batch_size: 32
   epochs: 100
   num_workers: 4
-  # With downscale=3 there are only ~30 patches/image, so the per-epoch
-  # subsampling that fought redundancy at native scale is not needed.
   epoch_fraction: 1.0
   balanced_per_image: true
   with_replacement: false
@@ -48,18 +55,23 @@ train:
   class_weight_power: 0.5
 
 evaluation:
-  # Average predictions over the 8 dihedral (flip/rot90) views of each
-  # patch for val/test metrics. Costs 8x eval compute on those splits.
+  # Select checkpoints by patch-level val F1 (the task metric).
+  selection_metric: val_f1
+  early_stopping_patience: 15
+  min_delta: 0.0
+  # Held-out test is scored once at the end on the best/SWA weights.
+  eval_test: end
+  eval_val_every: 1
   tta: true
-  # Evaluate the train split (without TTA) after every epoch.
-  eval_train: true
-  # Weight averaging over the last N epochs. 0 disables. The averaged
-  # model is evaluated on val/test (metrics prefixed swa_*) and saved
-  # as model_swa.pt.
-  swa_window: 10
-  # Evaluate the SWA model every N epochs (always on the last one).
-  swa_eval_every: 1
+  eval_train: false
+  eval_train_every: 1
+  # Average the N best val checkpoints rather than the last (overfit) ones.
+  swa_window: 5
+  swa_mode: best
+  swa_eval_every: 0
 
 logging:
-  save_dir: logs/centralized
+  save_dir: logs/runs
+  run_name: texture
+  unique_dir: true
   log_file: experiment.log

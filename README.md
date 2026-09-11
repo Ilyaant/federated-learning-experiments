@@ -1,80 +1,90 @@
 # Эксперименты по классификации текстур
 
-Код для централизованного обучения классификатора текстур (FastViT-T8).
+Код для централизованного обучения классификатора текстур (FastViT-T8)
+и подбора гиперпараметров по patch-level F1 на валидации.
 
 ## Подготовка данных
 
 Исходные изображения лежат в папках-классах (clear, G, GP, M, T).
-Скрипт конвертирует их в grayscale и делит на train/val/test:
+Скрипт конвертирует их в grayscale и делит на train/val/test **по группам
+кадров одного образца** (`15_11_17(2-1)пп(20)-1-3` и `-2-4` не разъезжаются
+по сплитам):
 
 ```shell
 python -m src.datasets.preprocessing
 ```
 
-Пути по умолчанию: `data/dataset2_exp` -> `data/dataset2_exp_prepared`
-(совпадают с `dataset.root` в конфиге).
+Пути по умолчанию: `data/dataset2_exp` -> `data/dataset2_exp_prepared`.
 
-## Запуск
+Даже если на диске уже лежит старый file-level сплит, обучение по умолчанию
+пересобирает train/val/test в памяти (`dataset.regroup: true`,
+`dataset.split_seed: 42`). Чтобы использовать папки as-is:
+
+```shell
+python main.py --override dataset.regroup=false
+```
+
+## Запуск одного эксперимента
 
 ```shell
 python main.py --config configs/texture.yaml
 ```
 
-Частые переопределения без правки YAML:
+Частые переопределения:
 
 ```shell
 python main.py --epochs 30 --downscale 3 --save-dir logs/run_downscale3
+python main.py --override train.lr=3e-5 --override dataset.augmentation.blur_prob=0.0
+python main.py --patience 10 --selection-metric val_f1 --run-name geom_ds2
 ```
 
-Конфигурация: `configs/texture.yaml`.
+Результаты пишутся в уникальный каталог под `logging.save_dir`
+(`logs/runs/<run_name>_<timestamp>`), если не задан `--save-dir`:
 
-Результаты пишутся в `logging.save_dir`:
-
-- `metrics.csv` / `history.json` — метрики по эпохам
+- `metrics.csv` / `history.json` — метрики по эпохам (без test, пока не `eval_test: every`)
+- `summary.json` — чекпоинт, выбранный по val, и **одно** измерение test
+- `split_manifest.json` — какие группы кадров попали в какой сплит
 - `config.yaml` — итоговый конфиг запуска
-- `model_best.pt` — лучший чекпоинт по `val_f1`
+- `model_best.pt` — лучший чекпоинт по `evaluation.selection_metric` (по умолчанию patch-level `val_f1`)
 - `model_final.pt` — веса после последней эпохи
-- `model_swa.pt` — среднее весов за последние `evaluation.swa_window` эпох
+- `model_swa.pt` — среднее лучших `evaluation.swa_window` чекпоинтов (`swa_mode: best`)
 
-Ключи конфига, относящиеся к patch-level качеству:
+Обучение останавливается, если selection-метрика не растёт
+`evaluation.early_stopping_patience` эпох. Test считается один раз в конце
+на best/SWA, а не каждую эпоху.
 
-- `dataset.downscale` — во сколько раз уменьшить изображение перед нарезкой
-  на патчи (1 = нативный масштаб, 3 = патч 224 покрывает ~30% ширины кадра).
-- `evaluation.tta` — усреднение предсказаний по 8 симметриям квадрата
-  (flip/rot90) на val/test.
-- `evaluation.swa_window` — усреднение весов за последние N эпох;
-  SWA-модель оценивается на val/test (`swa_*` в `metrics.csv`) и
-  сохраняется как `model_swa.pt`.
+## Подбор гиперпараметров
 
-## Описание экспериментов
+Список джобов: `configs/sweep.yaml`. Сначала посмотреть план:
 
-### Общая конфигурация
+```shell
+python main.py --sweep configs/sweep.yaml --dry-run
+```
 
-Изображения криогелей делятся на train-val-test, а затем нарезаются на патчи размера 224х224 с перекрытием в 50%. Общие параметры экспериментов:
+Запуск сетки:
 
-- перевод в оттенки серого + нормализация + автоконтраст с отсечением 1% экстремальных пикселей
-- модель FastViT-T8
-- lr = 0.0001, batch_size=32
-- 100 эпох, cosine schedule до min_lr = 1e-5
+```shell
+python main.py --sweep configs/sweep.yaml
+```
 
-### Эксперимент без аугментаций
+Каждый джоб пишет свой каталог. Сводка sweep:
 
-В данном эксперименте используются все тренировочные данные.
+- `logs/sweeps/<name>_<timestamp>/summary.csv`
+- `logs/sweeps/<name>_<timestamp>/ranking.json` — лучший джоб по val-метрике
 
-Результаты: `logs/exp_no_aug`
+Победителя потом прогоняют отдельно с TTA:
 
-Анализ результатов: `notebooks/results_no_aug.ipynb`
+```shell
+python main.py --downscale 2 --save-dir logs/final_best \
+  --override dataset.augmentation.blur_prob=0.0 \
+  --override dataset.augmentation.noise_prob=0.0 \
+  --override evaluation.tta=true
+```
 
-### Эксперимент с аугментациями
+Ключи, которые обычно крутят в sweep:
 
-В данном эксперименте к патчам изображений применяются аугментации:
-
-- **Повороты**: +15 градусов и -15 градусов
-- **Блюр**: Gaussian blur с ядром 5х5 и sigma=1.0. Каждый пиксель заменяется взвешенным средним соседей по 2D-гауссиане
-- **Шум**: Аддитивный гауссов шум `patch + N(0,1) * 0.05`
-
-Таким образом, на каждый патч приходится 5 итоговых сэмплов: оригинальный, повороты на 15 градусов, размытие, зашумление.
-
-Результаты: `logs/draft_exp_aug`
-
-Анализ результатов: `notebooks/results_aug.ipynb`
+- `dataset.downscale` — масштаб кадра до нарезки патчей
+- `dataset.overlap` — перекрытие патчей
+- `dataset.augmentation.blur_prob` / `noise_prob` — фотометрические аугментации
+- `train.lr`, `train.epochs`
+- `evaluation.tta`, `evaluation.early_stopping_patience`

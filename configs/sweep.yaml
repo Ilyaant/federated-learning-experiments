@@ -1,0 +1,45 @@
+base: configs/texture.yaml
+name: quality_search
+save_root: logs/sweeps
+selection_metric: val_f1
+
+# Shared settings for every job. TTA is off during search so jobs finish
+# faster; re-enable it for a final run of the winner:
+#   python main.py --override evaluation.tta=true --save-dir logs/final_best
+apply:
+  train.epochs: 60
+  evaluation.tta: false
+  evaluation.early_stopping_patience: 12
+  evaluation.eval_train: false
+
+# Curated jobs, not a full cartesian product: scale of the patch, whether
+# photometric augs are on, overlap, and a lower LR.
+runs:
+  - name: ds1_photo
+    dataset.downscale: 1.0
+  - name: ds1_geom
+    dataset.downscale: 1.0
+    dataset.augmentation.blur_prob: 0.0
+    dataset.augmentation.noise_prob: 0.0
+  - name: ds2_photo
+    dataset.downscale: 2.0
+  - name: ds2_geom
+    dataset.downscale: 2.0
+    dataset.augmentation.blur_prob: 0.0
+    dataset.augmentation.noise_prob: 0.0
+  - name: ds3_photo
+    dataset.downscale: 3.0
+  - name: ds3_geom
+    dataset.downscale: 3.0
+    dataset.augmentation.blur_prob: 0.0
+    dataset.augmentation.noise_prob: 0.0
+  - name: ds2_geom_overlap0
+    dataset.downscale: 2.0
+    dataset.overlap: 0.0
+    dataset.augmentation.blur_prob: 0.0
+    dataset.augmentation.noise_prob: 0.0
+  - name: ds2_geom_lr3e5
+    dataset.downscale: 2.0
+    train.lr: 0.00003
+    dataset.augmentation.blur_prob: 0.0
+    dataset.augmentation.noise_prob: 0.0

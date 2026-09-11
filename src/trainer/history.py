@@ -55,6 +55,15 @@ def configure_file_logging(
     return log_path
 
 
+def reset_file_logging() -> None:
+    """Drop file handlers so consecutive runs in one process do not mix logs."""
+    root_logger = logging.getLogger()
+    for handler in list(root_logger.handlers):
+        if isinstance(handler, logging.FileHandler):
+            handler.close()
+            root_logger.removeHandler(handler)
+
+
 class LiveHistoryWriter:
     """Persist per-epoch metrics while training is running."""
 
@@ -64,6 +73,7 @@ class LiveHistoryWriter:
         self.metrics: Dict[int, Dict[str, float]] = defaultdict(dict)
         self.extras: Dict[int, Dict[str, object]] = defaultdict(dict)
         self.best: Dict[str, float | int] | None = None
+        self.summary: Dict[str, object] | None = None
         self.flush()
 
     def update(self, epoch: int, metrics: Mapping) -> None:
@@ -86,6 +96,10 @@ class LiveHistoryWriter:
         self.best = {"epoch": int(epoch), "score": float(score), "metric": metric}
         self.flush()
 
+    def set_summary(self, summary: Mapping) -> None:
+        self.summary = dict(summary)
+        self.flush()
+
     def _history_dict(self) -> Dict:
         series: Dict[str, list[tuple[int, float]]] = defaultdict(list)
         for epoch in sorted(self.metrics):
@@ -98,6 +112,8 @@ class LiveHistoryWriter:
             }
         if self.best is not None:
             payload["best"] = self.best
+        if self.summary is not None:
+            payload["summary"] = self.summary
         return payload
 
     def flush(self) -> None:
@@ -119,6 +135,13 @@ class LiveHistoryWriter:
             for epoch in sorted(self.metrics):
                 writer.writerow({"epoch": epoch, **self.metrics[epoch]})
         metrics_tmp.replace(metrics_path)
+
+        if self.summary is not None:
+            summary_path = self.save_dir / "summary.json"
+            summary_tmp = summary_path.with_suffix(".json.tmp")
+            with open(summary_tmp, "w", encoding="utf-8") as file:
+                json.dump(self.summary, file, indent=2, ensure_ascii=False)
+            summary_tmp.replace(summary_path)
 
 
 def save_model(model: torch.nn.Module, path: str | Path) -> None:
