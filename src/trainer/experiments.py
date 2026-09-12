@@ -113,8 +113,6 @@ def resolve_save_dir(cfg: dict, run_name: str | None = None) -> Path:
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         folder = f"{name}_{stamp}" if name else stamp
         return base / folder
-    if name:
-        return base / str(name)
     return base
 
 

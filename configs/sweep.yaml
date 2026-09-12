@@ -1,45 +1,44 @@
 base: configs/texture.yaml
-name: quality_search
-save_root: logs/sweeps
+name: ds1_regularize
+save_root: logs/sweeps2
 selection_metric: val_f1
 
-# Shared settings for every job. TTA is off during search so jobs finish
-# faster; re-enable it for a final run of the winner:
-#   python main.py --override evaluation.tta=true --save-dir logs/final_best
+# Follow-up to quality_search: keep native-scale geom augs (the winner),
+# then ablate patch subsampling and stronger regularization. SWA is off
+# because it lost to the raw best checkpoint in every previous run.
 apply:
+  dataset.downscale: 1.0
+  dataset.augmentation.blur_prob: 0.0
+  dataset.augmentation.noise_prob: 0.0
+  train.lr: 0.0001
   train.epochs: 60
   evaluation.tta: false
-  evaluation.early_stopping_patience: 12
+  evaluation.early_stopping_patience: 20
   evaluation.eval_train: false
+  evaluation.swa_window: 0
 
-# Curated jobs, not a full cartesian product: scale of the patch, whether
-# photometric augs are on, overlap, and a lower LR.
 runs:
-  - name: ds1_photo
-    dataset.downscale: 1.0
-  - name: ds1_geom
-    dataset.downscale: 1.0
-    dataset.augmentation.blur_prob: 0.0
-    dataset.augmentation.noise_prob: 0.0
-  - name: ds2_photo
-    dataset.downscale: 2.0
-  - name: ds2_geom
-    dataset.downscale: 2.0
-    dataset.augmentation.blur_prob: 0.0
-    dataset.augmentation.noise_prob: 0.0
-  - name: ds3_photo
-    dataset.downscale: 3.0
-  - name: ds3_geom
-    dataset.downscale: 3.0
-    dataset.augmentation.blur_prob: 0.0
-    dataset.augmentation.noise_prob: 0.0
-  - name: ds2_geom_overlap0
-    dataset.downscale: 2.0
-    dataset.overlap: 0.0
-    dataset.augmentation.blur_prob: 0.0
-    dataset.augmentation.noise_prob: 0.0
-  - name: ds2_geom_lr3e5
-    dataset.downscale: 2.0
-    train.lr: 0.00003
-    dataset.augmentation.blur_prob: 0.0
-    dataset.augmentation.noise_prob: 0.0
+  - name: geom_ref
+  - name: geom_frac025
+    train.epoch_fraction: 0.25
+  - name: geom_reg
+    model.dropout: 0.5
+    model.drop_path_rate: 0.3
+    train.weight_decay: 0.1
+  - name: geom_frac025_reg
+    train.epoch_fraction: 0.25
+    model.dropout: 0.5
+    model.drop_path_rate: 0.3
+    train.weight_decay: 0.1
+  - name: geom_frac025_reg_bb
+    train.epoch_fraction: 0.25
+    model.dropout: 0.5
+    model.drop_path_rate: 0.3
+    train.weight_decay: 0.1
+    train.backbone_lr: 0.00001
+  - name: geom_frac025_reg_cw
+    train.epoch_fraction: 0.25
+    model.dropout: 0.5
+    model.drop_path_rate: 0.3
+    train.weight_decay: 0.1
+    train.class_weight_power: 1.0

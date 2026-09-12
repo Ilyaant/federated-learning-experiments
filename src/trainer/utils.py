@@ -6,6 +6,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 import torch
+import torch.nn as nn
 
 
 def seed_everything(seed: int = 42):
@@ -30,6 +31,47 @@ def get_device() -> torch.device:
         return torch.device("mps")
 
     return torch.device("cpu")
+
+
+def build_optimizer(model: nn.Module, cfg: Mapping) -> torch.optim.Optimizer:
+    """AdamW with an optional slower backbone learning rate."""
+    train_cfg = cfg["train"]
+    head_lr = float(train_cfg["lr"])
+    weight_decay = float(train_cfg["weight_decay"])
+    backbone_lr = train_cfg.get("backbone_lr")
+    if backbone_lr is not None:
+        backbone_lr = float(backbone_lr)
+
+    if backbone_lr is None or backbone_lr == head_lr:
+        optimizer = torch.optim.AdamW(
+            model.parameters(),
+            lr=head_lr,
+            weight_decay=weight_decay,
+        )
+    else:
+        classifier = model.get_classifier()
+        classifier_ids = {id(parameter) for parameter in classifier.parameters()}
+        backbone = [
+            parameter
+            for parameter in model.parameters()
+            if parameter.requires_grad and id(parameter) not in classifier_ids
+        ]
+        head = [
+            parameter
+            for parameter in classifier.parameters()
+            if parameter.requires_grad
+        ]
+        optimizer = torch.optim.AdamW(
+            [
+                {"params": backbone, "lr": backbone_lr},
+                {"params": head, "lr": head_lr},
+            ],
+            weight_decay=weight_decay,
+        )
+
+    for group in optimizer.param_groups:
+        group["initial_lr"] = group["lr"]
+    return optimizer
 
 
 def cosine_learning_rate(

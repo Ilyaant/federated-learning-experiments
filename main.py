@@ -26,7 +26,7 @@ from src.trainer.experiments import (
 from src.trainer.history import configure_file_logging, reset_file_logging
 from src.trainer.losses import compute_class_weights
 from src.trainer.trainer import Trainer
-from src.trainer.utils import get_device, seed_everything
+from src.trainer.utils import build_optimizer, get_device, seed_everything
 
 
 logger = logging.getLogger(__name__)
@@ -201,17 +201,24 @@ def build_trainer(cfg: dict) -> Trainer:
     )
     eval_criterion = torch.nn.CrossEntropyLoss()
     eval_cfg = cfg.get("evaluation", {})
+    optimizer = build_optimizer(model, cfg)
+    logger.info(
+        "Optimizer groups %s",
+        [
+            {
+                "lr": group["lr"],
+                "n_params": sum(parameter.numel() for parameter in group["params"]),
+            }
+            for group in optimizer.param_groups
+        ],
+    )
 
     return Trainer(
         model=model,
         train_dataset=train_dataset,
         val_dataset=val_dataset,
         test_dataset=test_dataset,
-        optimizer=torch.optim.AdamW(
-            model.parameters(),
-            lr=cfg["train"]["lr"],
-            weight_decay=cfg["train"]["weight_decay"],
-        ),
+        optimizer=optimizer,
         criterion=criterion,
         eval_criterion=eval_criterion,
         batch_size=cfg["train"]["batch_size"],

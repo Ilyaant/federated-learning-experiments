@@ -55,15 +55,11 @@ python main.py --patience 10 --selection-metric val_f1 --run-name geom_ds2
 
 ## Подбор гиперпараметров
 
-Список джобов: `configs/sweep.yaml`. Сначала посмотреть план:
+Список джобов: `configs/sweep.yaml` (сейчас — регуляризация поверх победителя
+`ds1_geom`: `epoch_fraction`, dropout/weight_decay, меньший lr backbone).
 
 ```shell
 python main.py --sweep configs/sweep.yaml --dry-run
-```
-
-Запуск сетки:
-
-```shell
 python main.py --sweep configs/sweep.yaml
 ```
 
@@ -75,16 +71,15 @@ python main.py --sweep configs/sweep.yaml
 Победителя потом прогоняют отдельно с TTA:
 
 ```shell
-python main.py --downscale 2 --save-dir logs/final_best \
+python main.py --downscale 1 --save-dir logs/final_best \
   --override dataset.augmentation.blur_prob=0.0 \
   --override dataset.augmentation.noise_prob=0.0 \
+  --override train.epoch_fraction=0.25 \
   --override evaluation.tta=true
 ```
 
 Ключи, которые обычно крутят в sweep:
 
-- `dataset.downscale` — масштаб кадра до нарезки патчей
-- `dataset.overlap` — перекрытие патчей
-- `dataset.augmentation.blur_prob` / `noise_prob` — фотометрические аугментации
-- `train.lr`, `train.epochs`
+- `train.epoch_fraction`, `train.backbone_lr`, `train.weight_decay`
+- `model.dropout`, `model.drop_path_rate`
 - `evaluation.tta`, `evaluation.early_stopping_patience`

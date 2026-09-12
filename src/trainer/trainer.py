@@ -124,6 +124,8 @@ class Trainer:
         self.swa_mode = swa_mode
         self.swa_eval_every = max(0, int(swa_eval_every))
         self.current_lr = initial_lr
+        for group in self.optimizer.param_groups:
+            group.setdefault("initial_lr", group["lr"])
 
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
@@ -202,8 +204,9 @@ class Trainer:
             self.initial_lr,
             self.min_lr,
         )
+        scale = self.current_lr / self.initial_lr if self.initial_lr else 1.0
         for group in self.optimizer.param_groups:
-            group["lr"] = self.current_lr
+            group["lr"] = float(group.get("initial_lr", self.initial_lr)) * scale
         return self.current_lr
 
     def train_one_epoch(self, epoch: int) -> float:
