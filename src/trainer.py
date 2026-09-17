@@ -29,13 +29,24 @@ from .model import split_parameters
 
 LEVELS = ("patch", "image")
 
+def _split_fields(prefix: str) -> List[str]:
+    """CSV columns for one evaluated split: loss, patch- and image-level metrics."""
+    return (
+        [f"{prefix}_loss"]
+        + [f"{prefix}_patch_{m}" for m in METRIC_NAMES]
+        + [f"{prefix}_image_{m}" for m in METRIC_NAMES]
+        + [f"{prefix}_n_patches", f"{prefix}_n_images"]
+    )
+
+
 EPOCH_CSV_FIELDS = (
+    # Training pass: augmented patches, weights change during the epoch.
     ["epoch", "lr", "epoch_time_sec", "train_loss"]
-    + [f"train_patch_{m}" for m in METRIC_NAMES]
-    + ["val_loss"]
-    + [f"val_patch_{m}" for m in METRIC_NAMES]
-    + [f"val_image_{m}" for m in METRIC_NAMES]
-    + ["val_n_patches", "val_n_images", "is_best"]
+    + [f"train_running_patch_{m}" for m in METRIC_NAMES]
+    # Train scored in eval mode without augmentation (evaluation.eval_train_every).
+    + _split_fields("train_eval")
+    + _split_fields("val")
+    + ["is_best"]
 )
 
 FINAL_CSV_FIELDS = [
@@ -62,6 +73,7 @@ class Trainer:
         test_loader: DataLoader,
         run_dir: str | Path,
         device: torch.device,
+        train_eval_loader: Optional[DataLoader] = None,
     ):
         self.config = config
         self.model = model.to(device)
@@ -70,6 +82,7 @@ class Trainer:
         self.train_sampler = train_sampler
         self.val_loader = val_loader
         self.test_loader = test_loader
+        self.train_eval_loader = train_eval_loader
         self.run_dir = Path(run_dir)
         self.device = device
         self.logger = get_logger()
@@ -89,6 +102,9 @@ class Trainer:
         self.minimize = self.selection_metric == "val_loss"
         self.patience = eval_cfg.get("early_stopping_patience")
         self.min_delta = float(eval_cfg.get("min_delta", 0.0))
+        self.eval_train_every = int(eval_cfg.get("eval_train_every", 0) or 0)
+        if self.train_eval_loader is None:
+            self.eval_train_every = 0
 
         self.criterion = self._build_criterion(train_cfg)
         self.optimizer = self._build_optimizer(train_cfg)
@@ -290,6 +306,9 @@ class Trainer:
         for epoch in range(1, self.epochs + 1):
             start = time.time()
             train_result = self.train_one_epoch(epoch)
+            train_eval_result = None
+            if self.eval_train_every and epoch % self.eval_train_every == 0:
+                train_eval_result = self.evaluate(self.train_eval_loader, "train")
             val_result = self.evaluate(self.val_loader, "val")
             elapsed = time.time() - start
 
@@ -305,21 +324,24 @@ class Trainer:
                 self._save_checkpoint("model_last.pt", epoch, value)
 
             self.logger.info(
-                "epoch %d/%d done in %.0fs | train loss %.4f | train patch: %s",
+                "epoch %d/%d done in %.0fs | train loss %.4f | train running patch (aug): %s",
                 epoch, self.epochs, elapsed, train_result["loss"], format_metrics(train_result["patch"]),
             )
+            if train_eval_result is not None:
+                self._log_split(f"epoch {epoch} train (eval, no aug)", train_eval_result)
             self._log_split(f"epoch {epoch} val", val_result)
             self.logger.info(
                 "%s = %.4f (best %.4f @ epoch %s)%s",
                 self.selection_metric, value, self.best_value, self.best_epoch, " *" if is_best else "",
             )
 
-            row = self._epoch_row(epoch, elapsed, train_result, val_result, is_best)
+            row = self._epoch_row(epoch, elapsed, train_result, train_eval_result, val_result, is_best)
             self.epoch_csv.write(row)
             self.history.append(
                 {
                     **row,
                     "train": train_result,
+                    "train_eval": train_eval_result,
                     "val": val_result,
                 }
             )
@@ -333,11 +355,27 @@ class Trainer:
 
         return {"best_epoch": self.best_epoch, "best_value": self.best_value}
 
+    @staticmethod
+    def _split_row(prefix: str, result: Optional[Dict[str, object]]) -> Dict[str, object]:
+        """Flatten an ``evaluate`` result into ``{prefix}_*`` CSV columns."""
+        if result is None:
+            return {}
+        row: Dict[str, object] = {
+            f"{prefix}_loss": result["loss"],
+            f"{prefix}_n_patches": result["n_patches"],
+            f"{prefix}_n_images": result["n_images"],
+        }
+        for level in LEVELS:
+            for metric in METRIC_NAMES:
+                row[f"{prefix}_{level}_{metric}"] = result[level][metric]
+        return row
+
     def _epoch_row(
         self,
         epoch: int,
         elapsed: float,
         train_result: Dict[str, object],
+        train_eval_result: Optional[Dict[str, object]],
         val_result: Dict[str, object],
         is_best: bool,
     ) -> Dict[str, object]:
@@ -346,22 +384,19 @@ class Trainer:
             "lr": self._current_lr(),
             "epoch_time_sec": elapsed,
             "train_loss": train_result["loss"],
-            "val_loss": val_result["loss"],
-            "val_n_patches": val_result["n_patches"],
-            "val_n_images": val_result["n_images"],
             "is_best": is_best,
         }
         for metric in METRIC_NAMES:
-            row[f"train_patch_{metric}"] = train_result["patch"][metric]
-            for level in LEVELS:
-                row[f"val_{level}_{metric}"] = val_result[level][metric]
+            row[f"train_running_patch_{metric}"] = train_result["patch"][metric]
+        row.update(self._split_row("train_eval", train_eval_result))
+        row.update(self._split_row("val", val_result))
         return row
 
     # ------------------------------------------------------------ final eval
     def final_evaluation(
         self,
         checkpoint: str = "model_best.pt",
-        train_eval_loader: Optional[DataLoader] = None,
+        include_train: bool = False,
     ) -> Dict[str, object]:
         """Score the selected checkpoint on val and test (and optionally train)."""
         path = self.run_dir / checkpoint
@@ -375,8 +410,8 @@ class Trainer:
             self.logger.warning("Checkpoint %s not found, evaluating current weights", checkpoint)
 
         loaders = {"val": self.val_loader, "test": self.test_loader}
-        if train_eval_loader is not None:
-            loaders = {"train": train_eval_loader, **loaders}
+        if include_train and self.train_eval_loader is not None:
+            loaders = {"train": self.train_eval_loader, **loaders}
 
         results: Dict[str, object] = {}
         final_csv = CsvLogger(self.final_csv_path, FINAL_CSV_FIELDS)

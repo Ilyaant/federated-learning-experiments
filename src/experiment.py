@@ -152,7 +152,7 @@ def build_loaders(
             generator=generator,
         )
     }
-    for split in ("val", "test", "train_eval"):
+    for split in ("val", "test"):
         loaders[split] = DataLoader(
             datasets[split],
             batch_size=int(eval_cfg.get("batch_size", 64)),
@@ -162,6 +162,24 @@ def build_loaders(
             persistent_workers=False,
             worker_init_fn=_worker_init,
         )
+
+    # Train scored in eval mode: a fixed (seeded, never reshuffled) subset of
+    # grid patches per image, ordered by image so the decode cache is reused.
+    train_eval_sampler = PerImagePatchSampler(
+        datasets["train_eval"],
+        patches_per_image=eval_cfg.get("train_eval_patches_per_image"),
+        seed=seed,
+        shuffle=False,
+    )
+    loaders["train_eval"] = DataLoader(
+        datasets["train_eval"],
+        batch_size=int(eval_cfg.get("batch_size", 64)),
+        sampler=train_eval_sampler,
+        num_workers=eval_workers,
+        pin_memory=pin_memory,
+        persistent_workers=False,
+        worker_init_fn=_worker_init,
+    )
     return loaders, train_sampler
 
 
@@ -215,6 +233,12 @@ def run_experiment(config: Config, dry_run: bool = False) -> Dict[str, object]:
         "Train patches per epoch: %d (%d batches of %d)",
         len(train_sampler), len(loaders["train"]), get_path(config, "train.batch_size", 32),
     )
+    logger.info(
+        "Train eval (no aug): every %s epoch(s) on %d patches (%s per image)",
+        get_path(config, "evaluation.eval_train_every", 0),
+        len(loaders["train_eval"].sampler),
+        get_path(config, "evaluation.train_eval_patches_per_image") or "all",
+    )
 
     model = build_model(
         config.get("model", {}),
@@ -239,14 +263,17 @@ def run_experiment(config: Config, dry_run: bool = False) -> Dict[str, object]:
         train_sampler=train_sampler,
         val_loader=loaders["val"],
         test_loader=loaders["test"],
+        train_eval_loader=loaders["train_eval"],
         run_dir=run_dir,
         device=device,
     )
     fit_result = trainer.fit()
     logger.info("Training finished: best %s=%.4f at epoch %s", trainer.selection_metric, fit_result["best_value"], fit_result["best_epoch"])
 
-    train_eval_loader = loaders["train_eval"] if get_path(config, "evaluation.eval_train_at_end", False) else None
-    summary = trainer.final_evaluation("model_best.pt", train_eval_loader=train_eval_loader)
+    summary = trainer.final_evaluation(
+        "model_best.pt",
+        include_train=bool(get_path(config, "evaluation.eval_train_at_end", False)),
+    )
     summary["run_dir"] = str(run_dir)
     summary["total_time_sec"] = time.time() - started
     save_json(summary, run_dir / "summary.json")

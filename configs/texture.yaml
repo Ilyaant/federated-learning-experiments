@@ -10,12 +10,12 @@ seed: 42
 device: auto
 
 dataset:
-  root: data/dataset2_exp_prepared
+  root: data/dataset2_exp_prepared_new
   # На диске сплит сделан по файлам, и кадры одного образца
   # (``15_11_17(2-1)пп(20)-1-3`` и ``-2-4``) попадают в разные сплиты.
   # regroup: true пересобирает train/val/test в памяти по группам кадров,
   # regroup: false берёт папки train/val/test как есть.
-  regroup: true
+  regroup: false
   group_by: sample
   split_seed: 42
   train_ratio: 0.7
@@ -106,18 +106,26 @@ evaluation:
   selection_metric: val_patch_f1
   early_stopping_patience: 10
   min_delta: 0.0
+  # Оценка на train в eval-режиме (без аугментаций), патчи + изображения.
+  # Каждые N эпох; 0 отключает. В metrics.csv это колонки train_eval_*,
+  # тогда как train_loss / train_running_* - метрики обучающего прохода
+  # по аугментированным патчам.
+  eval_train_every: 1
+  # Сколько патчей на train-изображение брать для этой оценки
+  # (фиксированное подмножество, одно и то же на всех эпохах). null = все.
+  train_eval_patches_per_image: 16
   # Считать ли на лучшем чекпоинте метрики на train (без аугментаций).
-  eval_train_at_end: false
+  eval_train_at_end: true
 
 logging:
-  save_dir: logs/runs
-  run_name: fastvit_t8_patches
+  save_dir: logs
+  run_name: fastvit_t8_patches_new_dataset
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log
-  # Метрики по эпохам (train/val, патчи и изображения).
+  # Метрики по эпохам (train/train_eval/val, патчи и изображения).
   metrics_csv: metrics.csv
-  # Итоговые метрики лучшего чекпоинта на val/test (патчи и изображения).
+  # Итоговые метрики лучшего чекпоинта на train/val/test (патчи и изображения).
   final_csv: final_metrics.csv
   log_every_n_batches: 20
   save_last: true
