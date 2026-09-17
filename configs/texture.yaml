@@ -10,7 +10,7 @@ seed: 42
 device: auto
 
 dataset:
-  root: data/dataset2_exp_prepared_new
+  root: data/dataset2_exp_prepared
   # На диске сплит сделан по файлам, и кадры одного образца
   # (``15_11_17(2-1)пп(20)-1-3`` и ``-2-4``) попадают в разные сплиты.
   # regroup: true пересобирает train/val/test в памяти по группам кадров,
@@ -35,7 +35,7 @@ patches:
   include_edges: true
   # Сколько случайных патчей сетки брать с каждого train-изображения за
   # эпоху. null = все патчи каждую эпоху.
-  train_patches_per_image: 16
+  train_patches_per_image: null
   # Режим дополнения при выходе патча за границы изображения: reflect | replicate.
   pad_mode: reflect
   # Нормализация патча (в градациях серого один канал).
@@ -119,7 +119,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_patches_new_dataset
+  run_name: fastvit_t8_patches_all_patches_overlap_0.5
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log
