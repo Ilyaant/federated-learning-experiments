@@ -1,0 +1,7 @@
+checkpoint,split,level,n,loss,accuracy,precision,recall,f1
+model_best.pt,train,patch,7280,0.610647,0.884341,0.884291,0.881701,0.882406
+model_best.pt,train,image,455,,0.967033,0.970876,0.968191,0.969127
+model_best.pt,val,patch,8448,1.115135,0.656723,0.638828,0.632503,0.632631
+model_best.pt,val,image,96,,0.729167,0.712810,0.709410,0.708293
+model_best.pt,test,patch,9064,1.091932,0.660305,0.657142,0.651109,0.650320
+model_best.pt,test,image,103,,0.786408,0.799216,0.769226,0.774690

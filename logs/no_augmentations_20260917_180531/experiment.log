@@ -1,0 +1,1581 @@
+2026-09-17 18:05:31 | INFO    | Run directory: logs/no_augmentations_20260917_180531
+2026-09-17 18:05:31 | INFO    | Device: cuda | torch 2.8.0+cu128 | threads 10
+2026-09-17 18:05:31 | INFO    | Seed: 42
+2026-09-17 18:05:31 | INFO    | Classes (5): ['G', 'GP', 'M', 'T', 'clear']
+2026-09-17 18:05:31 | INFO    | Split: regroup=False group_by=none counts={'train': {'images': 455, 'groups': None}, 'val': {'images': 96, 'groups': None}, 'test': {'images': 103, 'groups': None}}
+2026-09-17 18:05:31 | INFO    | Patches: size 224 | train overlap 0.00 | eval overlap 0.00 | train patches/image/epoch None
+2026-09-17 18:05:31 | INFO    | Train transform: Normalize
+2026-09-17 18:05:31 | INFO    | Eval transform:  Normalize
+2026-09-17 18:05:31 | INFO    | train      455 images, 40040 patches | images per class {'G': 103, 'GP': 106, 'M': 88, 'T': 99, 'clear': 59} | patches per class {'G': 9064, 'GP': 9328, 'M': 7744, 'T': 8712, 'clear': 5192}
+2026-09-17 18:05:31 | INFO    | val        96 images, 8448 patches | images per class {'G': 22, 'GP': 22, 'M': 19, 'T': 21, 'clear': 12} | patches per class {'G': 1936, 'GP': 1936, 'M': 1672, 'T': 1848, 'clear': 1056}
+2026-09-17 18:05:31 | INFO    | test       103 images, 9064 patches | images per class {'G': 23, 'GP': 24, 'M': 20, 'T': 22, 'clear': 14} | patches per class {'G': 2024, 'GP': 2112, 'M': 1760, 'T': 1936, 'clear': 1232}
+2026-09-17 18:05:31 | INFO    | Datasets built in 0.1s
+2026-09-17 18:05:32 | INFO    | Train patches per epoch: 40040 (1252 batches of 32)
+2026-09-17 18:05:32 | INFO    | Train eval (no aug): every 1 epoch(s) on 7280 patches (16 per image)
+2026-09-17 18:05:32 | INFO    | Model: fastvit_t8 | pretrained=True | params 3.26M (trainable 3.26M)
+2026-09-17 18:05:32 | INFO    | Training 40 epochs | selection metric val_patch_f1 | patience 10 | amp True
+2026-09-17 18:05:44 | INFO    | epoch 1 | batch 20/1252 | loss 1.6859 | acc 0.2172 | lr 1.00e-06 | 12s
+2026-09-17 18:05:46 | INFO    | epoch 1 | batch 40/1252 | loss 1.6815 | acc 0.2000 | lr 1.64e-06 | 14s
+2026-09-17 18:05:48 | INFO    | epoch 1 | batch 60/1252 | loss 1.6827 | acc 0.2052 | lr 2.44e-06 | 16s
+2026-09-17 18:05:49 | INFO    | epoch 1 | batch 80/1252 | loss 1.6784 | acc 0.2059 | lr 3.23e-06 | 17s
+2026-09-17 18:05:51 | INFO    | epoch 1 | batch 100/1252 | loss 1.6766 | acc 0.2016 | lr 4.03e-06 | 19s
+2026-09-17 18:05:52 | INFO    | epoch 1 | batch 120/1252 | loss 1.6719 | acc 0.2039 | lr 4.83e-06 | 20s
+2026-09-17 18:05:54 | INFO    | epoch 1 | batch 140/1252 | loss 1.6674 | acc 0.2042 | lr 5.63e-06 | 22s
+2026-09-17 18:05:55 | INFO    | epoch 1 | batch 160/1252 | loss 1.6619 | acc 0.2047 | lr 6.43e-06 | 23s
+2026-09-17 18:05:57 | INFO    | epoch 1 | batch 180/1252 | loss 1.6588 | acc 0.2042 | lr 7.23e-06 | 24s
+2026-09-17 18:05:58 | INFO    | epoch 1 | batch 200/1252 | loss 1.6549 | acc 0.2075 | lr 8.03e-06 | 26s
+2026-09-17 18:05:59 | INFO    | epoch 1 | batch 220/1252 | loss 1.6527 | acc 0.2097 | lr 8.83e-06 | 27s
+2026-09-17 18:06:01 | INFO    | epoch 1 | batch 240/1252 | loss 1.6499 | acc 0.2092 | lr 9.62e-06 | 29s
+2026-09-17 18:06:02 | INFO    | epoch 1 | batch 260/1252 | loss 1.6475 | acc 0.2107 | lr 1.04e-05 | 30s
+2026-09-17 18:06:03 | INFO    | epoch 1 | batch 280/1252 | loss 1.6444 | acc 0.2132 | lr 1.12e-05 | 31s
+2026-09-17 18:06:05 | INFO    | epoch 1 | batch 300/1252 | loss 1.6417 | acc 0.2171 | lr 1.20e-05 | 33s
+2026-09-17 18:06:06 | INFO    | epoch 1 | batch 320/1252 | loss 1.6399 | acc 0.2191 | lr 1.28e-05 | 34s
+2026-09-17 18:06:07 | INFO    | epoch 1 | batch 340/1252 | loss 1.6386 | acc 0.2195 | lr 1.36e-05 | 35s
+2026-09-17 18:06:09 | INFO    | epoch 1 | batch 360/1252 | loss 1.6362 | acc 0.2207 | lr 1.44e-05 | 37s
+2026-09-17 18:06:10 | INFO    | epoch 1 | batch 380/1252 | loss 1.6342 | acc 0.2234 | lr 1.52e-05 | 38s
+2026-09-17 18:06:12 | INFO    | epoch 1 | batch 400/1252 | loss 1.6317 | acc 0.2258 | lr 1.60e-05 | 39s
+2026-09-17 18:06:13 | INFO    | epoch 1 | batch 420/1252 | loss 1.6298 | acc 0.2284 | lr 1.68e-05 | 41s
+2026-09-17 18:06:14 | INFO    | epoch 1 | batch 440/1252 | loss 1.6269 | acc 0.2325 | lr 1.76e-05 | 42s
+2026-09-17 18:06:16 | INFO    | epoch 1 | batch 460/1252 | loss 1.6244 | acc 0.2365 | lr 1.84e-05 | 44s
+2026-09-17 18:06:17 | INFO    | epoch 1 | batch 480/1252 | loss 1.6204 | acc 0.2419 | lr 1.92e-05 | 45s
+2026-09-17 18:06:19 | INFO    | epoch 1 | batch 500/1252 | loss 1.6164 | acc 0.2457 | lr 2.00e-05 | 47s
+2026-09-17 18:06:20 | INFO    | epoch 1 | batch 520/1252 | loss 1.6116 | acc 0.2501 | lr 2.08e-05 | 48s
+2026-09-17 18:06:22 | INFO    | epoch 1 | batch 540/1252 | loss 1.6055 | acc 0.2543 | lr 2.16e-05 | 50s
+2026-09-17 18:06:23 | INFO    | epoch 1 | batch 560/1252 | loss 1.5997 | acc 0.2586 | lr 2.24e-05 | 51s
+2026-09-17 18:06:24 | INFO    | epoch 1 | batch 580/1252 | loss 1.5941 | acc 0.2624 | lr 2.32e-05 | 52s
+2026-09-17 18:06:26 | INFO    | epoch 1 | batch 600/1252 | loss 1.5882 | acc 0.2668 | lr 2.40e-05 | 54s
+2026-09-17 18:06:27 | INFO    | epoch 1 | batch 620/1252 | loss 1.5821 | acc 0.2712 | lr 2.48e-05 | 55s
+2026-09-17 18:06:29 | INFO    | epoch 1 | batch 640/1252 | loss 1.5765 | acc 0.2744 | lr 2.56e-05 | 57s
+2026-09-17 18:06:30 | INFO    | epoch 1 | batch 660/1252 | loss 1.5709 | acc 0.2776 | lr 2.64e-05 | 58s
+2026-09-17 18:06:32 | INFO    | epoch 1 | batch 680/1252 | loss 1.5651 | acc 0.2810 | lr 2.72e-05 | 59s
+2026-09-17 18:06:33 | INFO    | epoch 1 | batch 700/1252 | loss 1.5595 | acc 0.2847 | lr 2.80e-05 | 61s
+2026-09-17 18:06:34 | INFO    | epoch 1 | batch 720/1252 | loss 1.5546 | acc 0.2875 | lr 2.88e-05 | 62s
+2026-09-17 18:06:36 | INFO    | epoch 1 | batch 740/1252 | loss 1.5493 | acc 0.2910 | lr 2.96e-05 | 64s
+2026-09-17 18:06:37 | INFO    | epoch 1 | batch 760/1252 | loss 1.5458 | acc 0.2925 | lr 3.04e-05 | 65s
+2026-09-17 18:06:39 | INFO    | epoch 1 | batch 780/1252 | loss 1.5414 | acc 0.2950 | lr 3.12e-05 | 67s
+2026-09-17 18:06:40 | INFO    | epoch 1 | batch 800/1252 | loss 1.5365 | acc 0.2979 | lr 3.20e-05 | 68s
+2026-09-17 18:06:41 | INFO    | epoch 1 | batch 820/1252 | loss 1.5320 | acc 0.3003 | lr 3.28e-05 | 69s
+2026-09-17 18:06:43 | INFO    | epoch 1 | batch 840/1252 | loss 1.5277 | acc 0.3029 | lr 3.36e-05 | 71s
+2026-09-17 18:06:44 | INFO    | epoch 1 | batch 860/1252 | loss 1.5229 | acc 0.3057 | lr 3.44e-05 | 72s
+2026-09-17 18:06:46 | INFO    | epoch 1 | batch 880/1252 | loss 1.5183 | acc 0.3083 | lr 3.52e-05 | 74s
+2026-09-17 18:06:47 | INFO    | epoch 1 | batch 900/1252 | loss 1.5139 | acc 0.3116 | lr 3.60e-05 | 75s
+2026-09-17 18:06:48 | INFO    | epoch 1 | batch 920/1252 | loss 1.5096 | acc 0.3146 | lr 3.68e-05 | 76s
+2026-09-17 18:06:50 | INFO    | epoch 1 | batch 940/1252 | loss 1.5054 | acc 0.3180 | lr 3.76e-05 | 78s
+2026-09-17 18:06:51 | INFO    | epoch 1 | batch 960/1252 | loss 1.5013 | acc 0.3213 | lr 3.84e-05 | 79s
+2026-09-17 18:06:53 | INFO    | epoch 1 | batch 980/1252 | loss 1.4977 | acc 0.3238 | lr 3.92e-05 | 80s
+2026-09-17 18:06:54 | INFO    | epoch 1 | batch 1000/1252 | loss 1.4940 | acc 0.3257 | lr 4.00e-05 | 82s
+2026-09-17 18:06:55 | INFO    | epoch 1 | batch 1020/1252 | loss 1.4906 | acc 0.3279 | lr 4.08e-05 | 83s
+2026-09-17 18:06:57 | INFO    | epoch 1 | batch 1040/1252 | loss 1.4872 | acc 0.3305 | lr 4.16e-05 | 85s
+2026-09-17 18:06:58 | INFO    | epoch 1 | batch 1060/1252 | loss 1.4837 | acc 0.3327 | lr 4.24e-05 | 86s
+2026-09-17 18:07:00 | INFO    | epoch 1 | batch 1080/1252 | loss 1.4798 | acc 0.3350 | lr 4.32e-05 | 87s
+2026-09-17 18:07:01 | INFO    | epoch 1 | batch 1100/1252 | loss 1.4764 | acc 0.3372 | lr 4.40e-05 | 89s
+2026-09-17 18:07:02 | INFO    | epoch 1 | batch 1120/1252 | loss 1.4733 | acc 0.3394 | lr 4.48e-05 | 90s
+2026-09-17 18:07:04 | INFO    | epoch 1 | batch 1140/1252 | loss 1.4700 | acc 0.3419 | lr 4.56e-05 | 92s
+2026-09-17 18:07:05 | INFO    | epoch 1 | batch 1160/1252 | loss 1.4670 | acc 0.3439 | lr 4.64e-05 | 93s
+2026-09-17 18:07:06 | INFO    | epoch 1 | batch 1180/1252 | loss 1.4631 | acc 0.3465 | lr 4.72e-05 | 94s
+2026-09-17 18:07:08 | INFO    | epoch 1 | batch 1200/1252 | loss 1.4594 | acc 0.3492 | lr 4.80e-05 | 96s
+2026-09-17 18:07:09 | INFO    | epoch 1 | batch 1220/1252 | loss 1.4560 | acc 0.3517 | lr 4.88e-05 | 97s
+2026-09-17 18:07:10 | INFO    | epoch 1 | batch 1240/1252 | loss 1.4521 | acc 0.3547 | lr 4.96e-05 | 98s
+2026-09-17 18:07:20 | INFO    | epoch 1 | batch 1252/1252 | loss 1.4503 | acc 0.3559 | lr 5.00e-05 | 107s
+2026-09-17 18:07:35 | INFO    | epoch 1/40 done in 123s | train loss 1.4503 | train running patch (aug): accuracy=0.3559 precision=0.3304 recall=0.3278 f1=0.3171
+2026-09-17 18:07:35 | INFO    | epoch 1 train (eval, no aug) | loss 1.1709 | patch[7280]: accuracy=0.5526 precision=0.5305 recall=0.5126 f1=0.5023 | image[455]: accuracy=0.5846 precision=0.5966 recall=0.5409 f1=0.5288
+2026-09-17 18:07:35 | INFO    | epoch 1 val | loss 1.2055 | patch[8448]: accuracy=0.5282 precision=0.4995 recall=0.4821 f1=0.4631 | image[96]: accuracy=0.5104 precision=0.4478 recall=0.4583 f1=0.4241
+2026-09-17 18:07:35 | INFO    | val_patch_f1 = 0.4631 (best 0.4631 @ epoch 1) *
+2026-09-17 18:07:37 | INFO    | epoch 2 | batch 20/1252 | loss 1.2718 | acc 0.4875 | lr 5.08e-05 | 2s
+2026-09-17 18:07:38 | INFO    | epoch 2 | batch 40/1252 | loss 1.2612 | acc 0.4914 | lr 5.16e-05 | 3s
+2026-09-17 18:07:40 | INFO    | epoch 2 | batch 60/1252 | loss 1.2667 | acc 0.4839 | lr 5.24e-05 | 4s
+2026-09-17 18:07:41 | INFO    | epoch 2 | batch 80/1252 | loss 1.2556 | acc 0.4910 | lr 5.32e-05 | 6s
+2026-09-17 18:07:42 | INFO    | epoch 2 | batch 100/1252 | loss 1.2446 | acc 0.4997 | lr 5.40e-05 | 7s
+2026-09-17 18:07:44 | INFO    | epoch 2 | batch 120/1252 | loss 1.2402 | acc 0.5026 | lr 5.48e-05 | 9s
+2026-09-17 18:07:45 | INFO    | epoch 2 | batch 140/1252 | loss 1.2376 | acc 0.5025 | lr 5.56e-05 | 10s
+2026-09-17 18:07:47 | INFO    | epoch 2 | batch 160/1252 | loss 1.2323 | acc 0.5076 | lr 5.64e-05 | 12s
+2026-09-17 18:07:48 | INFO    | epoch 2 | batch 180/1252 | loss 1.2273 | acc 0.5090 | lr 5.72e-05 | 13s
+2026-09-17 18:07:50 | INFO    | epoch 2 | batch 200/1252 | loss 1.2241 | acc 0.5100 | lr 5.80e-05 | 14s
+2026-09-17 18:07:51 | INFO    | epoch 2 | batch 220/1252 | loss 1.2230 | acc 0.5098 | lr 5.88e-05 | 16s
+2026-09-17 18:07:52 | INFO    | epoch 2 | batch 240/1252 | loss 1.2244 | acc 0.5077 | lr 5.96e-05 | 17s
+2026-09-17 18:07:54 | INFO    | epoch 2 | batch 260/1252 | loss 1.2243 | acc 0.5073 | lr 6.04e-05 | 19s
+2026-09-17 18:07:55 | INFO    | epoch 2 | batch 280/1252 | loss 1.2224 | acc 0.5089 | lr 6.12e-05 | 20s
+2026-09-17 18:07:57 | INFO    | epoch 2 | batch 300/1252 | loss 1.2187 | acc 0.5126 | lr 6.20e-05 | 22s
+2026-09-17 18:07:58 | INFO    | epoch 2 | batch 320/1252 | loss 1.2174 | acc 0.5150 | lr 6.28e-05 | 23s
+2026-09-17 18:08:00 | INFO    | epoch 2 | batch 340/1252 | loss 1.2122 | acc 0.5190 | lr 6.36e-05 | 24s
+2026-09-17 18:08:01 | INFO    | epoch 2 | batch 360/1252 | loss 1.2115 | acc 0.5192 | lr 6.44e-05 | 26s
+2026-09-17 18:08:02 | INFO    | epoch 2 | batch 380/1252 | loss 1.2106 | acc 0.5201 | lr 6.52e-05 | 27s
+2026-09-17 18:08:04 | INFO    | epoch 2 | batch 400/1252 | loss 1.2096 | acc 0.5230 | lr 6.60e-05 | 29s
+2026-09-17 18:08:05 | INFO    | epoch 2 | batch 420/1252 | loss 1.2085 | acc 0.5230 | lr 6.68e-05 | 30s
+2026-09-17 18:08:07 | INFO    | epoch 2 | batch 440/1252 | loss 1.2054 | acc 0.5252 | lr 6.76e-05 | 31s
+2026-09-17 18:08:08 | INFO    | epoch 2 | batch 460/1252 | loss 1.2045 | acc 0.5257 | lr 6.84e-05 | 33s
+2026-09-17 18:08:10 | INFO    | epoch 2 | batch 480/1252 | loss 1.2023 | acc 0.5268 | lr 6.92e-05 | 34s
+2026-09-17 18:08:11 | INFO    | epoch 2 | batch 500/1252 | loss 1.2022 | acc 0.5277 | lr 7.00e-05 | 36s
+2026-09-17 18:08:12 | INFO    | epoch 2 | batch 520/1252 | loss 1.2010 | acc 0.5287 | lr 7.08e-05 | 37s
+2026-09-17 18:08:14 | INFO    | epoch 2 | batch 540/1252 | loss 1.1998 | acc 0.5295 | lr 7.16e-05 | 39s
+2026-09-17 18:08:15 | INFO    | epoch 2 | batch 560/1252 | loss 1.1969 | acc 0.5313 | lr 7.24e-05 | 40s
+2026-09-17 18:08:17 | INFO    | epoch 2 | batch 580/1252 | loss 1.1956 | acc 0.5311 | lr 7.32e-05 | 42s
+2026-09-17 18:08:18 | INFO    | epoch 2 | batch 600/1252 | loss 1.1946 | acc 0.5312 | lr 7.40e-05 | 43s
+2026-09-17 18:08:20 | INFO    | epoch 2 | batch 620/1252 | loss 1.1952 | acc 0.5311 | lr 7.48e-05 | 44s
+2026-09-17 18:08:21 | INFO    | epoch 2 | batch 640/1252 | loss 1.1943 | acc 0.5320 | lr 7.56e-05 | 46s
+2026-09-17 18:08:22 | INFO    | epoch 2 | batch 660/1252 | loss 1.1932 | acc 0.5324 | lr 7.64e-05 | 47s
+2026-09-17 18:08:24 | INFO    | epoch 2 | batch 680/1252 | loss 1.1909 | acc 0.5336 | lr 7.72e-05 | 49s
+2026-09-17 18:08:25 | INFO    | epoch 2 | batch 700/1252 | loss 1.1886 | acc 0.5346 | lr 7.80e-05 | 50s
+2026-09-17 18:08:27 | INFO    | epoch 2 | batch 720/1252 | loss 1.1858 | acc 0.5367 | lr 7.88e-05 | 52s
+2026-09-17 18:08:28 | INFO    | epoch 2 | batch 740/1252 | loss 1.1840 | acc 0.5379 | lr 7.96e-05 | 53s
+2026-09-17 18:08:30 | INFO    | epoch 2 | batch 760/1252 | loss 1.1837 | acc 0.5379 | lr 8.04e-05 | 54s
+2026-09-17 18:08:31 | INFO    | epoch 2 | batch 780/1252 | loss 1.1815 | acc 0.5385 | lr 8.12e-05 | 56s
+2026-09-17 18:08:32 | INFO    | epoch 2 | batch 800/1252 | loss 1.1794 | acc 0.5401 | lr 8.20e-05 | 57s
+2026-09-17 18:08:34 | INFO    | epoch 2 | batch 820/1252 | loss 1.1770 | acc 0.5417 | lr 8.28e-05 | 59s
+2026-09-17 18:08:35 | INFO    | epoch 2 | batch 840/1252 | loss 1.1738 | acc 0.5436 | lr 8.36e-05 | 60s
+2026-09-17 18:08:37 | INFO    | epoch 2 | batch 860/1252 | loss 1.1720 | acc 0.5444 | lr 8.44e-05 | 62s
+2026-09-17 18:08:38 | INFO    | epoch 2 | batch 880/1252 | loss 1.1692 | acc 0.5465 | lr 8.52e-05 | 63s
+2026-09-17 18:08:40 | INFO    | epoch 2 | batch 900/1252 | loss 1.1679 | acc 0.5473 | lr 8.60e-05 | 64s
+2026-09-17 18:08:41 | INFO    | epoch 2 | batch 920/1252 | loss 1.1665 | acc 0.5485 | lr 8.68e-05 | 66s
+2026-09-17 18:08:42 | INFO    | epoch 2 | batch 940/1252 | loss 1.1648 | acc 0.5498 | lr 8.76e-05 | 67s
+2026-09-17 18:08:44 | INFO    | epoch 2 | batch 960/1252 | loss 1.1630 | acc 0.5508 | lr 8.84e-05 | 69s
+2026-09-17 18:08:45 | INFO    | epoch 2 | batch 980/1252 | loss 1.1620 | acc 0.5516 | lr 8.92e-05 | 70s
+2026-09-17 18:08:47 | INFO    | epoch 2 | batch 1000/1252 | loss 1.1607 | acc 0.5525 | lr 9.00e-05 | 71s
+2026-09-17 18:08:48 | INFO    | epoch 2 | batch 1020/1252 | loss 1.1595 | acc 0.5534 | lr 9.08e-05 | 73s
+2026-09-17 18:08:49 | INFO    | epoch 2 | batch 1040/1252 | loss 1.1585 | acc 0.5540 | lr 9.16e-05 | 74s
+2026-09-17 18:08:51 | INFO    | epoch 2 | batch 1060/1252 | loss 1.1573 | acc 0.5547 | lr 9.24e-05 | 76s
+2026-09-17 18:08:52 | INFO    | epoch 2 | batch 1080/1252 | loss 1.1558 | acc 0.5553 | lr 9.32e-05 | 77s
+2026-09-17 18:08:54 | INFO    | epoch 2 | batch 1100/1252 | loss 1.1541 | acc 0.5564 | lr 9.40e-05 | 78s
+2026-09-17 18:08:55 | INFO    | epoch 2 | batch 1120/1252 | loss 1.1527 | acc 0.5570 | lr 9.48e-05 | 80s
+2026-09-17 18:08:56 | INFO    | epoch 2 | batch 1140/1252 | loss 1.1515 | acc 0.5575 | lr 9.56e-05 | 81s
+2026-09-17 18:08:58 | INFO    | epoch 2 | batch 1160/1252 | loss 1.1502 | acc 0.5583 | lr 9.64e-05 | 82s
+2026-09-17 18:08:59 | INFO    | epoch 2 | batch 1180/1252 | loss 1.1480 | acc 0.5596 | lr 9.72e-05 | 84s
+2026-09-17 18:09:00 | INFO    | epoch 2 | batch 1200/1252 | loss 1.1463 | acc 0.5608 | lr 9.80e-05 | 85s
+2026-09-17 18:09:02 | INFO    | epoch 2 | batch 1220/1252 | loss 1.1450 | acc 0.5620 | lr 9.88e-05 | 87s
+2026-09-17 18:09:03 | INFO    | epoch 2 | batch 1240/1252 | loss 1.1437 | acc 0.5628 | lr 9.96e-05 | 88s
+2026-09-17 18:09:04 | INFO    | epoch 2 | batch 1252/1252 | loss 1.1432 | acc 0.5631 | lr 1.00e-04 | 89s
+2026-09-17 18:09:14 | INFO    | epoch 2/40 done in 98s | train loss 1.1432 | train running patch (aug): accuracy=0.5631 precision=0.5411 recall=0.5318 f1=0.5291
+2026-09-17 18:09:14 | INFO    | epoch 2 train (eval, no aug) | loss 0.9517 | patch[7280]: accuracy=0.6812 precision=0.6768 recall=0.6626 f1=0.6622 | image[455]: accuracy=0.7297 precision=0.7395 recall=0.7145 f1=0.7156
+2026-09-17 18:09:14 | INFO    | epoch 2 val | loss 1.1166 | patch[8448]: accuracy=0.5888 precision=0.5836 recall=0.5543 f1=0.5530 | image[96]: accuracy=0.6771 precision=0.6816 recall=0.6431 f1=0.6467
+2026-09-17 18:09:14 | INFO    | val_patch_f1 = 0.5530 (best 0.5530 @ epoch 2) *
+2026-09-17 18:09:15 | INFO    | epoch 3 | batch 20/1252 | loss 1.0551 | acc 0.6094 | lr 1.00e-04 | 1s
+2026-09-17 18:09:17 | INFO    | epoch 3 | batch 40/1252 | loss 1.0478 | acc 0.6195 | lr 1.00e-04 | 3s
+2026-09-17 18:09:18 | INFO    | epoch 3 | batch 60/1252 | loss 1.0475 | acc 0.6255 | lr 1.00e-04 | 4s
+2026-09-17 18:09:19 | INFO    | epoch 3 | batch 80/1252 | loss 1.0385 | acc 0.6266 | lr 1.00e-04 | 6s
+2026-09-17 18:09:21 | INFO    | epoch 3 | batch 100/1252 | loss 1.0391 | acc 0.6266 | lr 1.00e-04 | 7s
+2026-09-17 18:09:22 | INFO    | epoch 3 | batch 120/1252 | loss 1.0381 | acc 0.6276 | lr 1.00e-04 | 8s
+2026-09-17 18:09:24 | INFO    | epoch 3 | batch 140/1252 | loss 1.0392 | acc 0.6257 | lr 1.00e-04 | 10s
+2026-09-17 18:09:25 | INFO    | epoch 3 | batch 160/1252 | loss 1.0296 | acc 0.6330 | lr 1.00e-04 | 11s
+2026-09-17 18:09:26 | INFO    | epoch 3 | batch 180/1252 | loss 1.0275 | acc 0.6349 | lr 1.00e-04 | 12s
+2026-09-17 18:09:28 | INFO    | epoch 3 | batch 200/1252 | loss 1.0316 | acc 0.6316 | lr 1.00e-04 | 14s
+2026-09-17 18:09:29 | INFO    | epoch 3 | batch 220/1252 | loss 1.0338 | acc 0.6305 | lr 1.00e-04 | 15s
+2026-09-17 18:09:30 | INFO    | epoch 3 | batch 240/1252 | loss 1.0318 | acc 0.6318 | lr 1.00e-04 | 17s
+2026-09-17 18:09:32 | INFO    | epoch 3 | batch 260/1252 | loss 1.0305 | acc 0.6332 | lr 1.00e-04 | 18s
+2026-09-17 18:09:33 | INFO    | epoch 3 | batch 280/1252 | loss 1.0283 | acc 0.6344 | lr 1.00e-04 | 19s
+2026-09-17 18:09:35 | INFO    | epoch 3 | batch 300/1252 | loss 1.0237 | acc 0.6378 | lr 1.00e-04 | 21s
+2026-09-17 18:09:36 | INFO    | epoch 3 | batch 320/1252 | loss 1.0227 | acc 0.6399 | lr 1.00e-04 | 22s
+2026-09-17 18:09:37 | INFO    | epoch 3 | batch 340/1252 | loss 1.0196 | acc 0.6419 | lr 1.00e-04 | 24s
+2026-09-17 18:09:39 | INFO    | epoch 3 | batch 360/1252 | loss 1.0181 | acc 0.6434 | lr 1.00e-04 | 25s
+2026-09-17 18:09:40 | INFO    | epoch 3 | batch 380/1252 | loss 1.0163 | acc 0.6443 | lr 1.00e-04 | 26s
+2026-09-17 18:09:42 | INFO    | epoch 3 | batch 400/1252 | loss 1.0148 | acc 0.6451 | lr 1.00e-04 | 28s
+2026-09-17 18:09:43 | INFO    | epoch 3 | batch 420/1252 | loss 1.0148 | acc 0.6448 | lr 1.00e-04 | 29s
+2026-09-17 18:09:44 | INFO    | epoch 3 | batch 440/1252 | loss 1.0131 | acc 0.6463 | lr 1.00e-04 | 30s
+2026-09-17 18:09:46 | INFO    | epoch 3 | batch 460/1252 | loss 1.0130 | acc 0.6463 | lr 1.00e-04 | 32s
+2026-09-17 18:09:47 | INFO    | epoch 3 | batch 480/1252 | loss 1.0127 | acc 0.6455 | lr 1.00e-04 | 33s
+2026-09-17 18:09:48 | INFO    | epoch 3 | batch 500/1252 | loss 1.0129 | acc 0.6459 | lr 1.00e-04 | 35s
+2026-09-17 18:09:50 | INFO    | epoch 3 | batch 520/1252 | loss 1.0126 | acc 0.6461 | lr 1.00e-04 | 36s
+2026-09-17 18:09:51 | INFO    | epoch 3 | batch 540/1252 | loss 1.0109 | acc 0.6473 | lr 1.00e-04 | 37s
+2026-09-17 18:09:53 | INFO    | epoch 3 | batch 560/1252 | loss 1.0107 | acc 0.6474 | lr 1.00e-04 | 39s
+2026-09-17 18:09:54 | INFO    | epoch 3 | batch 580/1252 | loss 1.0087 | acc 0.6489 | lr 1.00e-04 | 40s
+2026-09-17 18:09:55 | INFO    | epoch 3 | batch 600/1252 | loss 1.0073 | acc 0.6508 | lr 1.00e-04 | 41s
+2026-09-17 18:09:57 | INFO    | epoch 3 | batch 620/1252 | loss 1.0074 | acc 0.6509 | lr 1.00e-04 | 43s
+2026-09-17 18:09:58 | INFO    | epoch 3 | batch 640/1252 | loss 1.0056 | acc 0.6518 | lr 1.00e-04 | 44s
+2026-09-17 18:09:59 | INFO    | epoch 3 | batch 660/1252 | loss 1.0039 | acc 0.6528 | lr 1.00e-04 | 46s
+2026-09-17 18:10:01 | INFO    | epoch 3 | batch 680/1252 | loss 1.0042 | acc 0.6525 | lr 1.00e-04 | 47s
+2026-09-17 18:10:02 | INFO    | epoch 3 | batch 700/1252 | loss 1.0026 | acc 0.6537 | lr 9.99e-05 | 48s
+2026-09-17 18:10:04 | INFO    | epoch 3 | batch 720/1252 | loss 1.0026 | acc 0.6539 | lr 9.99e-05 | 50s
+2026-09-17 18:10:05 | INFO    | epoch 3 | batch 740/1252 | loss 1.0013 | acc 0.6547 | lr 9.99e-05 | 51s
+2026-09-17 18:10:06 | INFO    | epoch 3 | batch 760/1252 | loss 0.9989 | acc 0.6564 | lr 9.99e-05 | 53s
+2026-09-17 18:10:08 | INFO    | epoch 3 | batch 780/1252 | loss 0.9996 | acc 0.6560 | lr 9.99e-05 | 54s
+2026-09-17 18:10:09 | INFO    | epoch 3 | batch 800/1252 | loss 0.9984 | acc 0.6565 | lr 9.99e-05 | 55s
+2026-09-17 18:10:11 | INFO    | epoch 3 | batch 820/1252 | loss 0.9972 | acc 0.6573 | lr 9.99e-05 | 57s
+2026-09-17 18:10:12 | INFO    | epoch 3 | batch 840/1252 | loss 0.9956 | acc 0.6580 | lr 9.99e-05 | 58s
+2026-09-17 18:10:13 | INFO    | epoch 3 | batch 860/1252 | loss 0.9952 | acc 0.6581 | lr 9.99e-05 | 59s
+2026-09-17 18:10:15 | INFO    | epoch 3 | batch 880/1252 | loss 0.9942 | acc 0.6590 | lr 9.99e-05 | 61s
+2026-09-17 18:10:16 | INFO    | epoch 3 | batch 900/1252 | loss 0.9928 | acc 0.6598 | lr 9.99e-05 | 62s
+2026-09-17 18:10:18 | INFO    | epoch 3 | batch 920/1252 | loss 0.9919 | acc 0.6604 | lr 9.99e-05 | 64s
+2026-09-17 18:10:19 | INFO    | epoch 3 | batch 940/1252 | loss 0.9910 | acc 0.6612 | lr 9.99e-05 | 65s
+2026-09-17 18:10:20 | INFO    | epoch 3 | batch 960/1252 | loss 0.9895 | acc 0.6621 | lr 9.99e-05 | 66s
+2026-09-17 18:10:22 | INFO    | epoch 3 | batch 980/1252 | loss 0.9880 | acc 0.6636 | lr 9.99e-05 | 68s
+2026-09-17 18:10:23 | INFO    | epoch 3 | batch 1000/1252 | loss 0.9875 | acc 0.6640 | lr 9.99e-05 | 69s
+2026-09-17 18:10:25 | INFO    | epoch 3 | batch 1020/1252 | loss 0.9865 | acc 0.6646 | lr 9.99e-05 | 71s
+2026-09-17 18:10:26 | INFO    | epoch 3 | batch 1040/1252 | loss 0.9866 | acc 0.6648 | lr 9.99e-05 | 72s
+2026-09-17 18:10:27 | INFO    | epoch 3 | batch 1060/1252 | loss 0.9851 | acc 0.6659 | lr 9.99e-05 | 74s
+2026-09-17 18:10:29 | INFO    | epoch 3 | batch 1080/1252 | loss 0.9837 | acc 0.6669 | lr 9.99e-05 | 75s
+2026-09-17 18:10:30 | INFO    | epoch 3 | batch 1100/1252 | loss 0.9832 | acc 0.6674 | lr 9.99e-05 | 76s
+2026-09-17 18:10:32 | INFO    | epoch 3 | batch 1120/1252 | loss 0.9828 | acc 0.6675 | lr 9.99e-05 | 78s
+2026-09-17 18:10:33 | INFO    | epoch 3 | batch 1140/1252 | loss 0.9820 | acc 0.6681 | lr 9.99e-05 | 79s
+2026-09-17 18:10:35 | INFO    | epoch 3 | batch 1160/1252 | loss 0.9814 | acc 0.6682 | lr 9.99e-05 | 81s
+2026-09-17 18:10:36 | INFO    | epoch 3 | batch 1180/1252 | loss 0.9799 | acc 0.6691 | lr 9.98e-05 | 82s
+2026-09-17 18:10:38 | INFO    | epoch 3 | batch 1200/1252 | loss 0.9788 | acc 0.6698 | lr 9.98e-05 | 84s
+2026-09-17 18:10:39 | INFO    | epoch 3 | batch 1220/1252 | loss 0.9780 | acc 0.6703 | lr 9.98e-05 | 85s
+2026-09-17 18:10:40 | INFO    | epoch 3 | batch 1240/1252 | loss 0.9773 | acc 0.6708 | lr 9.98e-05 | 86s
+2026-09-17 18:10:41 | INFO    | epoch 3 | batch 1252/1252 | loss 0.9763 | acc 0.6715 | lr 9.98e-05 | 87s
+2026-09-17 18:10:51 | INFO    | epoch 3/40 done in 97s | train loss 0.9763 | train running patch (aug): accuracy=0.6715 precision=0.6592 recall=0.6495 f1=0.6516
+2026-09-17 18:10:51 | INFO    | epoch 3 train (eval, no aug) | loss 0.7824 | patch[7280]: accuracy=0.7993 precision=0.7925 recall=0.7906 f1=0.7904 | image[455]: accuracy=0.8857 precision=0.8884 recall=0.8758 f1=0.8797
+2026-09-17 18:10:51 | INFO    | epoch 3 val | loss 1.1328 | patch[8448]: accuracy=0.6130 precision=0.5956 recall=0.5847 f1=0.5860 | image[96]: accuracy=0.6771 precision=0.6607 recall=0.6455 f1=0.6477
+2026-09-17 18:10:51 | INFO    | val_patch_f1 = 0.5860 (best 0.5860 @ epoch 3) *
+2026-09-17 18:10:53 | INFO    | epoch 4 | batch 20/1252 | loss 0.8999 | acc 0.7203 | lr 9.98e-05 | 1s
+2026-09-17 18:10:54 | INFO    | epoch 4 | batch 40/1252 | loss 0.8885 | acc 0.7344 | lr 9.98e-05 | 3s
+2026-09-17 18:10:55 | INFO    | epoch 4 | batch 60/1252 | loss 0.8984 | acc 0.7339 | lr 9.98e-05 | 4s
+2026-09-17 18:10:57 | INFO    | epoch 4 | batch 80/1252 | loss 0.9076 | acc 0.7242 | lr 9.98e-05 | 6s
+2026-09-17 18:10:58 | INFO    | epoch 4 | batch 100/1252 | loss 0.9085 | acc 0.7259 | lr 9.98e-05 | 7s
+2026-09-17 18:11:00 | INFO    | epoch 4 | batch 120/1252 | loss 0.9049 | acc 0.7266 | lr 9.98e-05 | 9s
+2026-09-17 18:11:01 | INFO    | epoch 4 | batch 140/1252 | loss 0.9032 | acc 0.7257 | lr 9.98e-05 | 10s
+2026-09-17 18:11:03 | INFO    | epoch 4 | batch 160/1252 | loss 0.8967 | acc 0.7305 | lr 9.98e-05 | 12s
+2026-09-17 18:11:04 | INFO    | epoch 4 | batch 180/1252 | loss 0.8964 | acc 0.7306 | lr 9.98e-05 | 13s
+2026-09-17 18:11:05 | INFO    | epoch 4 | batch 200/1252 | loss 0.8949 | acc 0.7306 | lr 9.98e-05 | 14s
+2026-09-17 18:11:07 | INFO    | epoch 4 | batch 220/1252 | loss 0.8929 | acc 0.7324 | lr 9.98e-05 | 16s
+2026-09-17 18:11:08 | INFO    | epoch 4 | batch 240/1252 | loss 0.8893 | acc 0.7344 | lr 9.98e-05 | 17s
+2026-09-17 18:11:09 | INFO    | epoch 4 | batch 260/1252 | loss 0.8904 | acc 0.7343 | lr 9.98e-05 | 18s
+2026-09-17 18:11:11 | INFO    | epoch 4 | batch 280/1252 | loss 0.8869 | acc 0.7362 | lr 9.97e-05 | 20s
+2026-09-17 18:11:12 | INFO    | epoch 4 | batch 300/1252 | loss 0.8870 | acc 0.7370 | lr 9.97e-05 | 21s
+2026-09-17 18:11:14 | INFO    | epoch 4 | batch 320/1252 | loss 0.8870 | acc 0.7370 | lr 9.97e-05 | 23s
+2026-09-17 18:11:15 | INFO    | epoch 4 | batch 340/1252 | loss 0.8874 | acc 0.7373 | lr 9.97e-05 | 24s
+2026-09-17 18:11:17 | INFO    | epoch 4 | batch 360/1252 | loss 0.8867 | acc 0.7374 | lr 9.97e-05 | 26s
+2026-09-17 18:11:18 | INFO    | epoch 4 | batch 380/1252 | loss 0.8861 | acc 0.7374 | lr 9.97e-05 | 27s
+2026-09-17 18:11:20 | INFO    | epoch 4 | batch 400/1252 | loss 0.8852 | acc 0.7367 | lr 9.97e-05 | 29s
+2026-09-17 18:11:21 | INFO    | epoch 4 | batch 420/1252 | loss 0.8828 | acc 0.7379 | lr 9.97e-05 | 30s
+2026-09-17 18:11:22 | INFO    | epoch 4 | batch 440/1252 | loss 0.8811 | acc 0.7388 | lr 9.97e-05 | 31s
+2026-09-17 18:11:24 | INFO    | epoch 4 | batch 460/1252 | loss 0.8799 | acc 0.7396 | lr 9.97e-05 | 33s
+2026-09-17 18:11:25 | INFO    | epoch 4 | batch 480/1252 | loss 0.8793 | acc 0.7396 | lr 9.97e-05 | 34s
+2026-09-17 18:11:27 | INFO    | epoch 4 | batch 500/1252 | loss 0.8791 | acc 0.7398 | lr 9.97e-05 | 36s
+2026-09-17 18:11:28 | INFO    | epoch 4 | batch 520/1252 | loss 0.8787 | acc 0.7395 | lr 9.97e-05 | 37s
+2026-09-17 18:11:30 | INFO    | epoch 4 | batch 540/1252 | loss 0.8787 | acc 0.7399 | lr 9.97e-05 | 39s
+2026-09-17 18:11:31 | INFO    | epoch 4 | batch 560/1252 | loss 0.8780 | acc 0.7391 | lr 9.96e-05 | 40s
+2026-09-17 18:11:33 | INFO    | epoch 4 | batch 580/1252 | loss 0.8759 | acc 0.7397 | lr 9.96e-05 | 42s
+2026-09-17 18:11:34 | INFO    | epoch 4 | batch 600/1252 | loss 0.8759 | acc 0.7393 | lr 9.96e-05 | 43s
+2026-09-17 18:11:36 | INFO    | epoch 4 | batch 620/1252 | loss 0.8750 | acc 0.7401 | lr 9.96e-05 | 45s
+2026-09-17 18:11:37 | INFO    | epoch 4 | batch 640/1252 | loss 0.8759 | acc 0.7396 | lr 9.96e-05 | 46s
+2026-09-17 18:11:38 | INFO    | epoch 4 | batch 660/1252 | loss 0.8742 | acc 0.7408 | lr 9.96e-05 | 47s
+2026-09-17 18:11:40 | INFO    | epoch 4 | batch 680/1252 | loss 0.8728 | acc 0.7416 | lr 9.96e-05 | 49s
+2026-09-17 18:11:41 | INFO    | epoch 4 | batch 700/1252 | loss 0.8724 | acc 0.7416 | lr 9.96e-05 | 50s
+2026-09-17 18:11:42 | INFO    | epoch 4 | batch 720/1252 | loss 0.8718 | acc 0.7422 | lr 9.96e-05 | 51s
+2026-09-17 18:11:44 | INFO    | epoch 4 | batch 740/1252 | loss 0.8710 | acc 0.7424 | lr 9.96e-05 | 53s
+2026-09-17 18:11:45 | INFO    | epoch 4 | batch 760/1252 | loss 0.8715 | acc 0.7422 | lr 9.96e-05 | 54s
+2026-09-17 18:11:47 | INFO    | epoch 4 | batch 780/1252 | loss 0.8700 | acc 0.7433 | lr 9.96e-05 | 56s
+2026-09-17 18:11:48 | INFO    | epoch 4 | batch 800/1252 | loss 0.8714 | acc 0.7422 | lr 9.95e-05 | 57s
+2026-09-17 18:11:49 | INFO    | epoch 4 | batch 820/1252 | loss 0.8706 | acc 0.7423 | lr 9.95e-05 | 58s
+2026-09-17 18:11:51 | INFO    | epoch 4 | batch 840/1252 | loss 0.8698 | acc 0.7427 | lr 9.95e-05 | 60s
+2026-09-17 18:11:52 | INFO    | epoch 4 | batch 860/1252 | loss 0.8688 | acc 0.7432 | lr 9.95e-05 | 61s
+2026-09-17 18:11:53 | INFO    | epoch 4 | batch 880/1252 | loss 0.8687 | acc 0.7435 | lr 9.95e-05 | 62s
+2026-09-17 18:11:55 | INFO    | epoch 4 | batch 900/1252 | loss 0.8680 | acc 0.7437 | lr 9.95e-05 | 64s
+2026-09-17 18:11:56 | INFO    | epoch 4 | batch 920/1252 | loss 0.8667 | acc 0.7443 | lr 9.95e-05 | 65s
+2026-09-17 18:11:58 | INFO    | epoch 4 | batch 940/1252 | loss 0.8661 | acc 0.7445 | lr 9.95e-05 | 67s
+2026-09-17 18:11:59 | INFO    | epoch 4 | batch 960/1252 | loss 0.8651 | acc 0.7451 | lr 9.95e-05 | 68s
+2026-09-17 18:12:00 | INFO    | epoch 4 | batch 980/1252 | loss 0.8645 | acc 0.7453 | lr 9.95e-05 | 69s
+2026-09-17 18:12:02 | INFO    | epoch 4 | batch 1000/1252 | loss 0.8644 | acc 0.7451 | lr 9.95e-05 | 71s
+2026-09-17 18:12:03 | INFO    | epoch 4 | batch 1020/1252 | loss 0.8639 | acc 0.7456 | lr 9.94e-05 | 72s
+2026-09-17 18:12:04 | INFO    | epoch 4 | batch 1040/1252 | loss 0.8640 | acc 0.7457 | lr 9.94e-05 | 73s
+2026-09-17 18:12:06 | INFO    | epoch 4 | batch 1060/1252 | loss 0.8640 | acc 0.7455 | lr 9.94e-05 | 75s
+2026-09-17 18:12:07 | INFO    | epoch 4 | batch 1080/1252 | loss 0.8630 | acc 0.7461 | lr 9.94e-05 | 76s
+2026-09-17 18:12:09 | INFO    | epoch 4 | batch 1100/1252 | loss 0.8623 | acc 0.7467 | lr 9.94e-05 | 78s
+2026-09-17 18:12:10 | INFO    | epoch 4 | batch 1120/1252 | loss 0.8613 | acc 0.7472 | lr 9.94e-05 | 79s
+2026-09-17 18:12:11 | INFO    | epoch 4 | batch 1140/1252 | loss 0.8606 | acc 0.7474 | lr 9.94e-05 | 80s
+2026-09-17 18:12:13 | INFO    | epoch 4 | batch 1160/1252 | loss 0.8599 | acc 0.7480 | lr 9.94e-05 | 82s
+2026-09-17 18:12:14 | INFO    | epoch 4 | batch 1180/1252 | loss 0.8592 | acc 0.7485 | lr 9.94e-05 | 83s
+2026-09-17 18:12:16 | INFO    | epoch 4 | batch 1200/1252 | loss 0.8580 | acc 0.7493 | lr 9.94e-05 | 84s
+2026-09-17 18:12:17 | INFO    | epoch 4 | batch 1220/1252 | loss 0.8575 | acc 0.7498 | lr 9.93e-05 | 86s
+2026-09-17 18:12:18 | INFO    | epoch 4 | batch 1240/1252 | loss 0.8569 | acc 0.7503 | lr 9.93e-05 | 87s
+2026-09-17 18:12:19 | INFO    | epoch 4 | batch 1252/1252 | loss 0.8567 | acc 0.7503 | lr 9.93e-05 | 88s
+2026-09-17 18:12:29 | INFO    | epoch 4/40 done in 98s | train loss 0.8567 | train running patch (aug): accuracy=0.7503 precision=0.7435 recall=0.7340 f1=0.7372
+2026-09-17 18:12:29 | INFO    | epoch 4 train (eval, no aug) | loss 0.7295 | patch[7280]: accuracy=0.8231 precision=0.8327 recall=0.8083 f1=0.8140 | image[455]: accuracy=0.8967 precision=0.9041 recall=0.8849 f1=0.8908
+2026-09-17 18:12:29 | INFO    | epoch 4 val | loss 1.1415 | patch[8448]: accuracy=0.6291 precision=0.5979 recall=0.5930 f1=0.5864 | image[96]: accuracy=0.6771 precision=0.6832 recall=0.6316 f1=0.6230
+2026-09-17 18:12:29 | INFO    | val_patch_f1 = 0.5864 (best 0.5864 @ epoch 4) *
+2026-09-17 18:12:30 | INFO    | epoch 5 | batch 20/1252 | loss 0.7581 | acc 0.8078 | lr 9.93e-05 | 1s
+2026-09-17 18:12:32 | INFO    | epoch 5 | batch 40/1252 | loss 0.7705 | acc 0.8031 | lr 9.93e-05 | 3s
+2026-09-17 18:12:33 | INFO    | epoch 5 | batch 60/1252 | loss 0.7721 | acc 0.8052 | lr 9.93e-05 | 4s
+2026-09-17 18:12:35 | INFO    | epoch 5 | batch 80/1252 | loss 0.7844 | acc 0.8023 | lr 9.93e-05 | 6s
+2026-09-17 18:12:36 | INFO    | epoch 5 | batch 100/1252 | loss 0.7873 | acc 0.7963 | lr 9.93e-05 | 7s
+2026-09-17 18:12:37 | INFO    | epoch 5 | batch 120/1252 | loss 0.7856 | acc 0.7951 | lr 9.93e-05 | 9s
+2026-09-17 18:12:39 | INFO    | epoch 5 | batch 140/1252 | loss 0.7833 | acc 0.7962 | lr 9.92e-05 | 10s
+2026-09-17 18:12:40 | INFO    | epoch 5 | batch 160/1252 | loss 0.7827 | acc 0.7957 | lr 9.92e-05 | 11s
+2026-09-17 18:12:42 | INFO    | epoch 5 | batch 180/1252 | loss 0.7825 | acc 0.7967 | lr 9.92e-05 | 13s
+2026-09-17 18:12:43 | INFO    | epoch 5 | batch 200/1252 | loss 0.7808 | acc 0.7964 | lr 9.92e-05 | 14s
+2026-09-17 18:12:44 | INFO    | epoch 5 | batch 220/1252 | loss 0.7829 | acc 0.7949 | lr 9.92e-05 | 16s
+2026-09-17 18:12:46 | INFO    | epoch 5 | batch 240/1252 | loss 0.7879 | acc 0.7905 | lr 9.92e-05 | 17s
+2026-09-17 18:12:47 | INFO    | epoch 5 | batch 260/1252 | loss 0.7865 | acc 0.7925 | lr 9.92e-05 | 18s
+2026-09-17 18:12:49 | INFO    | epoch 5 | batch 280/1252 | loss 0.7865 | acc 0.7929 | lr 9.92e-05 | 20s
+2026-09-17 18:12:50 | INFO    | epoch 5 | batch 300/1252 | loss 0.7833 | acc 0.7944 | lr 9.92e-05 | 21s
+2026-09-17 18:12:51 | INFO    | epoch 5 | batch 320/1252 | loss 0.7830 | acc 0.7944 | lr 9.91e-05 | 23s
+2026-09-17 18:12:53 | INFO    | epoch 5 | batch 340/1252 | loss 0.7833 | acc 0.7946 | lr 9.91e-05 | 24s
+2026-09-17 18:12:54 | INFO    | epoch 5 | batch 360/1252 | loss 0.7850 | acc 0.7928 | lr 9.91e-05 | 25s
+2026-09-17 18:12:56 | INFO    | epoch 5 | batch 380/1252 | loss 0.7840 | acc 0.7929 | lr 9.91e-05 | 27s
+2026-09-17 18:12:57 | INFO    | epoch 5 | batch 400/1252 | loss 0.7838 | acc 0.7936 | lr 9.91e-05 | 28s
+2026-09-17 18:12:58 | INFO    | epoch 5 | batch 420/1252 | loss 0.7844 | acc 0.7932 | lr 9.91e-05 | 30s
+2026-09-17 18:13:00 | INFO    | epoch 5 | batch 440/1252 | loss 0.7842 | acc 0.7937 | lr 9.91e-05 | 31s
+2026-09-17 18:13:01 | INFO    | epoch 5 | batch 460/1252 | loss 0.7824 | acc 0.7954 | lr 9.91e-05 | 32s
+2026-09-17 18:13:03 | INFO    | epoch 5 | batch 480/1252 | loss 0.7848 | acc 0.7931 | lr 9.90e-05 | 34s
+2026-09-17 18:13:04 | INFO    | epoch 5 | batch 500/1252 | loss 0.7851 | acc 0.7927 | lr 9.90e-05 | 35s
+2026-09-17 18:13:05 | INFO    | epoch 5 | batch 520/1252 | loss 0.7865 | acc 0.7918 | lr 9.90e-05 | 36s
+2026-09-17 18:13:07 | INFO    | epoch 5 | batch 540/1252 | loss 0.7861 | acc 0.7917 | lr 9.90e-05 | 38s
+2026-09-17 18:13:08 | INFO    | epoch 5 | batch 560/1252 | loss 0.7862 | acc 0.7912 | lr 9.90e-05 | 39s
+2026-09-17 18:13:10 | INFO    | epoch 5 | batch 580/1252 | loss 0.7864 | acc 0.7911 | lr 9.90e-05 | 41s
+2026-09-17 18:13:11 | INFO    | epoch 5 | batch 600/1252 | loss 0.7856 | acc 0.7917 | lr 9.90e-05 | 42s
+2026-09-17 18:13:12 | INFO    | epoch 5 | batch 620/1252 | loss 0.7845 | acc 0.7922 | lr 9.90e-05 | 43s
+2026-09-17 18:13:14 | INFO    | epoch 5 | batch 640/1252 | loss 0.7844 | acc 0.7922 | lr 9.89e-05 | 45s
+2026-09-17 18:13:15 | INFO    | epoch 5 | batch 660/1252 | loss 0.7835 | acc 0.7925 | lr 9.89e-05 | 46s
+2026-09-17 18:13:16 | INFO    | epoch 5 | batch 680/1252 | loss 0.7826 | acc 0.7935 | lr 9.89e-05 | 47s
+2026-09-17 18:13:18 | INFO    | epoch 5 | batch 700/1252 | loss 0.7819 | acc 0.7939 | lr 9.89e-05 | 49s
+2026-09-17 18:13:19 | INFO    | epoch 5 | batch 720/1252 | loss 0.7810 | acc 0.7947 | lr 9.89e-05 | 50s
+2026-09-17 18:13:21 | INFO    | epoch 5 | batch 740/1252 | loss 0.7810 | acc 0.7948 | lr 9.89e-05 | 52s
+2026-09-17 18:13:22 | INFO    | epoch 5 | batch 760/1252 | loss 0.7800 | acc 0.7952 | lr 9.89e-05 | 53s
+2026-09-17 18:13:23 | INFO    | epoch 5 | batch 780/1252 | loss 0.7801 | acc 0.7957 | lr 9.88e-05 | 54s
+2026-09-17 18:13:25 | INFO    | epoch 5 | batch 800/1252 | loss 0.7801 | acc 0.7958 | lr 9.88e-05 | 56s
+2026-09-17 18:13:26 | INFO    | epoch 5 | batch 820/1252 | loss 0.7812 | acc 0.7950 | lr 9.88e-05 | 57s
+2026-09-17 18:13:28 | INFO    | epoch 5 | batch 840/1252 | loss 0.7812 | acc 0.7948 | lr 9.88e-05 | 59s
+2026-09-17 18:13:29 | INFO    | epoch 5 | batch 860/1252 | loss 0.7817 | acc 0.7947 | lr 9.88e-05 | 60s
+2026-09-17 18:13:30 | INFO    | epoch 5 | batch 880/1252 | loss 0.7818 | acc 0.7946 | lr 9.88e-05 | 61s
+2026-09-17 18:13:32 | INFO    | epoch 5 | batch 900/1252 | loss 0.7813 | acc 0.7947 | lr 9.88e-05 | 63s
+2026-09-17 18:13:33 | INFO    | epoch 5 | batch 920/1252 | loss 0.7814 | acc 0.7946 | lr 9.87e-05 | 64s
+2026-09-17 18:13:35 | INFO    | epoch 5 | batch 940/1252 | loss 0.7806 | acc 0.7949 | lr 9.87e-05 | 66s
+2026-09-17 18:13:36 | INFO    | epoch 5 | batch 960/1252 | loss 0.7812 | acc 0.7946 | lr 9.87e-05 | 67s
+2026-09-17 18:13:37 | INFO    | epoch 5 | batch 980/1252 | loss 0.7809 | acc 0.7951 | lr 9.87e-05 | 69s
+2026-09-17 18:13:39 | INFO    | epoch 5 | batch 1000/1252 | loss 0.7807 | acc 0.7953 | lr 9.87e-05 | 70s
+2026-09-17 18:13:40 | INFO    | epoch 5 | batch 1020/1252 | loss 0.7798 | acc 0.7960 | lr 9.87e-05 | 71s
+2026-09-17 18:13:42 | INFO    | epoch 5 | batch 1040/1252 | loss 0.7804 | acc 0.7959 | lr 9.87e-05 | 73s
+2026-09-17 18:13:43 | INFO    | epoch 5 | batch 1060/1252 | loss 0.7801 | acc 0.7961 | lr 9.86e-05 | 74s
+2026-09-17 18:13:44 | INFO    | epoch 5 | batch 1080/1252 | loss 0.7786 | acc 0.7970 | lr 9.86e-05 | 76s
+2026-09-17 18:13:46 | INFO    | epoch 5 | batch 1100/1252 | loss 0.7787 | acc 0.7972 | lr 9.86e-05 | 77s
+2026-09-17 18:13:47 | INFO    | epoch 5 | batch 1120/1252 | loss 0.7780 | acc 0.7977 | lr 9.86e-05 | 78s
+2026-09-17 18:13:49 | INFO    | epoch 5 | batch 1140/1252 | loss 0.7771 | acc 0.7983 | lr 9.86e-05 | 80s
+2026-09-17 18:13:50 | INFO    | epoch 5 | batch 1160/1252 | loss 0.7770 | acc 0.7982 | lr 9.86e-05 | 81s
+2026-09-17 18:13:51 | INFO    | epoch 5 | batch 1180/1252 | loss 0.7761 | acc 0.7986 | lr 9.85e-05 | 83s
+2026-09-17 18:13:53 | INFO    | epoch 5 | batch 1200/1252 | loss 0.7760 | acc 0.7985 | lr 9.85e-05 | 84s
+2026-09-17 18:13:54 | INFO    | epoch 5 | batch 1220/1252 | loss 0.7756 | acc 0.7987 | lr 9.85e-05 | 85s
+2026-09-17 18:13:56 | INFO    | epoch 5 | batch 1240/1252 | loss 0.7756 | acc 0.7987 | lr 9.85e-05 | 87s
+2026-09-17 18:13:56 | INFO    | epoch 5 | batch 1252/1252 | loss 0.7758 | acc 0.7984 | lr 9.85e-05 | 87s
+2026-09-17 18:14:06 | INFO    | epoch 5/40 done in 97s | train loss 0.7758 | train running patch (aug): accuracy=0.7984 precision=0.7932 recall=0.7853 f1=0.7883
+2026-09-17 18:14:06 | INFO    | epoch 5 train (eval, no aug) | loss 0.6318 | patch[7280]: accuracy=0.8776 precision=0.8825 recall=0.8679 f1=0.8734 | image[455]: accuracy=0.9692 precision=0.9719 recall=0.9643 f1=0.9676
+2026-09-17 18:14:06 | INFO    | epoch 5 val | loss 1.1365 | patch[8448]: accuracy=0.6478 precision=0.6254 recall=0.6135 f1=0.6132 | image[96]: accuracy=0.7083 precision=0.6970 recall=0.6661 f1=0.6680
+2026-09-17 18:14:06 | INFO    | val_patch_f1 = 0.6132 (best 0.6132 @ epoch 5) *
+2026-09-17 18:14:08 | INFO    | epoch 6 | batch 20/1252 | loss 0.7220 | acc 0.8375 | lr 9.85e-05 | 1s
+2026-09-17 18:14:09 | INFO    | epoch 6 | batch 40/1252 | loss 0.7195 | acc 0.8383 | lr 9.85e-05 | 3s
+2026-09-17 18:14:10 | INFO    | epoch 6 | batch 60/1252 | loss 0.7382 | acc 0.8250 | lr 9.84e-05 | 4s
+2026-09-17 18:14:12 | INFO    | epoch 6 | batch 80/1252 | loss 0.7231 | acc 0.8324 | lr 9.84e-05 | 5s
+2026-09-17 18:14:13 | INFO    | epoch 6 | batch 100/1252 | loss 0.7176 | acc 0.8363 | lr 9.84e-05 | 7s
+2026-09-17 18:14:14 | INFO    | epoch 6 | batch 120/1252 | loss 0.7177 | acc 0.8362 | lr 9.84e-05 | 8s
+2026-09-17 18:14:16 | INFO    | epoch 6 | batch 140/1252 | loss 0.7210 | acc 0.8348 | lr 9.84e-05 | 10s
+2026-09-17 18:14:17 | INFO    | epoch 6 | batch 160/1252 | loss 0.7182 | acc 0.8357 | lr 9.84e-05 | 11s
+2026-09-17 18:14:19 | INFO    | epoch 6 | batch 180/1252 | loss 0.7169 | acc 0.8363 | lr 9.83e-05 | 12s
+2026-09-17 18:14:20 | INFO    | epoch 6 | batch 200/1252 | loss 0.7175 | acc 0.8373 | lr 9.83e-05 | 14s
+2026-09-17 18:14:21 | INFO    | epoch 6 | batch 220/1252 | loss 0.7195 | acc 0.8358 | lr 9.83e-05 | 15s
+2026-09-17 18:14:23 | INFO    | epoch 6 | batch 240/1252 | loss 0.7185 | acc 0.8361 | lr 9.83e-05 | 17s
+2026-09-17 18:14:24 | INFO    | epoch 6 | batch 260/1252 | loss 0.7213 | acc 0.8335 | lr 9.83e-05 | 18s
+2026-09-17 18:14:26 | INFO    | epoch 6 | batch 280/1252 | loss 0.7217 | acc 0.8328 | lr 9.83e-05 | 19s
+2026-09-17 18:14:27 | INFO    | epoch 6 | batch 300/1252 | loss 0.7221 | acc 0.8319 | lr 9.82e-05 | 21s
+2026-09-17 18:14:28 | INFO    | epoch 6 | batch 320/1252 | loss 0.7187 | acc 0.8345 | lr 9.82e-05 | 22s
+2026-09-17 18:14:30 | INFO    | epoch 6 | batch 340/1252 | loss 0.7214 | acc 0.8335 | lr 9.82e-05 | 24s
+2026-09-17 18:14:31 | INFO    | epoch 6 | batch 360/1252 | loss 0.7222 | acc 0.8329 | lr 9.82e-05 | 25s
+2026-09-17 18:14:33 | INFO    | epoch 6 | batch 380/1252 | loss 0.7237 | acc 0.8324 | lr 9.82e-05 | 27s
+2026-09-17 18:14:34 | INFO    | epoch 6 | batch 400/1252 | loss 0.7243 | acc 0.8313 | lr 9.81e-05 | 28s
+2026-09-17 18:14:36 | INFO    | epoch 6 | batch 420/1252 | loss 0.7228 | acc 0.8315 | lr 9.81e-05 | 30s
+2026-09-17 18:14:37 | INFO    | epoch 6 | batch 440/1252 | loss 0.7242 | acc 0.8305 | lr 9.81e-05 | 31s
+2026-09-17 18:14:39 | INFO    | epoch 6 | batch 460/1252 | loss 0.7227 | acc 0.8308 | lr 9.81e-05 | 32s
+2026-09-17 18:14:40 | INFO    | epoch 6 | batch 480/1252 | loss 0.7221 | acc 0.8313 | lr 9.81e-05 | 34s
+2026-09-17 18:14:42 | INFO    | epoch 6 | batch 500/1252 | loss 0.7213 | acc 0.8311 | lr 9.81e-05 | 35s
+2026-09-17 18:14:43 | INFO    | epoch 6 | batch 520/1252 | loss 0.7221 | acc 0.8306 | lr 9.80e-05 | 37s
+2026-09-17 18:14:44 | INFO    | epoch 6 | batch 540/1252 | loss 0.7212 | acc 0.8306 | lr 9.80e-05 | 38s
+2026-09-17 18:14:46 | INFO    | epoch 6 | batch 560/1252 | loss 0.7213 | acc 0.8304 | lr 9.80e-05 | 40s
+2026-09-17 18:14:47 | INFO    | epoch 6 | batch 580/1252 | loss 0.7212 | acc 0.8306 | lr 9.80e-05 | 41s
+2026-09-17 18:14:49 | INFO    | epoch 6 | batch 600/1252 | loss 0.7231 | acc 0.8295 | lr 9.80e-05 | 43s
+2026-09-17 18:14:50 | INFO    | epoch 6 | batch 620/1252 | loss 0.7230 | acc 0.8301 | lr 9.79e-05 | 44s
+2026-09-17 18:14:52 | INFO    | epoch 6 | batch 640/1252 | loss 0.7241 | acc 0.8295 | lr 9.79e-05 | 46s
+2026-09-17 18:14:53 | INFO    | epoch 6 | batch 660/1252 | loss 0.7237 | acc 0.8300 | lr 9.79e-05 | 47s
+2026-09-17 18:14:55 | INFO    | epoch 6 | batch 680/1252 | loss 0.7246 | acc 0.8295 | lr 9.79e-05 | 49s
+2026-09-17 18:14:56 | INFO    | epoch 6 | batch 700/1252 | loss 0.7231 | acc 0.8307 | lr 9.79e-05 | 50s
+2026-09-17 18:14:58 | INFO    | epoch 6 | batch 720/1252 | loss 0.7224 | acc 0.8310 | lr 9.79e-05 | 51s
+2026-09-17 18:14:59 | INFO    | epoch 6 | batch 740/1252 | loss 0.7221 | acc 0.8307 | lr 9.78e-05 | 53s
+2026-09-17 18:15:00 | INFO    | epoch 6 | batch 760/1252 | loss 0.7224 | acc 0.8303 | lr 9.78e-05 | 54s
+2026-09-17 18:15:02 | INFO    | epoch 6 | batch 780/1252 | loss 0.7230 | acc 0.8301 | lr 9.78e-05 | 56s
+2026-09-17 18:15:03 | INFO    | epoch 6 | batch 800/1252 | loss 0.7228 | acc 0.8298 | lr 9.78e-05 | 57s
+2026-09-17 18:15:05 | INFO    | epoch 6 | batch 820/1252 | loss 0.7229 | acc 0.8300 | lr 9.78e-05 | 58s
+2026-09-17 18:15:06 | INFO    | epoch 6 | batch 840/1252 | loss 0.7217 | acc 0.8309 | lr 9.77e-05 | 60s
+2026-09-17 18:15:07 | INFO    | epoch 6 | batch 860/1252 | loss 0.7217 | acc 0.8307 | lr 9.77e-05 | 61s
+2026-09-17 18:15:09 | INFO    | epoch 6 | batch 880/1252 | loss 0.7208 | acc 0.8311 | lr 9.77e-05 | 63s
+2026-09-17 18:15:10 | INFO    | epoch 6 | batch 900/1252 | loss 0.7199 | acc 0.8315 | lr 9.77e-05 | 64s
+2026-09-17 18:15:12 | INFO    | epoch 6 | batch 920/1252 | loss 0.7198 | acc 0.8318 | lr 9.77e-05 | 66s
+2026-09-17 18:15:13 | INFO    | epoch 6 | batch 940/1252 | loss 0.7190 | acc 0.8323 | lr 9.76e-05 | 67s
+2026-09-17 18:15:15 | INFO    | epoch 6 | batch 960/1252 | loss 0.7190 | acc 0.8324 | lr 9.76e-05 | 68s
+2026-09-17 18:15:16 | INFO    | epoch 6 | batch 980/1252 | loss 0.7188 | acc 0.8326 | lr 9.76e-05 | 70s
+2026-09-17 18:15:18 | INFO    | epoch 6 | batch 1000/1252 | loss 0.7192 | acc 0.8323 | lr 9.76e-05 | 71s
+2026-09-17 18:15:19 | INFO    | epoch 6 | batch 1020/1252 | loss 0.7188 | acc 0.8323 | lr 9.76e-05 | 73s
+2026-09-17 18:15:20 | INFO    | epoch 6 | batch 1040/1252 | loss 0.7184 | acc 0.8327 | lr 9.75e-05 | 74s
+2026-09-17 18:15:22 | INFO    | epoch 6 | batch 1060/1252 | loss 0.7184 | acc 0.8323 | lr 9.75e-05 | 76s
+2026-09-17 18:15:23 | INFO    | epoch 6 | batch 1080/1252 | loss 0.7179 | acc 0.8326 | lr 9.75e-05 | 77s
+2026-09-17 18:15:25 | INFO    | epoch 6 | batch 1100/1252 | loss 0.7183 | acc 0.8326 | lr 9.75e-05 | 78s
+2026-09-17 18:15:26 | INFO    | epoch 6 | batch 1120/1252 | loss 0.7173 | acc 0.8332 | lr 9.75e-05 | 80s
+2026-09-17 18:15:28 | INFO    | epoch 6 | batch 1140/1252 | loss 0.7169 | acc 0.8333 | lr 9.74e-05 | 81s
+2026-09-17 18:15:29 | INFO    | epoch 6 | batch 1160/1252 | loss 0.7174 | acc 0.8329 | lr 9.74e-05 | 83s
+2026-09-17 18:15:30 | INFO    | epoch 6 | batch 1180/1252 | loss 0.7172 | acc 0.8334 | lr 9.74e-05 | 84s
+2026-09-17 18:15:32 | INFO    | epoch 6 | batch 1200/1252 | loss 0.7171 | acc 0.8336 | lr 9.74e-05 | 86s
+2026-09-17 18:15:33 | INFO    | epoch 6 | batch 1220/1252 | loss 0.7175 | acc 0.8336 | lr 9.74e-05 | 87s
+2026-09-17 18:15:35 | INFO    | epoch 6 | batch 1240/1252 | loss 0.7180 | acc 0.8333 | lr 9.73e-05 | 88s
+2026-09-17 18:15:36 | INFO    | epoch 6 | batch 1252/1252 | loss 0.7179 | acc 0.8332 | lr 9.73e-05 | 89s
+2026-09-17 18:15:45 | INFO    | epoch 6/40 done in 99s | train loss 0.7179 | train running patch (aug): accuracy=0.8332 precision=0.8298 recall=0.8224 f1=0.8255
+2026-09-17 18:15:45 | INFO    | epoch 6 train (eval, no aug) | loss 0.6084 | patch[7280]: accuracy=0.8900 precision=0.8949 recall=0.8829 f1=0.8876 | image[455]: accuracy=0.9495 precision=0.9553 recall=0.9458 f1=0.9497
+2026-09-17 18:15:45 | INFO    | epoch 6 val | loss 1.1195 | patch[8448]: accuracy=0.6763 precision=0.6644 recall=0.6504 f1=0.6520 | image[96]: accuracy=0.7188 precision=0.7026 recall=0.6893 f1=0.6910
+2026-09-17 18:15:45 | INFO    | val_patch_f1 = 0.6520 (best 0.6520 @ epoch 6) *
+2026-09-17 18:15:47 | INFO    | epoch 7 | batch 20/1252 | loss 0.7149 | acc 0.8344 | lr 9.73e-05 | 1s
+2026-09-17 18:15:48 | INFO    | epoch 7 | batch 40/1252 | loss 0.6852 | acc 0.8500 | lr 9.73e-05 | 3s
+2026-09-17 18:15:50 | INFO    | epoch 7 | batch 60/1252 | loss 0.6871 | acc 0.8484 | lr 9.73e-05 | 4s
+2026-09-17 18:15:51 | INFO    | epoch 7 | batch 80/1252 | loss 0.6962 | acc 0.8438 | lr 9.72e-05 | 6s
+2026-09-17 18:15:52 | INFO    | epoch 7 | batch 100/1252 | loss 0.6952 | acc 0.8447 | lr 9.72e-05 | 7s
+2026-09-17 18:15:54 | INFO    | epoch 7 | batch 120/1252 | loss 0.6916 | acc 0.8456 | lr 9.72e-05 | 8s
+2026-09-17 18:15:55 | INFO    | epoch 7 | batch 140/1252 | loss 0.6902 | acc 0.8471 | lr 9.72e-05 | 10s
+2026-09-17 18:15:56 | INFO    | epoch 7 | batch 160/1252 | loss 0.6890 | acc 0.8467 | lr 9.71e-05 | 11s
+2026-09-17 18:15:58 | INFO    | epoch 7 | batch 180/1252 | loss 0.6834 | acc 0.8497 | lr 9.71e-05 | 12s
+2026-09-17 18:15:59 | INFO    | epoch 7 | batch 200/1252 | loss 0.6791 | acc 0.8508 | lr 9.71e-05 | 14s
+2026-09-17 18:16:01 | INFO    | epoch 7 | batch 220/1252 | loss 0.6752 | acc 0.8537 | lr 9.71e-05 | 15s
+2026-09-17 18:16:02 | INFO    | epoch 7 | batch 240/1252 | loss 0.6784 | acc 0.8522 | lr 9.71e-05 | 16s
+2026-09-17 18:16:03 | INFO    | epoch 7 | batch 260/1252 | loss 0.6796 | acc 0.8524 | lr 9.70e-05 | 18s
+2026-09-17 18:16:05 | INFO    | epoch 7 | batch 280/1252 | loss 0.6834 | acc 0.8510 | lr 9.70e-05 | 19s
+2026-09-17 18:16:06 | INFO    | epoch 7 | batch 300/1252 | loss 0.6809 | acc 0.8530 | lr 9.70e-05 | 21s
+2026-09-17 18:16:07 | INFO    | epoch 7 | batch 320/1252 | loss 0.6778 | acc 0.8555 | lr 9.70e-05 | 22s
+2026-09-17 18:16:09 | INFO    | epoch 7 | batch 340/1252 | loss 0.6754 | acc 0.8564 | lr 9.69e-05 | 23s
+2026-09-17 18:16:10 | INFO    | epoch 7 | batch 360/1252 | loss 0.6774 | acc 0.8552 | lr 9.69e-05 | 25s
+2026-09-17 18:16:11 | INFO    | epoch 7 | batch 380/1252 | loss 0.6750 | acc 0.8567 | lr 9.69e-05 | 26s
+2026-09-17 18:16:13 | INFO    | epoch 7 | batch 400/1252 | loss 0.6739 | acc 0.8577 | lr 9.69e-05 | 27s
+2026-09-17 18:16:14 | INFO    | epoch 7 | batch 420/1252 | loss 0.6730 | acc 0.8583 | lr 9.69e-05 | 29s
+2026-09-17 18:16:16 | INFO    | epoch 7 | batch 440/1252 | loss 0.6743 | acc 0.8580 | lr 9.68e-05 | 30s
+2026-09-17 18:16:17 | INFO    | epoch 7 | batch 460/1252 | loss 0.6750 | acc 0.8578 | lr 9.68e-05 | 32s
+2026-09-17 18:16:18 | INFO    | epoch 7 | batch 480/1252 | loss 0.6748 | acc 0.8578 | lr 9.68e-05 | 33s
+2026-09-17 18:16:20 | INFO    | epoch 7 | batch 500/1252 | loss 0.6741 | acc 0.8584 | lr 9.68e-05 | 34s
+2026-09-17 18:16:21 | INFO    | epoch 7 | batch 520/1252 | loss 0.6744 | acc 0.8576 | lr 9.67e-05 | 36s
+2026-09-17 18:16:23 | INFO    | epoch 7 | batch 540/1252 | loss 0.6750 | acc 0.8572 | lr 9.67e-05 | 37s
+2026-09-17 18:16:24 | INFO    | epoch 7 | batch 560/1252 | loss 0.6757 | acc 0.8565 | lr 9.67e-05 | 39s
+2026-09-17 18:16:25 | INFO    | epoch 7 | batch 580/1252 | loss 0.6754 | acc 0.8570 | lr 9.67e-05 | 40s
+2026-09-17 18:16:27 | INFO    | epoch 7 | batch 600/1252 | loss 0.6754 | acc 0.8567 | lr 9.66e-05 | 41s
+2026-09-17 18:16:28 | INFO    | epoch 7 | batch 620/1252 | loss 0.6752 | acc 0.8570 | lr 9.66e-05 | 43s
+2026-09-17 18:16:29 | INFO    | epoch 7 | batch 640/1252 | loss 0.6743 | acc 0.8572 | lr 9.66e-05 | 44s
+2026-09-17 18:16:31 | INFO    | epoch 7 | batch 660/1252 | loss 0.6743 | acc 0.8571 | lr 9.66e-05 | 46s
+2026-09-17 18:16:32 | INFO    | epoch 7 | batch 680/1252 | loss 0.6741 | acc 0.8572 | lr 9.65e-05 | 47s
+2026-09-17 18:16:34 | INFO    | epoch 7 | batch 700/1252 | loss 0.6737 | acc 0.8573 | lr 9.65e-05 | 48s
+2026-09-17 18:16:35 | INFO    | epoch 7 | batch 720/1252 | loss 0.6731 | acc 0.8579 | lr 9.65e-05 | 50s
+2026-09-17 18:16:37 | INFO    | epoch 7 | batch 740/1252 | loss 0.6737 | acc 0.8575 | lr 9.65e-05 | 51s
+2026-09-17 18:16:38 | INFO    | epoch 7 | batch 760/1252 | loss 0.6731 | acc 0.8579 | lr 9.65e-05 | 53s
+2026-09-17 18:16:39 | INFO    | epoch 7 | batch 780/1252 | loss 0.6742 | acc 0.8574 | lr 9.64e-05 | 54s
+2026-09-17 18:16:41 | INFO    | epoch 7 | batch 800/1252 | loss 0.6740 | acc 0.8573 | lr 9.64e-05 | 55s
+2026-09-17 18:16:42 | INFO    | epoch 7 | batch 820/1252 | loss 0.6734 | acc 0.8574 | lr 9.64e-05 | 57s
+2026-09-17 18:16:44 | INFO    | epoch 7 | batch 840/1252 | loss 0.6731 | acc 0.8573 | lr 9.64e-05 | 58s
+2026-09-17 18:16:45 | INFO    | epoch 7 | batch 860/1252 | loss 0.6727 | acc 0.8576 | lr 9.63e-05 | 60s
+2026-09-17 18:16:46 | INFO    | epoch 7 | batch 880/1252 | loss 0.6729 | acc 0.8575 | lr 9.63e-05 | 61s
+2026-09-17 18:16:48 | INFO    | epoch 7 | batch 900/1252 | loss 0.6739 | acc 0.8569 | lr 9.63e-05 | 62s
+2026-09-17 18:16:49 | INFO    | epoch 7 | batch 920/1252 | loss 0.6738 | acc 0.8569 | lr 9.63e-05 | 64s
+2026-09-17 18:16:50 | INFO    | epoch 7 | batch 940/1252 | loss 0.6738 | acc 0.8568 | lr 9.62e-05 | 65s
+2026-09-17 18:16:52 | INFO    | epoch 7 | batch 960/1252 | loss 0.6735 | acc 0.8570 | lr 9.62e-05 | 66s
+2026-09-17 18:16:53 | INFO    | epoch 7 | batch 980/1252 | loss 0.6731 | acc 0.8566 | lr 9.62e-05 | 68s
+2026-09-17 18:16:55 | INFO    | epoch 7 | batch 1000/1252 | loss 0.6725 | acc 0.8571 | lr 9.62e-05 | 69s
+2026-09-17 18:16:56 | INFO    | epoch 7 | batch 1020/1252 | loss 0.6722 | acc 0.8573 | lr 9.61e-05 | 71s
+2026-09-17 18:16:57 | INFO    | epoch 7 | batch 1040/1252 | loss 0.6718 | acc 0.8576 | lr 9.61e-05 | 72s
+2026-09-17 18:16:59 | INFO    | epoch 7 | batch 1060/1252 | loss 0.6724 | acc 0.8573 | lr 9.61e-05 | 73s
+2026-09-17 18:17:00 | INFO    | epoch 7 | batch 1080/1252 | loss 0.6726 | acc 0.8574 | lr 9.61e-05 | 75s
+2026-09-17 18:17:02 | INFO    | epoch 7 | batch 1100/1252 | loss 0.6728 | acc 0.8574 | lr 9.60e-05 | 76s
+2026-09-17 18:17:03 | INFO    | epoch 7 | batch 1120/1252 | loss 0.6724 | acc 0.8574 | lr 9.60e-05 | 78s
+2026-09-17 18:17:04 | INFO    | epoch 7 | batch 1140/1252 | loss 0.6727 | acc 0.8571 | lr 9.60e-05 | 79s
+2026-09-17 18:17:06 | INFO    | epoch 7 | batch 1160/1252 | loss 0.6731 | acc 0.8568 | lr 9.60e-05 | 80s
+2026-09-17 18:17:07 | INFO    | epoch 7 | batch 1180/1252 | loss 0.6732 | acc 0.8568 | lr 9.59e-05 | 82s
+2026-09-17 18:17:09 | INFO    | epoch 7 | batch 1200/1252 | loss 0.6730 | acc 0.8569 | lr 9.59e-05 | 83s
+2026-09-17 18:17:10 | INFO    | epoch 7 | batch 1220/1252 | loss 0.6733 | acc 0.8568 | lr 9.59e-05 | 85s
+2026-09-17 18:17:11 | INFO    | epoch 7 | batch 1240/1252 | loss 0.6737 | acc 0.8567 | lr 9.58e-05 | 86s
+2026-09-17 18:17:12 | INFO    | epoch 7 | batch 1252/1252 | loss 0.6737 | acc 0.8567 | lr 9.58e-05 | 87s
+2026-09-17 18:17:22 | INFO    | epoch 7/40 done in 97s | train loss 0.6737 | train running patch (aug): accuracy=0.8567 precision=0.8532 recall=0.8475 f1=0.8499
+2026-09-17 18:17:22 | INFO    | epoch 7 train (eval, no aug) | loss 0.5395 | patch[7280]: accuracy=0.9284 precision=0.9267 recall=0.9245 f1=0.9249 | image[455]: accuracy=0.9802 precision=0.9818 recall=0.9794 f1=0.9804
+2026-09-17 18:17:22 | INFO    | epoch 7 val | loss 1.1186 | patch[8448]: accuracy=0.6616 precision=0.6368 recall=0.6376 f1=0.6365 | image[96]: accuracy=0.7292 precision=0.7148 recall=0.7098 f1=0.7106
+2026-09-17 18:17:22 | INFO    | val_patch_f1 = 0.6365 (best 0.6520 @ epoch 6)
+2026-09-17 18:17:24 | INFO    | epoch 8 | batch 20/1252 | loss 0.6431 | acc 0.8750 | lr 9.58e-05 | 2s
+2026-09-17 18:17:25 | INFO    | epoch 8 | batch 40/1252 | loss 0.6423 | acc 0.8727 | lr 9.58e-05 | 3s
+2026-09-17 18:17:26 | INFO    | epoch 8 | batch 60/1252 | loss 0.6476 | acc 0.8708 | lr 9.58e-05 | 4s
+2026-09-17 18:17:28 | INFO    | epoch 8 | batch 80/1252 | loss 0.6454 | acc 0.8750 | lr 9.57e-05 | 6s
+2026-09-17 18:17:29 | INFO    | epoch 8 | batch 100/1252 | loss 0.6504 | acc 0.8688 | lr 9.57e-05 | 7s
+2026-09-17 18:17:31 | INFO    | epoch 8 | batch 120/1252 | loss 0.6472 | acc 0.8721 | lr 9.57e-05 | 8s
+2026-09-17 18:17:32 | INFO    | epoch 8 | batch 140/1252 | loss 0.6457 | acc 0.8699 | lr 9.56e-05 | 10s
+2026-09-17 18:17:33 | INFO    | epoch 8 | batch 160/1252 | loss 0.6474 | acc 0.8703 | lr 9.56e-05 | 11s
+2026-09-17 18:17:35 | INFO    | epoch 8 | batch 180/1252 | loss 0.6446 | acc 0.8727 | lr 9.56e-05 | 13s
+2026-09-17 18:17:36 | INFO    | epoch 8 | batch 200/1252 | loss 0.6430 | acc 0.8742 | lr 9.56e-05 | 14s
+2026-09-17 18:17:38 | INFO    | epoch 8 | batch 220/1252 | loss 0.6402 | acc 0.8770 | lr 9.55e-05 | 16s
+2026-09-17 18:17:39 | INFO    | epoch 8 | batch 240/1252 | loss 0.6389 | acc 0.8771 | lr 9.55e-05 | 17s
+2026-09-17 18:17:40 | INFO    | epoch 8 | batch 260/1252 | loss 0.6385 | acc 0.8782 | lr 9.55e-05 | 18s
+2026-09-17 18:17:42 | INFO    | epoch 8 | batch 280/1252 | loss 0.6393 | acc 0.8783 | lr 9.55e-05 | 20s
+2026-09-17 18:17:43 | INFO    | epoch 8 | batch 300/1252 | loss 0.6433 | acc 0.8754 | lr 9.54e-05 | 21s
+2026-09-17 18:17:45 | INFO    | epoch 8 | batch 320/1252 | loss 0.6421 | acc 0.8758 | lr 9.54e-05 | 23s
+2026-09-17 18:17:46 | INFO    | epoch 8 | batch 340/1252 | loss 0.6429 | acc 0.8752 | lr 9.54e-05 | 24s
+2026-09-17 18:17:47 | INFO    | epoch 8 | batch 360/1252 | loss 0.6411 | acc 0.8759 | lr 9.53e-05 | 25s
+2026-09-17 18:17:49 | INFO    | epoch 8 | batch 380/1252 | loss 0.6393 | acc 0.8765 | lr 9.53e-05 | 27s
+2026-09-17 18:17:50 | INFO    | epoch 8 | batch 400/1252 | loss 0.6376 | acc 0.8776 | lr 9.53e-05 | 28s
+2026-09-17 18:17:51 | INFO    | epoch 8 | batch 420/1252 | loss 0.6380 | acc 0.8776 | lr 9.53e-05 | 29s
+2026-09-17 18:17:53 | INFO    | epoch 8 | batch 440/1252 | loss 0.6368 | acc 0.8780 | lr 9.52e-05 | 31s
+2026-09-17 18:17:54 | INFO    | epoch 8 | batch 460/1252 | loss 0.6367 | acc 0.8777 | lr 9.52e-05 | 32s
+2026-09-17 18:17:55 | INFO    | epoch 8 | batch 480/1252 | loss 0.6374 | acc 0.8775 | lr 9.52e-05 | 33s
+2026-09-17 18:17:57 | INFO    | epoch 8 | batch 500/1252 | loss 0.6378 | acc 0.8769 | lr 9.51e-05 | 35s
+2026-09-17 18:17:58 | INFO    | epoch 8 | batch 520/1252 | loss 0.6378 | acc 0.8769 | lr 9.51e-05 | 36s
+2026-09-17 18:17:59 | INFO    | epoch 8 | batch 540/1252 | loss 0.6392 | acc 0.8764 | lr 9.51e-05 | 37s
+2026-09-17 18:18:01 | INFO    | epoch 8 | batch 560/1252 | loss 0.6381 | acc 0.8771 | lr 9.51e-05 | 39s
+2026-09-17 18:18:02 | INFO    | epoch 8 | batch 580/1252 | loss 0.6385 | acc 0.8770 | lr 9.50e-05 | 40s
+2026-09-17 18:18:03 | INFO    | epoch 8 | batch 600/1252 | loss 0.6378 | acc 0.8776 | lr 9.50e-05 | 41s
+2026-09-17 18:18:05 | INFO    | epoch 8 | batch 620/1252 | loss 0.6380 | acc 0.8771 | lr 9.50e-05 | 43s
+2026-09-17 18:18:06 | INFO    | epoch 8 | batch 640/1252 | loss 0.6384 | acc 0.8765 | lr 9.50e-05 | 44s
+2026-09-17 18:18:07 | INFO    | epoch 8 | batch 660/1252 | loss 0.6389 | acc 0.8762 | lr 9.49e-05 | 45s
+2026-09-17 18:18:09 | INFO    | epoch 8 | batch 680/1252 | loss 0.6383 | acc 0.8766 | lr 9.49e-05 | 47s
+2026-09-17 18:18:10 | INFO    | epoch 8 | batch 700/1252 | loss 0.6380 | acc 0.8767 | lr 9.49e-05 | 48s
+2026-09-17 18:18:11 | INFO    | epoch 8 | batch 720/1252 | loss 0.6378 | acc 0.8765 | lr 9.48e-05 | 49s
+2026-09-17 18:18:13 | INFO    | epoch 8 | batch 740/1252 | loss 0.6376 | acc 0.8766 | lr 9.48e-05 | 51s
+2026-09-17 18:18:14 | INFO    | epoch 8 | batch 760/1252 | loss 0.6384 | acc 0.8763 | lr 9.48e-05 | 52s
+2026-09-17 18:18:16 | INFO    | epoch 8 | batch 780/1252 | loss 0.6385 | acc 0.8761 | lr 9.47e-05 | 53s
+2026-09-17 18:18:17 | INFO    | epoch 8 | batch 800/1252 | loss 0.6385 | acc 0.8762 | lr 9.47e-05 | 55s
+2026-09-17 18:18:18 | INFO    | epoch 8 | batch 820/1252 | loss 0.6390 | acc 0.8760 | lr 9.47e-05 | 56s
+2026-09-17 18:18:20 | INFO    | epoch 8 | batch 840/1252 | loss 0.6395 | acc 0.8757 | lr 9.47e-05 | 58s
+2026-09-17 18:18:21 | INFO    | epoch 8 | batch 860/1252 | loss 0.6387 | acc 0.8763 | lr 9.46e-05 | 59s
+2026-09-17 18:18:22 | INFO    | epoch 8 | batch 880/1252 | loss 0.6379 | acc 0.8767 | lr 9.46e-05 | 60s
+2026-09-17 18:18:24 | INFO    | epoch 8 | batch 900/1252 | loss 0.6374 | acc 0.8768 | lr 9.46e-05 | 62s
+2026-09-17 18:18:25 | INFO    | epoch 8 | batch 920/1252 | loss 0.6370 | acc 0.8770 | lr 9.45e-05 | 63s
+2026-09-17 18:18:26 | INFO    | epoch 8 | batch 940/1252 | loss 0.6371 | acc 0.8767 | lr 9.45e-05 | 64s
+2026-09-17 18:18:28 | INFO    | epoch 8 | batch 960/1252 | loss 0.6369 | acc 0.8770 | lr 9.45e-05 | 66s
+2026-09-17 18:18:29 | INFO    | epoch 8 | batch 980/1252 | loss 0.6376 | acc 0.8768 | lr 9.45e-05 | 67s
+2026-09-17 18:18:31 | INFO    | epoch 8 | batch 1000/1252 | loss 0.6375 | acc 0.8770 | lr 9.44e-05 | 69s
+2026-09-17 18:18:32 | INFO    | epoch 8 | batch 1020/1252 | loss 0.6368 | acc 0.8772 | lr 9.44e-05 | 70s
+2026-09-17 18:18:34 | INFO    | epoch 8 | batch 1040/1252 | loss 0.6369 | acc 0.8771 | lr 9.44e-05 | 72s
+2026-09-17 18:18:35 | INFO    | epoch 8 | batch 1060/1252 | loss 0.6366 | acc 0.8775 | lr 9.43e-05 | 73s
+2026-09-17 18:18:36 | INFO    | epoch 8 | batch 1080/1252 | loss 0.6365 | acc 0.8775 | lr 9.43e-05 | 74s
+2026-09-17 18:18:38 | INFO    | epoch 8 | batch 1100/1252 | loss 0.6359 | acc 0.8779 | lr 9.43e-05 | 76s
+2026-09-17 18:18:39 | INFO    | epoch 8 | batch 1120/1252 | loss 0.6368 | acc 0.8775 | lr 9.42e-05 | 77s
+2026-09-17 18:18:41 | INFO    | epoch 8 | batch 1140/1252 | loss 0.6370 | acc 0.8773 | lr 9.42e-05 | 79s
+2026-09-17 18:18:42 | INFO    | epoch 8 | batch 1160/1252 | loss 0.6374 | acc 0.8771 | lr 9.42e-05 | 80s
+2026-09-17 18:18:43 | INFO    | epoch 8 | batch 1180/1252 | loss 0.6375 | acc 0.8772 | lr 9.41e-05 | 81s
+2026-09-17 18:18:45 | INFO    | epoch 8 | batch 1200/1252 | loss 0.6375 | acc 0.8771 | lr 9.41e-05 | 83s
+2026-09-17 18:18:46 | INFO    | epoch 8 | batch 1220/1252 | loss 0.6368 | acc 0.8776 | lr 9.41e-05 | 84s
+2026-09-17 18:18:48 | INFO    | epoch 8 | batch 1240/1252 | loss 0.6366 | acc 0.8778 | lr 9.41e-05 | 86s
+2026-09-17 18:18:48 | INFO    | epoch 8 | batch 1252/1252 | loss 0.6359 | acc 0.8781 | lr 9.40e-05 | 86s
+2026-09-17 18:18:58 | INFO    | epoch 8/40 done in 96s | train loss 0.6359 | train running patch (aug): accuracy=0.8781 precision=0.8749 recall=0.8708 f1=0.8727
+2026-09-17 18:18:58 | INFO    | epoch 8 train (eval, no aug) | loss 0.5253 | patch[7280]: accuracy=0.9353 precision=0.9372 recall=0.9324 f1=0.9341 | image[455]: accuracy=0.9846 precision=0.9876 recall=0.9856 f1=0.9862
+2026-09-17 18:18:58 | INFO    | epoch 8 val | loss 1.2089 | patch[8448]: accuracy=0.6649 precision=0.6553 recall=0.6411 f1=0.6423 | image[96]: accuracy=0.7188 precision=0.7122 recall=0.6897 f1=0.6937
+2026-09-17 18:18:58 | INFO    | val_patch_f1 = 0.6423 (best 0.6520 @ epoch 6)
+2026-09-17 18:19:00 | INFO    | epoch 9 | batch 20/1252 | loss 0.6027 | acc 0.9031 | lr 9.40e-05 | 1s
+2026-09-17 18:19:01 | INFO    | epoch 9 | batch 40/1252 | loss 0.5948 | acc 0.8977 | lr 9.40e-05 | 3s
+2026-09-17 18:19:02 | INFO    | epoch 9 | batch 60/1252 | loss 0.5929 | acc 0.9000 | lr 9.39e-05 | 4s
+2026-09-17 18:19:04 | INFO    | epoch 9 | batch 80/1252 | loss 0.5993 | acc 0.8930 | lr 9.39e-05 | 6s
+2026-09-17 18:19:05 | INFO    | epoch 9 | batch 100/1252 | loss 0.6011 | acc 0.8922 | lr 9.39e-05 | 7s
+2026-09-17 18:19:07 | INFO    | epoch 9 | batch 120/1252 | loss 0.5972 | acc 0.8945 | lr 9.38e-05 | 8s
+2026-09-17 18:19:08 | INFO    | epoch 9 | batch 140/1252 | loss 0.6018 | acc 0.8931 | lr 9.38e-05 | 10s
+2026-09-17 18:19:09 | INFO    | epoch 9 | batch 160/1252 | loss 0.6022 | acc 0.8945 | lr 9.38e-05 | 11s
+2026-09-17 18:19:11 | INFO    | epoch 9 | batch 180/1252 | loss 0.6049 | acc 0.8934 | lr 9.38e-05 | 13s
+2026-09-17 18:19:12 | INFO    | epoch 9 | batch 200/1252 | loss 0.6043 | acc 0.8942 | lr 9.37e-05 | 14s
+2026-09-17 18:19:14 | INFO    | epoch 9 | batch 220/1252 | loss 0.6049 | acc 0.8933 | lr 9.37e-05 | 15s
+2026-09-17 18:19:15 | INFO    | epoch 9 | batch 240/1252 | loss 0.6043 | acc 0.8947 | lr 9.37e-05 | 17s
+2026-09-17 18:19:16 | INFO    | epoch 9 | batch 260/1252 | loss 0.6040 | acc 0.8957 | lr 9.36e-05 | 18s
+2026-09-17 18:19:18 | INFO    | epoch 9 | batch 280/1252 | loss 0.6046 | acc 0.8952 | lr 9.36e-05 | 20s
+2026-09-17 18:19:19 | INFO    | epoch 9 | batch 300/1252 | loss 0.6066 | acc 0.8942 | lr 9.36e-05 | 21s
+2026-09-17 18:19:21 | INFO    | epoch 9 | batch 320/1252 | loss 0.6070 | acc 0.8944 | lr 9.35e-05 | 22s
+2026-09-17 18:19:22 | INFO    | epoch 9 | batch 340/1252 | loss 0.6073 | acc 0.8943 | lr 9.35e-05 | 24s
+2026-09-17 18:19:23 | INFO    | epoch 9 | batch 360/1252 | loss 0.6070 | acc 0.8949 | lr 9.35e-05 | 25s
+2026-09-17 18:19:25 | INFO    | epoch 9 | batch 380/1252 | loss 0.6067 | acc 0.8947 | lr 9.34e-05 | 27s
+2026-09-17 18:19:26 | INFO    | epoch 9 | batch 400/1252 | loss 0.6093 | acc 0.8934 | lr 9.34e-05 | 28s
+2026-09-17 18:19:28 | INFO    | epoch 9 | batch 420/1252 | loss 0.6108 | acc 0.8925 | lr 9.34e-05 | 29s
+2026-09-17 18:19:29 | INFO    | epoch 9 | batch 440/1252 | loss 0.6108 | acc 0.8919 | lr 9.33e-05 | 31s
+2026-09-17 18:19:30 | INFO    | epoch 9 | batch 460/1252 | loss 0.6106 | acc 0.8923 | lr 9.33e-05 | 32s
+2026-09-17 18:19:32 | INFO    | epoch 9 | batch 480/1252 | loss 0.6103 | acc 0.8931 | lr 9.33e-05 | 34s
+2026-09-17 18:19:33 | INFO    | epoch 9 | batch 500/1252 | loss 0.6104 | acc 0.8932 | lr 9.32e-05 | 35s
+2026-09-17 18:19:35 | INFO    | epoch 9 | batch 520/1252 | loss 0.6106 | acc 0.8930 | lr 9.32e-05 | 36s
+2026-09-17 18:19:36 | INFO    | epoch 9 | batch 540/1252 | loss 0.6116 | acc 0.8922 | lr 9.32e-05 | 38s
+2026-09-17 18:19:37 | INFO    | epoch 9 | batch 560/1252 | loss 0.6121 | acc 0.8924 | lr 9.31e-05 | 39s
+2026-09-17 18:19:39 | INFO    | epoch 9 | batch 580/1252 | loss 0.6124 | acc 0.8920 | lr 9.31e-05 | 41s
+2026-09-17 18:19:40 | INFO    | epoch 9 | batch 600/1252 | loss 0.6124 | acc 0.8918 | lr 9.31e-05 | 42s
+2026-09-17 18:19:42 | INFO    | epoch 9 | batch 620/1252 | loss 0.6121 | acc 0.8920 | lr 9.30e-05 | 44s
+2026-09-17 18:19:43 | INFO    | epoch 9 | batch 640/1252 | loss 0.6123 | acc 0.8918 | lr 9.30e-05 | 45s
+2026-09-17 18:19:45 | INFO    | epoch 9 | batch 660/1252 | loss 0.6129 | acc 0.8913 | lr 9.30e-05 | 46s
+2026-09-17 18:19:46 | INFO    | epoch 9 | batch 680/1252 | loss 0.6123 | acc 0.8914 | lr 9.29e-05 | 48s
+2026-09-17 18:19:48 | INFO    | epoch 9 | batch 700/1252 | loss 0.6112 | acc 0.8917 | lr 9.29e-05 | 49s
+2026-09-17 18:19:49 | INFO    | epoch 9 | batch 720/1252 | loss 0.6116 | acc 0.8918 | lr 9.29e-05 | 51s
+2026-09-17 18:19:51 | INFO    | epoch 9 | batch 740/1252 | loss 0.6120 | acc 0.8917 | lr 9.28e-05 | 52s
+2026-09-17 18:19:52 | INFO    | epoch 9 | batch 760/1252 | loss 0.6115 | acc 0.8920 | lr 9.28e-05 | 54s
+2026-09-17 18:19:53 | INFO    | epoch 9 | batch 780/1252 | loss 0.6102 | acc 0.8928 | lr 9.28e-05 | 55s
+2026-09-17 18:19:55 | INFO    | epoch 9 | batch 800/1252 | loss 0.6097 | acc 0.8932 | lr 9.27e-05 | 57s
+2026-09-17 18:19:56 | INFO    | epoch 9 | batch 820/1252 | loss 0.6105 | acc 0.8930 | lr 9.27e-05 | 58s
+2026-09-17 18:19:58 | INFO    | epoch 9 | batch 840/1252 | loss 0.6102 | acc 0.8932 | lr 9.27e-05 | 60s
+2026-09-17 18:19:59 | INFO    | epoch 9 | batch 860/1252 | loss 0.6100 | acc 0.8931 | lr 9.26e-05 | 61s
+2026-09-17 18:20:01 | INFO    | epoch 9 | batch 880/1252 | loss 0.6106 | acc 0.8928 | lr 9.26e-05 | 63s
+2026-09-17 18:20:02 | INFO    | epoch 9 | batch 900/1252 | loss 0.6102 | acc 0.8930 | lr 9.26e-05 | 64s
+2026-09-17 18:20:04 | INFO    | epoch 9 | batch 920/1252 | loss 0.6100 | acc 0.8933 | lr 9.25e-05 | 65s
+2026-09-17 18:20:05 | INFO    | epoch 9 | batch 940/1252 | loss 0.6105 | acc 0.8930 | lr 9.25e-05 | 67s
+2026-09-17 18:20:06 | INFO    | epoch 9 | batch 960/1252 | loss 0.6106 | acc 0.8929 | lr 9.25e-05 | 68s
+2026-09-17 18:20:08 | INFO    | epoch 9 | batch 980/1252 | loss 0.6109 | acc 0.8924 | lr 9.24e-05 | 70s
+2026-09-17 18:20:09 | INFO    | epoch 9 | batch 1000/1252 | loss 0.6110 | acc 0.8924 | lr 9.24e-05 | 71s
+2026-09-17 18:20:11 | INFO    | epoch 9 | batch 1020/1252 | loss 0.6109 | acc 0.8922 | lr 9.23e-05 | 72s
+2026-09-17 18:20:12 | INFO    | epoch 9 | batch 1040/1252 | loss 0.6114 | acc 0.8921 | lr 9.23e-05 | 74s
+2026-09-17 18:20:14 | INFO    | epoch 9 | batch 1060/1252 | loss 0.6110 | acc 0.8925 | lr 9.23e-05 | 75s
+2026-09-17 18:20:15 | INFO    | epoch 9 | batch 1080/1252 | loss 0.6101 | acc 0.8929 | lr 9.22e-05 | 77s
+2026-09-17 18:20:16 | INFO    | epoch 9 | batch 1100/1252 | loss 0.6101 | acc 0.8930 | lr 9.22e-05 | 78s
+2026-09-17 18:20:18 | INFO    | epoch 9 | batch 1120/1252 | loss 0.6096 | acc 0.8932 | lr 9.22e-05 | 79s
+2026-09-17 18:20:19 | INFO    | epoch 9 | batch 1140/1252 | loss 0.6093 | acc 0.8934 | lr 9.21e-05 | 81s
+2026-09-17 18:20:20 | INFO    | epoch 9 | batch 1160/1252 | loss 0.6094 | acc 0.8934 | lr 9.21e-05 | 82s
+2026-09-17 18:20:22 | INFO    | epoch 9 | batch 1180/1252 | loss 0.6093 | acc 0.8932 | lr 9.21e-05 | 84s
+2026-09-17 18:20:23 | INFO    | epoch 9 | batch 1200/1252 | loss 0.6094 | acc 0.8933 | lr 9.20e-05 | 85s
+2026-09-17 18:20:25 | INFO    | epoch 9 | batch 1220/1252 | loss 0.6092 | acc 0.8935 | lr 9.20e-05 | 86s
+2026-09-17 18:20:26 | INFO    | epoch 9 | batch 1240/1252 | loss 0.6089 | acc 0.8936 | lr 9.20e-05 | 88s
+2026-09-17 18:20:27 | INFO    | epoch 9 | batch 1252/1252 | loss 0.6083 | acc 0.8939 | lr 9.19e-05 | 88s
+2026-09-17 18:20:37 | INFO    | epoch 9/40 done in 98s | train loss 0.6083 | train running patch (aug): accuracy=0.8939 precision=0.8920 recall=0.8878 f1=0.8897
+2026-09-17 18:20:37 | INFO    | epoch 9 train (eval, no aug) | loss 0.4760 | patch[7280]: accuracy=0.9632 precision=0.9624 recall=0.9627 f1=0.9624 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:20:37 | INFO    | epoch 9 val | loss 1.1852 | patch[8448]: accuracy=0.6793 precision=0.6598 recall=0.6564 f1=0.6568 | image[96]: accuracy=0.7396 precision=0.7122 recall=0.7089 f1=0.7092
+2026-09-17 18:20:37 | INFO    | val_patch_f1 = 0.6568 (best 0.6568 @ epoch 9) *
+2026-09-17 18:20:38 | INFO    | epoch 10 | batch 20/1252 | loss 0.5674 | acc 0.9250 | lr 9.19e-05 | 1s
+2026-09-17 18:20:39 | INFO    | epoch 10 | batch 40/1252 | loss 0.5637 | acc 0.9211 | lr 9.19e-05 | 3s
+2026-09-17 18:20:41 | INFO    | epoch 10 | batch 60/1252 | loss 0.5730 | acc 0.9146 | lr 9.18e-05 | 4s
+2026-09-17 18:20:42 | INFO    | epoch 10 | batch 80/1252 | loss 0.5775 | acc 0.9133 | lr 9.18e-05 | 6s
+2026-09-17 18:20:44 | INFO    | epoch 10 | batch 100/1252 | loss 0.5840 | acc 0.9066 | lr 9.18e-05 | 7s
+2026-09-17 18:20:45 | INFO    | epoch 10 | batch 120/1252 | loss 0.5841 | acc 0.9073 | lr 9.17e-05 | 9s
+2026-09-17 18:20:47 | INFO    | epoch 10 | batch 140/1252 | loss 0.5818 | acc 0.9092 | lr 9.17e-05 | 10s
+2026-09-17 18:20:48 | INFO    | epoch 10 | batch 160/1252 | loss 0.5837 | acc 0.9078 | lr 9.17e-05 | 11s
+2026-09-17 18:20:49 | INFO    | epoch 10 | batch 180/1252 | loss 0.5797 | acc 0.9101 | lr 9.16e-05 | 13s
+2026-09-17 18:20:51 | INFO    | epoch 10 | batch 200/1252 | loss 0.5813 | acc 0.9087 | lr 9.16e-05 | 14s
+2026-09-17 18:20:52 | INFO    | epoch 10 | batch 220/1252 | loss 0.5835 | acc 0.9065 | lr 9.15e-05 | 16s
+2026-09-17 18:20:54 | INFO    | epoch 10 | batch 240/1252 | loss 0.5821 | acc 0.9073 | lr 9.15e-05 | 17s
+2026-09-17 18:20:55 | INFO    | epoch 10 | batch 260/1252 | loss 0.5829 | acc 0.9062 | lr 9.15e-05 | 18s
+2026-09-17 18:20:56 | INFO    | epoch 10 | batch 280/1252 | loss 0.5809 | acc 0.9077 | lr 9.14e-05 | 20s
+2026-09-17 18:20:58 | INFO    | epoch 10 | batch 300/1252 | loss 0.5816 | acc 0.9077 | lr 9.14e-05 | 21s
+2026-09-17 18:20:59 | INFO    | epoch 10 | batch 320/1252 | loss 0.5817 | acc 0.9079 | lr 9.14e-05 | 23s
+2026-09-17 18:21:01 | INFO    | epoch 10 | batch 340/1252 | loss 0.5840 | acc 0.9067 | lr 9.13e-05 | 24s
+2026-09-17 18:21:02 | INFO    | epoch 10 | batch 360/1252 | loss 0.5836 | acc 0.9069 | lr 9.13e-05 | 25s
+2026-09-17 18:21:03 | INFO    | epoch 10 | batch 380/1252 | loss 0.5820 | acc 0.9078 | lr 9.12e-05 | 27s
+2026-09-17 18:21:05 | INFO    | epoch 10 | batch 400/1252 | loss 0.5839 | acc 0.9065 | lr 9.12e-05 | 28s
+2026-09-17 18:21:06 | INFO    | epoch 10 | batch 420/1252 | loss 0.5832 | acc 0.9069 | lr 9.12e-05 | 29s
+2026-09-17 18:21:07 | INFO    | epoch 10 | batch 440/1252 | loss 0.5845 | acc 0.9062 | lr 9.11e-05 | 31s
+2026-09-17 18:21:09 | INFO    | epoch 10 | batch 460/1252 | loss 0.5851 | acc 0.9058 | lr 9.11e-05 | 32s
+2026-09-17 18:21:10 | INFO    | epoch 10 | batch 480/1252 | loss 0.5852 | acc 0.9057 | lr 9.11e-05 | 34s
+2026-09-17 18:21:12 | INFO    | epoch 10 | batch 500/1252 | loss 0.5847 | acc 0.9062 | lr 9.10e-05 | 35s
+2026-09-17 18:21:13 | INFO    | epoch 10 | batch 520/1252 | loss 0.5846 | acc 0.9062 | lr 9.10e-05 | 36s
+2026-09-17 18:21:14 | INFO    | epoch 10 | batch 540/1252 | loss 0.5839 | acc 0.9071 | lr 9.09e-05 | 38s
+2026-09-17 18:21:16 | INFO    | epoch 10 | batch 560/1252 | loss 0.5844 | acc 0.9066 | lr 9.09e-05 | 39s
+2026-09-17 18:21:17 | INFO    | epoch 10 | batch 580/1252 | loss 0.5850 | acc 0.9065 | lr 9.09e-05 | 41s
+2026-09-17 18:21:19 | INFO    | epoch 10 | batch 600/1252 | loss 0.5850 | acc 0.9065 | lr 9.08e-05 | 42s
+2026-09-17 18:21:20 | INFO    | epoch 10 | batch 620/1252 | loss 0.5849 | acc 0.9071 | lr 9.08e-05 | 44s
+2026-09-17 18:21:22 | INFO    | epoch 10 | batch 640/1252 | loss 0.5854 | acc 0.9068 | lr 9.08e-05 | 45s
+2026-09-17 18:21:23 | INFO    | epoch 10 | batch 660/1252 | loss 0.5851 | acc 0.9071 | lr 9.07e-05 | 46s
+2026-09-17 18:21:24 | INFO    | epoch 10 | batch 680/1252 | loss 0.5849 | acc 0.9072 | lr 9.07e-05 | 48s
+2026-09-17 18:21:26 | INFO    | epoch 10 | batch 700/1252 | loss 0.5853 | acc 0.9072 | lr 9.06e-05 | 49s
+2026-09-17 18:21:27 | INFO    | epoch 10 | batch 720/1252 | loss 0.5862 | acc 0.9066 | lr 9.06e-05 | 51s
+2026-09-17 18:21:29 | INFO    | epoch 10 | batch 740/1252 | loss 0.5862 | acc 0.9064 | lr 9.06e-05 | 52s
+2026-09-17 18:21:30 | INFO    | epoch 10 | batch 760/1252 | loss 0.5861 | acc 0.9060 | lr 9.05e-05 | 53s
+2026-09-17 18:21:31 | INFO    | epoch 10 | batch 780/1252 | loss 0.5860 | acc 0.9061 | lr 9.05e-05 | 55s
+2026-09-17 18:21:33 | INFO    | epoch 10 | batch 800/1252 | loss 0.5850 | acc 0.9066 | lr 9.05e-05 | 56s
+2026-09-17 18:21:34 | INFO    | epoch 10 | batch 820/1252 | loss 0.5857 | acc 0.9063 | lr 9.04e-05 | 58s
+2026-09-17 18:21:36 | INFO    | epoch 10 | batch 840/1252 | loss 0.5856 | acc 0.9063 | lr 9.04e-05 | 59s
+2026-09-17 18:21:37 | INFO    | epoch 10 | batch 860/1252 | loss 0.5856 | acc 0.9064 | lr 9.03e-05 | 61s
+2026-09-17 18:21:39 | INFO    | epoch 10 | batch 880/1252 | loss 0.5854 | acc 0.9064 | lr 9.03e-05 | 62s
+2026-09-17 18:21:40 | INFO    | epoch 10 | batch 900/1252 | loss 0.5852 | acc 0.9065 | lr 9.03e-05 | 63s
+2026-09-17 18:21:41 | INFO    | epoch 10 | batch 920/1252 | loss 0.5857 | acc 0.9061 | lr 9.02e-05 | 65s
+2026-09-17 18:21:43 | INFO    | epoch 10 | batch 940/1252 | loss 0.5854 | acc 0.9061 | lr 9.02e-05 | 66s
+2026-09-17 18:21:44 | INFO    | epoch 10 | batch 960/1252 | loss 0.5852 | acc 0.9062 | lr 9.01e-05 | 67s
+2026-09-17 18:21:45 | INFO    | epoch 10 | batch 980/1252 | loss 0.5852 | acc 0.9060 | lr 9.01e-05 | 69s
+2026-09-17 18:21:47 | INFO    | epoch 10 | batch 1000/1252 | loss 0.5856 | acc 0.9058 | lr 9.01e-05 | 70s
+2026-09-17 18:21:48 | INFO    | epoch 10 | batch 1020/1252 | loss 0.5855 | acc 0.9056 | lr 9.00e-05 | 72s
+2026-09-17 18:21:49 | INFO    | epoch 10 | batch 1040/1252 | loss 0.5855 | acc 0.9057 | lr 9.00e-05 | 73s
+2026-09-17 18:21:51 | INFO    | epoch 10 | batch 1060/1252 | loss 0.5859 | acc 0.9054 | lr 8.99e-05 | 74s
+2026-09-17 18:21:52 | INFO    | epoch 10 | batch 1080/1252 | loss 0.5866 | acc 0.9051 | lr 8.99e-05 | 76s
+2026-09-17 18:21:54 | INFO    | epoch 10 | batch 1100/1252 | loss 0.5862 | acc 0.9051 | lr 8.99e-05 | 77s
+2026-09-17 18:21:55 | INFO    | epoch 10 | batch 1120/1252 | loss 0.5870 | acc 0.9045 | lr 8.98e-05 | 78s
+2026-09-17 18:21:56 | INFO    | epoch 10 | batch 1140/1252 | loss 0.5866 | acc 0.9050 | lr 8.98e-05 | 80s
+2026-09-17 18:21:58 | INFO    | epoch 10 | batch 1160/1252 | loss 0.5858 | acc 0.9054 | lr 8.97e-05 | 81s
+2026-09-17 18:21:59 | INFO    | epoch 10 | batch 1180/1252 | loss 0.5861 | acc 0.9052 | lr 8.97e-05 | 83s
+2026-09-17 18:22:01 | INFO    | epoch 10 | batch 1200/1252 | loss 0.5856 | acc 0.9055 | lr 8.97e-05 | 84s
+2026-09-17 18:22:02 | INFO    | epoch 10 | batch 1220/1252 | loss 0.5851 | acc 0.9055 | lr 8.96e-05 | 85s
+2026-09-17 18:22:03 | INFO    | epoch 10 | batch 1240/1252 | loss 0.5854 | acc 0.9052 | lr 8.96e-05 | 87s
+2026-09-17 18:22:04 | INFO    | epoch 10 | batch 1252/1252 | loss 0.5856 | acc 0.9051 | lr 8.96e-05 | 87s
+2026-09-17 18:22:14 | INFO    | epoch 10/40 done in 97s | train loss 0.5856 | train running patch (aug): accuracy=0.9051 precision=0.9032 recall=0.8997 f1=0.9013
+2026-09-17 18:22:14 | INFO    | epoch 10 train (eval, no aug) | loss 0.4774 | patch[7280]: accuracy=0.9598 precision=0.9603 recall=0.9559 f1=0.9578 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:22:14 | INFO    | epoch 10 val | loss 1.1534 | patch[8448]: accuracy=0.6843 precision=0.6645 recall=0.6540 f1=0.6557 | image[96]: accuracy=0.7500 precision=0.7210 recall=0.7104 f1=0.7094
+2026-09-17 18:22:14 | INFO    | val_patch_f1 = 0.6557 (best 0.6568 @ epoch 9)
+2026-09-17 18:22:15 | INFO    | epoch 11 | batch 20/1252 | loss 0.5899 | acc 0.9016 | lr 8.95e-05 | 1s
+2026-09-17 18:22:17 | INFO    | epoch 11 | batch 40/1252 | loss 0.5771 | acc 0.9078 | lr 8.95e-05 | 3s
+2026-09-17 18:22:18 | INFO    | epoch 11 | batch 60/1252 | loss 0.5710 | acc 0.9078 | lr 8.94e-05 | 4s
+2026-09-17 18:22:20 | INFO    | epoch 11 | batch 80/1252 | loss 0.5681 | acc 0.9109 | lr 8.94e-05 | 6s
+2026-09-17 18:22:21 | INFO    | epoch 11 | batch 100/1252 | loss 0.5708 | acc 0.9109 | lr 8.94e-05 | 7s
+2026-09-17 18:22:23 | INFO    | epoch 11 | batch 120/1252 | loss 0.5687 | acc 0.9125 | lr 8.93e-05 | 9s
+2026-09-17 18:22:24 | INFO    | epoch 11 | batch 140/1252 | loss 0.5685 | acc 0.9132 | lr 8.93e-05 | 10s
+2026-09-17 18:22:25 | INFO    | epoch 11 | batch 160/1252 | loss 0.5700 | acc 0.9125 | lr 8.92e-05 | 11s
+2026-09-17 18:22:27 | INFO    | epoch 11 | batch 180/1252 | loss 0.5711 | acc 0.9115 | lr 8.92e-05 | 13s
+2026-09-17 18:22:28 | INFO    | epoch 11 | batch 200/1252 | loss 0.5722 | acc 0.9109 | lr 8.92e-05 | 14s
+2026-09-17 18:22:30 | INFO    | epoch 11 | batch 220/1252 | loss 0.5750 | acc 0.9105 | lr 8.91e-05 | 16s
+2026-09-17 18:22:31 | INFO    | epoch 11 | batch 240/1252 | loss 0.5750 | acc 0.9099 | lr 8.91e-05 | 17s
+2026-09-17 18:22:32 | INFO    | epoch 11 | batch 260/1252 | loss 0.5747 | acc 0.9100 | lr 8.90e-05 | 19s
+2026-09-17 18:22:34 | INFO    | epoch 11 | batch 280/1252 | loss 0.5762 | acc 0.9099 | lr 8.90e-05 | 20s
+2026-09-17 18:22:35 | INFO    | epoch 11 | batch 300/1252 | loss 0.5745 | acc 0.9106 | lr 8.90e-05 | 21s
+2026-09-17 18:22:36 | INFO    | epoch 11 | batch 320/1252 | loss 0.5735 | acc 0.9115 | lr 8.89e-05 | 23s
+2026-09-17 18:22:38 | INFO    | epoch 11 | batch 340/1252 | loss 0.5728 | acc 0.9125 | lr 8.89e-05 | 24s
+2026-09-17 18:22:39 | INFO    | epoch 11 | batch 360/1252 | loss 0.5705 | acc 0.9138 | lr 8.88e-05 | 25s
+2026-09-17 18:22:41 | INFO    | epoch 11 | batch 380/1252 | loss 0.5705 | acc 0.9140 | lr 8.88e-05 | 27s
+2026-09-17 18:22:42 | INFO    | epoch 11 | batch 400/1252 | loss 0.5694 | acc 0.9146 | lr 8.87e-05 | 28s
+2026-09-17 18:22:44 | INFO    | epoch 11 | batch 420/1252 | loss 0.5704 | acc 0.9142 | lr 8.87e-05 | 30s
+2026-09-17 18:22:45 | INFO    | epoch 11 | batch 440/1252 | loss 0.5717 | acc 0.9138 | lr 8.87e-05 | 31s
+2026-09-17 18:22:46 | INFO    | epoch 11 | batch 460/1252 | loss 0.5719 | acc 0.9143 | lr 8.86e-05 | 33s
+2026-09-17 18:22:48 | INFO    | epoch 11 | batch 480/1252 | loss 0.5714 | acc 0.9145 | lr 8.86e-05 | 34s
+2026-09-17 18:22:49 | INFO    | epoch 11 | batch 500/1252 | loss 0.5718 | acc 0.9141 | lr 8.85e-05 | 35s
+2026-09-17 18:22:51 | INFO    | epoch 11 | batch 520/1252 | loss 0.5721 | acc 0.9139 | lr 8.85e-05 | 37s
+2026-09-17 18:22:52 | INFO    | epoch 11 | batch 540/1252 | loss 0.5718 | acc 0.9142 | lr 8.85e-05 | 38s
+2026-09-17 18:22:54 | INFO    | epoch 11 | batch 560/1252 | loss 0.5721 | acc 0.9137 | lr 8.84e-05 | 40s
+2026-09-17 18:22:55 | INFO    | epoch 11 | batch 580/1252 | loss 0.5724 | acc 0.9135 | lr 8.84e-05 | 41s
+2026-09-17 18:22:56 | INFO    | epoch 11 | batch 600/1252 | loss 0.5734 | acc 0.9130 | lr 8.83e-05 | 43s
+2026-09-17 18:22:58 | INFO    | epoch 11 | batch 620/1252 | loss 0.5730 | acc 0.9134 | lr 8.83e-05 | 44s
+2026-09-17 18:22:59 | INFO    | epoch 11 | batch 640/1252 | loss 0.5716 | acc 0.9138 | lr 8.82e-05 | 45s
+2026-09-17 18:23:01 | INFO    | epoch 11 | batch 660/1252 | loss 0.5704 | acc 0.9143 | lr 8.82e-05 | 47s
+2026-09-17 18:23:02 | INFO    | epoch 11 | batch 680/1252 | loss 0.5704 | acc 0.9142 | lr 8.82e-05 | 48s
+2026-09-17 18:23:03 | INFO    | epoch 11 | batch 700/1252 | loss 0.5695 | acc 0.9147 | lr 8.81e-05 | 49s
+2026-09-17 18:23:05 | INFO    | epoch 11 | batch 720/1252 | loss 0.5693 | acc 0.9146 | lr 8.81e-05 | 51s
+2026-09-17 18:23:06 | INFO    | epoch 11 | batch 740/1252 | loss 0.5691 | acc 0.9147 | lr 8.80e-05 | 52s
+2026-09-17 18:23:08 | INFO    | epoch 11 | batch 760/1252 | loss 0.5678 | acc 0.9154 | lr 8.80e-05 | 54s
+2026-09-17 18:23:09 | INFO    | epoch 11 | batch 780/1252 | loss 0.5675 | acc 0.9154 | lr 8.79e-05 | 55s
+2026-09-17 18:23:10 | INFO    | epoch 11 | batch 800/1252 | loss 0.5678 | acc 0.9152 | lr 8.79e-05 | 56s
+2026-09-17 18:23:12 | INFO    | epoch 11 | batch 820/1252 | loss 0.5679 | acc 0.9150 | lr 8.79e-05 | 58s
+2026-09-17 18:23:13 | INFO    | epoch 11 | batch 840/1252 | loss 0.5684 | acc 0.9147 | lr 8.78e-05 | 59s
+2026-09-17 18:23:14 | INFO    | epoch 11 | batch 860/1252 | loss 0.5685 | acc 0.9143 | lr 8.78e-05 | 60s
+2026-09-17 18:23:16 | INFO    | epoch 11 | batch 880/1252 | loss 0.5686 | acc 0.9141 | lr 8.77e-05 | 62s
+2026-09-17 18:23:17 | INFO    | epoch 11 | batch 900/1252 | loss 0.5681 | acc 0.9145 | lr 8.77e-05 | 63s
+2026-09-17 18:23:19 | INFO    | epoch 11 | batch 920/1252 | loss 0.5674 | acc 0.9147 | lr 8.76e-05 | 65s
+2026-09-17 18:23:20 | INFO    | epoch 11 | batch 940/1252 | loss 0.5676 | acc 0.9146 | lr 8.76e-05 | 66s
+2026-09-17 18:23:22 | INFO    | epoch 11 | batch 960/1252 | loss 0.5670 | acc 0.9147 | lr 8.76e-05 | 68s
+2026-09-17 18:23:23 | INFO    | epoch 11 | batch 980/1252 | loss 0.5670 | acc 0.9149 | lr 8.75e-05 | 69s
+2026-09-17 18:23:24 | INFO    | epoch 11 | batch 1000/1252 | loss 0.5666 | acc 0.9150 | lr 8.75e-05 | 71s
+2026-09-17 18:23:26 | INFO    | epoch 11 | batch 1020/1252 | loss 0.5664 | acc 0.9151 | lr 8.74e-05 | 72s
+2026-09-17 18:23:27 | INFO    | epoch 11 | batch 1040/1252 | loss 0.5660 | acc 0.9153 | lr 8.74e-05 | 73s
+2026-09-17 18:23:29 | INFO    | epoch 11 | batch 1060/1252 | loss 0.5664 | acc 0.9150 | lr 8.73e-05 | 75s
+2026-09-17 18:23:30 | INFO    | epoch 11 | batch 1080/1252 | loss 0.5669 | acc 0.9148 | lr 8.73e-05 | 76s
+2026-09-17 18:23:31 | INFO    | epoch 11 | batch 1100/1252 | loss 0.5671 | acc 0.9147 | lr 8.73e-05 | 77s
+2026-09-17 18:23:33 | INFO    | epoch 11 | batch 1120/1252 | loss 0.5672 | acc 0.9145 | lr 8.72e-05 | 79s
+2026-09-17 18:23:34 | INFO    | epoch 11 | batch 1140/1252 | loss 0.5672 | acc 0.9145 | lr 8.72e-05 | 80s
+2026-09-17 18:23:36 | INFO    | epoch 11 | batch 1160/1252 | loss 0.5669 | acc 0.9145 | lr 8.71e-05 | 82s
+2026-09-17 18:23:37 | INFO    | epoch 11 | batch 1180/1252 | loss 0.5674 | acc 0.9143 | lr 8.71e-05 | 83s
+2026-09-17 18:23:39 | INFO    | epoch 11 | batch 1200/1252 | loss 0.5676 | acc 0.9142 | lr 8.70e-05 | 85s
+2026-09-17 18:23:40 | INFO    | epoch 11 | batch 1220/1252 | loss 0.5675 | acc 0.9142 | lr 8.70e-05 | 86s
+2026-09-17 18:23:41 | INFO    | epoch 11 | batch 1240/1252 | loss 0.5667 | acc 0.9147 | lr 8.69e-05 | 88s
+2026-09-17 18:23:42 | INFO    | epoch 11 | batch 1252/1252 | loss 0.5666 | acc 0.9147 | lr 8.69e-05 | 88s
+2026-09-17 18:23:52 | INFO    | epoch 11/40 done in 98s | train loss 0.5666 | train running patch (aug): accuracy=0.9147 precision=0.9129 recall=0.9101 f1=0.9114
+2026-09-17 18:23:52 | INFO    | epoch 11 train (eval, no aug) | loss 0.4823 | patch[7280]: accuracy=0.9569 precision=0.9570 recall=0.9570 f1=0.9567 | image[455]: accuracy=0.9978 precision=0.9981 recall=0.9977 f1=0.9979
+2026-09-17 18:23:52 | INFO    | epoch 11 val | loss 1.2783 | patch[8448]: accuracy=0.6370 precision=0.6253 recall=0.6157 f1=0.6167 | image[96]: accuracy=0.6771 precision=0.6586 recall=0.6449 f1=0.6475
+2026-09-17 18:23:52 | INFO    | val_patch_f1 = 0.6167 (best 0.6568 @ epoch 9)
+2026-09-17 18:23:53 | INFO    | epoch 12 | batch 20/1252 | loss 0.5606 | acc 0.9219 | lr 8.69e-05 | 1s
+2026-09-17 18:23:55 | INFO    | epoch 12 | batch 40/1252 | loss 0.5580 | acc 0.9227 | lr 8.68e-05 | 3s
+2026-09-17 18:23:56 | INFO    | epoch 12 | batch 60/1252 | loss 0.5526 | acc 0.9245 | lr 8.68e-05 | 4s
+2026-09-17 18:23:58 | INFO    | epoch 12 | batch 80/1252 | loss 0.5483 | acc 0.9254 | lr 8.67e-05 | 6s
+2026-09-17 18:23:59 | INFO    | epoch 12 | batch 100/1252 | loss 0.5450 | acc 0.9256 | lr 8.67e-05 | 7s
+2026-09-17 18:24:00 | INFO    | epoch 12 | batch 120/1252 | loss 0.5439 | acc 0.9281 | lr 8.67e-05 | 9s
+2026-09-17 18:24:02 | INFO    | epoch 12 | batch 140/1252 | loss 0.5449 | acc 0.9288 | lr 8.66e-05 | 10s
+2026-09-17 18:24:03 | INFO    | epoch 12 | batch 160/1252 | loss 0.5459 | acc 0.9264 | lr 8.66e-05 | 11s
+2026-09-17 18:24:05 | INFO    | epoch 12 | batch 180/1252 | loss 0.5493 | acc 0.9257 | lr 8.65e-05 | 13s
+2026-09-17 18:24:06 | INFO    | epoch 12 | batch 200/1252 | loss 0.5454 | acc 0.9259 | lr 8.65e-05 | 14s
+2026-09-17 18:24:07 | INFO    | epoch 12 | batch 220/1252 | loss 0.5451 | acc 0.9261 | lr 8.64e-05 | 16s
+2026-09-17 18:24:09 | INFO    | epoch 12 | batch 240/1252 | loss 0.5460 | acc 0.9251 | lr 8.64e-05 | 17s
+2026-09-17 18:24:10 | INFO    | epoch 12 | batch 260/1252 | loss 0.5469 | acc 0.9252 | lr 8.63e-05 | 18s
+2026-09-17 18:24:12 | INFO    | epoch 12 | batch 280/1252 | loss 0.5483 | acc 0.9243 | lr 8.63e-05 | 20s
+2026-09-17 18:24:13 | INFO    | epoch 12 | batch 300/1252 | loss 0.5475 | acc 0.9247 | lr 8.62e-05 | 21s
+2026-09-17 18:24:15 | INFO    | epoch 12 | batch 320/1252 | loss 0.5479 | acc 0.9247 | lr 8.62e-05 | 23s
+2026-09-17 18:24:16 | INFO    | epoch 12 | batch 340/1252 | loss 0.5477 | acc 0.9247 | lr 8.62e-05 | 24s
+2026-09-17 18:24:17 | INFO    | epoch 12 | batch 360/1252 | loss 0.5475 | acc 0.9247 | lr 8.61e-05 | 25s
+2026-09-17 18:24:19 | INFO    | epoch 12 | batch 380/1252 | loss 0.5474 | acc 0.9249 | lr 8.61e-05 | 27s
+2026-09-17 18:24:20 | INFO    | epoch 12 | batch 400/1252 | loss 0.5482 | acc 0.9250 | lr 8.60e-05 | 28s
+2026-09-17 18:24:22 | INFO    | epoch 12 | batch 420/1252 | loss 0.5480 | acc 0.9255 | lr 8.60e-05 | 30s
+2026-09-17 18:24:23 | INFO    | epoch 12 | batch 440/1252 | loss 0.5495 | acc 0.9245 | lr 8.59e-05 | 31s
+2026-09-17 18:24:25 | INFO    | epoch 12 | batch 460/1252 | loss 0.5500 | acc 0.9243 | lr 8.59e-05 | 33s
+2026-09-17 18:24:26 | INFO    | epoch 12 | batch 480/1252 | loss 0.5509 | acc 0.9240 | lr 8.58e-05 | 34s
+2026-09-17 18:24:27 | INFO    | epoch 12 | batch 500/1252 | loss 0.5511 | acc 0.9239 | lr 8.58e-05 | 35s
+2026-09-17 18:24:29 | INFO    | epoch 12 | batch 520/1252 | loss 0.5506 | acc 0.9242 | lr 8.57e-05 | 37s
+2026-09-17 18:24:30 | INFO    | epoch 12 | batch 540/1252 | loss 0.5518 | acc 0.9236 | lr 8.57e-05 | 38s
+2026-09-17 18:24:32 | INFO    | epoch 12 | batch 560/1252 | loss 0.5514 | acc 0.9239 | lr 8.57e-05 | 40s
+2026-09-17 18:24:33 | INFO    | epoch 12 | batch 580/1252 | loss 0.5506 | acc 0.9240 | lr 8.56e-05 | 41s
+2026-09-17 18:24:34 | INFO    | epoch 12 | batch 600/1252 | loss 0.5506 | acc 0.9242 | lr 8.56e-05 | 42s
+2026-09-17 18:24:36 | INFO    | epoch 12 | batch 620/1252 | loss 0.5511 | acc 0.9237 | lr 8.55e-05 | 44s
+2026-09-17 18:24:37 | INFO    | epoch 12 | batch 640/1252 | loss 0.5505 | acc 0.9241 | lr 8.55e-05 | 45s
+2026-09-17 18:24:39 | INFO    | epoch 12 | batch 660/1252 | loss 0.5525 | acc 0.9229 | lr 8.54e-05 | 47s
+2026-09-17 18:24:40 | INFO    | epoch 12 | batch 680/1252 | loss 0.5532 | acc 0.9222 | lr 8.54e-05 | 48s
+2026-09-17 18:24:41 | INFO    | epoch 12 | batch 700/1252 | loss 0.5523 | acc 0.9226 | lr 8.53e-05 | 50s
+2026-09-17 18:24:43 | INFO    | epoch 12 | batch 720/1252 | loss 0.5524 | acc 0.9224 | lr 8.53e-05 | 51s
+2026-09-17 18:24:44 | INFO    | epoch 12 | batch 740/1252 | loss 0.5526 | acc 0.9220 | lr 8.52e-05 | 52s
+2026-09-17 18:24:46 | INFO    | epoch 12 | batch 760/1252 | loss 0.5517 | acc 0.9224 | lr 8.52e-05 | 54s
+2026-09-17 18:24:47 | INFO    | epoch 12 | batch 780/1252 | loss 0.5517 | acc 0.9226 | lr 8.51e-05 | 55s
+2026-09-17 18:24:48 | INFO    | epoch 12 | batch 800/1252 | loss 0.5517 | acc 0.9227 | lr 8.51e-05 | 56s
+2026-09-17 18:24:50 | INFO    | epoch 12 | batch 820/1252 | loss 0.5510 | acc 0.9232 | lr 8.51e-05 | 58s
+2026-09-17 18:24:51 | INFO    | epoch 12 | batch 840/1252 | loss 0.5512 | acc 0.9231 | lr 8.50e-05 | 59s
+2026-09-17 18:24:52 | INFO    | epoch 12 | batch 860/1252 | loss 0.5513 | acc 0.9231 | lr 8.50e-05 | 61s
+2026-09-17 18:24:54 | INFO    | epoch 12 | batch 880/1252 | loss 0.5515 | acc 0.9230 | lr 8.49e-05 | 62s
+2026-09-17 18:24:55 | INFO    | epoch 12 | batch 900/1252 | loss 0.5511 | acc 0.9234 | lr 8.49e-05 | 63s
+2026-09-17 18:24:57 | INFO    | epoch 12 | batch 920/1252 | loss 0.5510 | acc 0.9236 | lr 8.48e-05 | 65s
+2026-09-17 18:24:58 | INFO    | epoch 12 | batch 940/1252 | loss 0.5508 | acc 0.9238 | lr 8.48e-05 | 66s
+2026-09-17 18:24:59 | INFO    | epoch 12 | batch 960/1252 | loss 0.5514 | acc 0.9233 | lr 8.47e-05 | 67s
+2026-09-17 18:25:01 | INFO    | epoch 12 | batch 980/1252 | loss 0.5510 | acc 0.9235 | lr 8.47e-05 | 69s
+2026-09-17 18:25:02 | INFO    | epoch 12 | batch 1000/1252 | loss 0.5507 | acc 0.9235 | lr 8.46e-05 | 70s
+2026-09-17 18:25:04 | INFO    | epoch 12 | batch 1020/1252 | loss 0.5507 | acc 0.9236 | lr 8.46e-05 | 72s
+2026-09-17 18:25:05 | INFO    | epoch 12 | batch 1040/1252 | loss 0.5504 | acc 0.9237 | lr 8.45e-05 | 73s
+2026-09-17 18:25:06 | INFO    | epoch 12 | batch 1060/1252 | loss 0.5507 | acc 0.9234 | lr 8.45e-05 | 74s
+2026-09-17 18:25:08 | INFO    | epoch 12 | batch 1080/1252 | loss 0.5504 | acc 0.9235 | lr 8.44e-05 | 76s
+2026-09-17 18:25:09 | INFO    | epoch 12 | batch 1100/1252 | loss 0.5505 | acc 0.9234 | lr 8.44e-05 | 77s
+2026-09-17 18:25:10 | INFO    | epoch 12 | batch 1120/1252 | loss 0.5502 | acc 0.9236 | lr 8.43e-05 | 78s
+2026-09-17 18:25:12 | INFO    | epoch 12 | batch 1140/1252 | loss 0.5499 | acc 0.9238 | lr 8.43e-05 | 80s
+2026-09-17 18:25:13 | INFO    | epoch 12 | batch 1160/1252 | loss 0.5496 | acc 0.9241 | lr 8.42e-05 | 81s
+2026-09-17 18:25:15 | INFO    | epoch 12 | batch 1180/1252 | loss 0.5501 | acc 0.9241 | lr 8.42e-05 | 83s
+2026-09-17 18:25:16 | INFO    | epoch 12 | batch 1200/1252 | loss 0.5504 | acc 0.9238 | lr 8.42e-05 | 84s
+2026-09-17 18:25:18 | INFO    | epoch 12 | batch 1220/1252 | loss 0.5497 | acc 0.9243 | lr 8.41e-05 | 86s
+2026-09-17 18:25:19 | INFO    | epoch 12 | batch 1240/1252 | loss 0.5494 | acc 0.9245 | lr 8.41e-05 | 87s
+2026-09-17 18:25:20 | INFO    | epoch 12 | batch 1252/1252 | loss 0.5489 | acc 0.9248 | lr 8.40e-05 | 88s
+2026-09-17 18:25:30 | INFO    | epoch 12/40 done in 98s | train loss 0.5489 | train running patch (aug): accuracy=0.9248 precision=0.9231 recall=0.9206 f1=0.9218
+2026-09-17 18:25:30 | INFO    | epoch 12 train (eval, no aug) | loss 0.4303 | patch[7280]: accuracy=0.9853 precision=0.9830 recall=0.9857 f1=0.9843 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:25:30 | INFO    | epoch 12 val | loss 1.1817 | patch[8448]: accuracy=0.6795 precision=0.6654 recall=0.6598 f1=0.6608 | image[96]: accuracy=0.7396 precision=0.7291 recall=0.7255 f1=0.7244
+2026-09-17 18:25:30 | INFO    | val_patch_f1 = 0.6608 (best 0.6608 @ epoch 12) *
+2026-09-17 18:25:31 | INFO    | epoch 13 | batch 20/1252 | loss 0.5142 | acc 0.9422 | lr 8.40e-05 | 1s
+2026-09-17 18:25:33 | INFO    | epoch 13 | batch 40/1252 | loss 0.5295 | acc 0.9367 | lr 8.39e-05 | 3s
+2026-09-17 18:25:34 | INFO    | epoch 13 | batch 60/1252 | loss 0.5290 | acc 0.9354 | lr 8.39e-05 | 4s
+2026-09-17 18:25:35 | INFO    | epoch 13 | batch 80/1252 | loss 0.5245 | acc 0.9371 | lr 8.38e-05 | 6s
+2026-09-17 18:25:37 | INFO    | epoch 13 | batch 100/1252 | loss 0.5250 | acc 0.9375 | lr 8.38e-05 | 7s
+2026-09-17 18:25:38 | INFO    | epoch 13 | batch 120/1252 | loss 0.5282 | acc 0.9362 | lr 8.37e-05 | 9s
+2026-09-17 18:25:40 | INFO    | epoch 13 | batch 140/1252 | loss 0.5322 | acc 0.9335 | lr 8.37e-05 | 10s
+2026-09-17 18:25:41 | INFO    | epoch 13 | batch 160/1252 | loss 0.5345 | acc 0.9314 | lr 8.36e-05 | 11s
+2026-09-17 18:25:42 | INFO    | epoch 13 | batch 180/1252 | loss 0.5369 | acc 0.9306 | lr 8.36e-05 | 13s
+2026-09-17 18:25:44 | INFO    | epoch 13 | batch 200/1252 | loss 0.5367 | acc 0.9309 | lr 8.35e-05 | 14s
+2026-09-17 18:25:45 | INFO    | epoch 13 | batch 220/1252 | loss 0.5370 | acc 0.9308 | lr 8.35e-05 | 16s
+2026-09-17 18:25:47 | INFO    | epoch 13 | batch 240/1252 | loss 0.5373 | acc 0.9305 | lr 8.34e-05 | 17s
+2026-09-17 18:25:48 | INFO    | epoch 13 | batch 260/1252 | loss 0.5354 | acc 0.9313 | lr 8.34e-05 | 18s
+2026-09-17 18:25:49 | INFO    | epoch 13 | batch 280/1252 | loss 0.5348 | acc 0.9317 | lr 8.33e-05 | 20s
+2026-09-17 18:25:51 | INFO    | epoch 13 | batch 300/1252 | loss 0.5356 | acc 0.9311 | lr 8.33e-05 | 21s
+2026-09-17 18:25:52 | INFO    | epoch 13 | batch 320/1252 | loss 0.5351 | acc 0.9313 | lr 8.32e-05 | 23s
+2026-09-17 18:25:54 | INFO    | epoch 13 | batch 340/1252 | loss 0.5344 | acc 0.9319 | lr 8.32e-05 | 24s
+2026-09-17 18:25:55 | INFO    | epoch 13 | batch 360/1252 | loss 0.5336 | acc 0.9324 | lr 8.32e-05 | 25s
+2026-09-17 18:25:56 | INFO    | epoch 13 | batch 380/1252 | loss 0.5332 | acc 0.9326 | lr 8.31e-05 | 27s
+2026-09-17 18:25:58 | INFO    | epoch 13 | batch 400/1252 | loss 0.5346 | acc 0.9314 | lr 8.31e-05 | 28s
+2026-09-17 18:25:59 | INFO    | epoch 13 | batch 420/1252 | loss 0.5351 | acc 0.9313 | lr 8.30e-05 | 29s
+2026-09-17 18:26:01 | INFO    | epoch 13 | batch 440/1252 | loss 0.5336 | acc 0.9323 | lr 8.30e-05 | 31s
+2026-09-17 18:26:02 | INFO    | epoch 13 | batch 460/1252 | loss 0.5349 | acc 0.9317 | lr 8.29e-05 | 32s
+2026-09-17 18:26:03 | INFO    | epoch 13 | batch 480/1252 | loss 0.5347 | acc 0.9318 | lr 8.29e-05 | 34s
+2026-09-17 18:26:05 | INFO    | epoch 13 | batch 500/1252 | loss 0.5345 | acc 0.9318 | lr 8.28e-05 | 35s
+2026-09-17 18:26:06 | INFO    | epoch 13 | batch 520/1252 | loss 0.5352 | acc 0.9314 | lr 8.28e-05 | 36s
+2026-09-17 18:26:07 | INFO    | epoch 13 | batch 540/1252 | loss 0.5342 | acc 0.9318 | lr 8.27e-05 | 38s
+2026-09-17 18:26:09 | INFO    | epoch 13 | batch 560/1252 | loss 0.5341 | acc 0.9320 | lr 8.27e-05 | 39s
+2026-09-17 18:26:10 | INFO    | epoch 13 | batch 580/1252 | loss 0.5347 | acc 0.9317 | lr 8.26e-05 | 41s
+2026-09-17 18:26:12 | INFO    | epoch 13 | batch 600/1252 | loss 0.5341 | acc 0.9323 | lr 8.26e-05 | 42s
+2026-09-17 18:26:13 | INFO    | epoch 13 | batch 620/1252 | loss 0.5345 | acc 0.9325 | lr 8.25e-05 | 43s
+2026-09-17 18:26:14 | INFO    | epoch 13 | batch 640/1252 | loss 0.5346 | acc 0.9322 | lr 8.25e-05 | 45s
+2026-09-17 18:26:16 | INFO    | epoch 13 | batch 660/1252 | loss 0.5346 | acc 0.9322 | lr 8.24e-05 | 46s
+2026-09-17 18:26:17 | INFO    | epoch 13 | batch 680/1252 | loss 0.5346 | acc 0.9322 | lr 8.24e-05 | 48s
+2026-09-17 18:26:19 | INFO    | epoch 13 | batch 700/1252 | loss 0.5346 | acc 0.9322 | lr 8.23e-05 | 49s
+2026-09-17 18:26:20 | INFO    | epoch 13 | batch 720/1252 | loss 0.5347 | acc 0.9321 | lr 8.23e-05 | 51s
+2026-09-17 18:26:22 | INFO    | epoch 13 | batch 740/1252 | loss 0.5343 | acc 0.9325 | lr 8.22e-05 | 52s
+2026-09-17 18:26:23 | INFO    | epoch 13 | batch 760/1252 | loss 0.5338 | acc 0.9329 | lr 8.22e-05 | 53s
+2026-09-17 18:26:24 | INFO    | epoch 13 | batch 780/1252 | loss 0.5340 | acc 0.9326 | lr 8.21e-05 | 55s
+2026-09-17 18:26:26 | INFO    | epoch 13 | batch 800/1252 | loss 0.5339 | acc 0.9325 | lr 8.21e-05 | 56s
+2026-09-17 18:26:27 | INFO    | epoch 13 | batch 820/1252 | loss 0.5342 | acc 0.9323 | lr 8.20e-05 | 58s
+2026-09-17 18:26:29 | INFO    | epoch 13 | batch 840/1252 | loss 0.5341 | acc 0.9323 | lr 8.20e-05 | 59s
+2026-09-17 18:26:30 | INFO    | epoch 13 | batch 860/1252 | loss 0.5343 | acc 0.9322 | lr 8.19e-05 | 60s
+2026-09-17 18:26:32 | INFO    | epoch 13 | batch 880/1252 | loss 0.5347 | acc 0.9322 | lr 8.19e-05 | 62s
+2026-09-17 18:26:33 | INFO    | epoch 13 | batch 900/1252 | loss 0.5347 | acc 0.9322 | lr 8.18e-05 | 63s
+2026-09-17 18:26:34 | INFO    | epoch 13 | batch 920/1252 | loss 0.5343 | acc 0.9323 | lr 8.18e-05 | 65s
+2026-09-17 18:26:36 | INFO    | epoch 13 | batch 940/1252 | loss 0.5345 | acc 0.9322 | lr 8.17e-05 | 66s
+2026-09-17 18:26:37 | INFO    | epoch 13 | batch 960/1252 | loss 0.5346 | acc 0.9322 | lr 8.17e-05 | 68s
+2026-09-17 18:26:39 | INFO    | epoch 13 | batch 980/1252 | loss 0.5345 | acc 0.9322 | lr 8.16e-05 | 69s
+2026-09-17 18:26:40 | INFO    | epoch 13 | batch 1000/1252 | loss 0.5347 | acc 0.9320 | lr 8.15e-05 | 70s
+2026-09-17 18:26:41 | INFO    | epoch 13 | batch 1020/1252 | loss 0.5347 | acc 0.9320 | lr 8.15e-05 | 72s
+2026-09-17 18:26:43 | INFO    | epoch 13 | batch 1040/1252 | loss 0.5349 | acc 0.9318 | lr 8.14e-05 | 73s
+2026-09-17 18:26:44 | INFO    | epoch 13 | batch 1060/1252 | loss 0.5348 | acc 0.9319 | lr 8.14e-05 | 75s
+2026-09-17 18:26:46 | INFO    | epoch 13 | batch 1080/1252 | loss 0.5346 | acc 0.9320 | lr 8.13e-05 | 76s
+2026-09-17 18:26:47 | INFO    | epoch 13 | batch 1100/1252 | loss 0.5350 | acc 0.9317 | lr 8.13e-05 | 77s
+2026-09-17 18:26:48 | INFO    | epoch 13 | batch 1120/1252 | loss 0.5350 | acc 0.9316 | lr 8.12e-05 | 79s
+2026-09-17 18:26:50 | INFO    | epoch 13 | batch 1140/1252 | loss 0.5348 | acc 0.9315 | lr 8.12e-05 | 80s
+2026-09-17 18:26:51 | INFO    | epoch 13 | batch 1160/1252 | loss 0.5346 | acc 0.9317 | lr 8.11e-05 | 81s
+2026-09-17 18:26:52 | INFO    | epoch 13 | batch 1180/1252 | loss 0.5340 | acc 0.9320 | lr 8.11e-05 | 83s
+2026-09-17 18:26:54 | INFO    | epoch 13 | batch 1200/1252 | loss 0.5341 | acc 0.9320 | lr 8.10e-05 | 84s
+2026-09-17 18:26:55 | INFO    | epoch 13 | batch 1220/1252 | loss 0.5339 | acc 0.9321 | lr 8.10e-05 | 85s
+2026-09-17 18:26:56 | INFO    | epoch 13 | batch 1240/1252 | loss 0.5336 | acc 0.9322 | lr 8.09e-05 | 87s
+2026-09-17 18:26:57 | INFO    | epoch 13 | batch 1252/1252 | loss 0.5339 | acc 0.9321 | lr 8.09e-05 | 88s
+2026-09-17 18:27:07 | INFO    | epoch 13/40 done in 97s | train loss 0.5339 | train running patch (aug): accuracy=0.9321 precision=0.9309 recall=0.9292 f1=0.9300
+2026-09-17 18:27:07 | INFO    | epoch 13 train (eval, no aug) | loss 0.4270 | patch[7280]: accuracy=0.9850 precision=0.9860 recall=0.9824 f1=0.9841 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:27:07 | INFO    | epoch 13 val | loss 1.1550 | patch[8448]: accuracy=0.6896 precision=0.6713 recall=0.6588 f1=0.6602 | image[96]: accuracy=0.7604 precision=0.7499 recall=0.7347 f1=0.7376
+2026-09-17 18:27:07 | INFO    | val_patch_f1 = 0.6602 (best 0.6608 @ epoch 12)
+2026-09-17 18:27:08 | INFO    | epoch 14 | batch 20/1252 | loss 0.5211 | acc 0.9469 | lr 8.09e-05 | 1s
+2026-09-17 18:27:10 | INFO    | epoch 14 | batch 40/1252 | loss 0.5236 | acc 0.9398 | lr 8.08e-05 | 3s
+2026-09-17 18:27:11 | INFO    | epoch 14 | batch 60/1252 | loss 0.5143 | acc 0.9453 | lr 8.07e-05 | 4s
+2026-09-17 18:27:13 | INFO    | epoch 14 | batch 80/1252 | loss 0.5150 | acc 0.9469 | lr 8.07e-05 | 6s
+2026-09-17 18:27:14 | INFO    | epoch 14 | batch 100/1252 | loss 0.5170 | acc 0.9447 | lr 8.06e-05 | 7s
+2026-09-17 18:27:15 | INFO    | epoch 14 | batch 120/1252 | loss 0.5195 | acc 0.9424 | lr 8.06e-05 | 8s
+2026-09-17 18:27:17 | INFO    | epoch 14 | batch 140/1252 | loss 0.5174 | acc 0.9433 | lr 8.05e-05 | 10s
+2026-09-17 18:27:18 | INFO    | epoch 14 | batch 160/1252 | loss 0.5225 | acc 0.9406 | lr 8.05e-05 | 11s
+2026-09-17 18:27:20 | INFO    | epoch 14 | batch 180/1252 | loss 0.5220 | acc 0.9403 | lr 8.04e-05 | 13s
+2026-09-17 18:27:21 | INFO    | epoch 14 | batch 200/1252 | loss 0.5237 | acc 0.9391 | lr 8.04e-05 | 14s
+2026-09-17 18:27:22 | INFO    | epoch 14 | batch 220/1252 | loss 0.5227 | acc 0.9389 | lr 8.03e-05 | 15s
+2026-09-17 18:27:24 | INFO    | epoch 14 | batch 240/1252 | loss 0.5230 | acc 0.9382 | lr 8.03e-05 | 17s
+2026-09-17 18:27:25 | INFO    | epoch 14 | batch 260/1252 | loss 0.5245 | acc 0.9369 | lr 8.02e-05 | 18s
+2026-09-17 18:27:27 | INFO    | epoch 14 | batch 280/1252 | loss 0.5238 | acc 0.9374 | lr 8.02e-05 | 20s
+2026-09-17 18:27:28 | INFO    | epoch 14 | batch 300/1252 | loss 0.5224 | acc 0.9379 | lr 8.01e-05 | 21s
+2026-09-17 18:27:29 | INFO    | epoch 14 | batch 320/1252 | loss 0.5230 | acc 0.9377 | lr 8.01e-05 | 22s
+2026-09-17 18:27:31 | INFO    | epoch 14 | batch 340/1252 | loss 0.5224 | acc 0.9378 | lr 8.00e-05 | 24s
+2026-09-17 18:27:32 | INFO    | epoch 14 | batch 360/1252 | loss 0.5216 | acc 0.9381 | lr 8.00e-05 | 25s
+2026-09-17 18:27:34 | INFO    | epoch 14 | batch 380/1252 | loss 0.5219 | acc 0.9377 | lr 7.99e-05 | 27s
+2026-09-17 18:27:35 | INFO    | epoch 14 | batch 400/1252 | loss 0.5211 | acc 0.9384 | lr 7.99e-05 | 28s
+2026-09-17 18:27:36 | INFO    | epoch 14 | batch 420/1252 | loss 0.5219 | acc 0.9380 | lr 7.98e-05 | 29s
+2026-09-17 18:27:38 | INFO    | epoch 14 | batch 440/1252 | loss 0.5218 | acc 0.9384 | lr 7.98e-05 | 31s
+2026-09-17 18:27:39 | INFO    | epoch 14 | batch 460/1252 | loss 0.5220 | acc 0.9387 | lr 7.97e-05 | 32s
+2026-09-17 18:27:41 | INFO    | epoch 14 | batch 480/1252 | loss 0.5220 | acc 0.9386 | lr 7.97e-05 | 34s
+2026-09-17 18:27:42 | INFO    | epoch 14 | batch 500/1252 | loss 0.5217 | acc 0.9387 | lr 7.96e-05 | 35s
+2026-09-17 18:27:43 | INFO    | epoch 14 | batch 520/1252 | loss 0.5214 | acc 0.9389 | lr 7.95e-05 | 36s
+2026-09-17 18:27:45 | INFO    | epoch 14 | batch 540/1252 | loss 0.5211 | acc 0.9389 | lr 7.95e-05 | 38s
+2026-09-17 18:27:46 | INFO    | epoch 14 | batch 560/1252 | loss 0.5225 | acc 0.9379 | lr 7.94e-05 | 39s
+2026-09-17 18:27:48 | INFO    | epoch 14 | batch 580/1252 | loss 0.5223 | acc 0.9379 | lr 7.94e-05 | 41s
+2026-09-17 18:27:49 | INFO    | epoch 14 | batch 600/1252 | loss 0.5218 | acc 0.9381 | lr 7.93e-05 | 42s
+2026-09-17 18:27:50 | INFO    | epoch 14 | batch 620/1252 | loss 0.5222 | acc 0.9378 | lr 7.93e-05 | 43s
+2026-09-17 18:27:52 | INFO    | epoch 14 | batch 640/1252 | loss 0.5229 | acc 0.9374 | lr 7.92e-05 | 45s
+2026-09-17 18:27:53 | INFO    | epoch 14 | batch 660/1252 | loss 0.5225 | acc 0.9376 | lr 7.92e-05 | 46s
+2026-09-17 18:27:55 | INFO    | epoch 14 | batch 680/1252 | loss 0.5224 | acc 0.9378 | lr 7.91e-05 | 48s
+2026-09-17 18:27:56 | INFO    | epoch 14 | batch 700/1252 | loss 0.5234 | acc 0.9371 | lr 7.91e-05 | 49s
+2026-09-17 18:27:57 | INFO    | epoch 14 | batch 720/1252 | loss 0.5236 | acc 0.9372 | lr 7.90e-05 | 50s
+2026-09-17 18:27:59 | INFO    | epoch 14 | batch 740/1252 | loss 0.5239 | acc 0.9370 | lr 7.90e-05 | 52s
+2026-09-17 18:28:00 | INFO    | epoch 14 | batch 760/1252 | loss 0.5230 | acc 0.9375 | lr 7.89e-05 | 53s
+2026-09-17 18:28:01 | INFO    | epoch 14 | batch 780/1252 | loss 0.5226 | acc 0.9378 | lr 7.89e-05 | 54s
+2026-09-17 18:28:03 | INFO    | epoch 14 | batch 800/1252 | loss 0.5226 | acc 0.9377 | lr 7.88e-05 | 56s
+2026-09-17 18:28:04 | INFO    | epoch 14 | batch 820/1252 | loss 0.5223 | acc 0.9378 | lr 7.87e-05 | 57s
+2026-09-17 18:28:06 | INFO    | epoch 14 | batch 840/1252 | loss 0.5220 | acc 0.9379 | lr 7.87e-05 | 59s
+2026-09-17 18:28:07 | INFO    | epoch 14 | batch 860/1252 | loss 0.5221 | acc 0.9378 | lr 7.86e-05 | 60s
+2026-09-17 18:28:08 | INFO    | epoch 14 | batch 880/1252 | loss 0.5225 | acc 0.9376 | lr 7.86e-05 | 61s
+2026-09-17 18:28:10 | INFO    | epoch 14 | batch 900/1252 | loss 0.5220 | acc 0.9380 | lr 7.85e-05 | 63s
+2026-09-17 18:28:11 | INFO    | epoch 14 | batch 920/1252 | loss 0.5216 | acc 0.9382 | lr 7.85e-05 | 64s
+2026-09-17 18:28:13 | INFO    | epoch 14 | batch 940/1252 | loss 0.5211 | acc 0.9385 | lr 7.84e-05 | 66s
+2026-09-17 18:28:14 | INFO    | epoch 14 | batch 960/1252 | loss 0.5214 | acc 0.9382 | lr 7.84e-05 | 67s
+2026-09-17 18:28:15 | INFO    | epoch 14 | batch 980/1252 | loss 0.5217 | acc 0.9380 | lr 7.83e-05 | 68s
+2026-09-17 18:28:17 | INFO    | epoch 14 | batch 1000/1252 | loss 0.5218 | acc 0.9379 | lr 7.83e-05 | 70s
+2026-09-17 18:28:18 | INFO    | epoch 14 | batch 1020/1252 | loss 0.5218 | acc 0.9381 | lr 7.82e-05 | 71s
+2026-09-17 18:28:20 | INFO    | epoch 14 | batch 1040/1252 | loss 0.5212 | acc 0.9386 | lr 7.82e-05 | 73s
+2026-09-17 18:28:21 | INFO    | epoch 14 | batch 1060/1252 | loss 0.5211 | acc 0.9386 | lr 7.81e-05 | 74s
+2026-09-17 18:28:22 | INFO    | epoch 14 | batch 1080/1252 | loss 0.5207 | acc 0.9388 | lr 7.80e-05 | 75s
+2026-09-17 18:28:24 | INFO    | epoch 14 | batch 1100/1252 | loss 0.5211 | acc 0.9387 | lr 7.80e-05 | 77s
+2026-09-17 18:28:25 | INFO    | epoch 14 | batch 1120/1252 | loss 0.5212 | acc 0.9387 | lr 7.79e-05 | 78s
+2026-09-17 18:28:26 | INFO    | epoch 14 | batch 1140/1252 | loss 0.5212 | acc 0.9387 | lr 7.79e-05 | 79s
+2026-09-17 18:28:28 | INFO    | epoch 14 | batch 1160/1252 | loss 0.5209 | acc 0.9389 | lr 7.78e-05 | 81s
+2026-09-17 18:28:29 | INFO    | epoch 14 | batch 1180/1252 | loss 0.5213 | acc 0.9388 | lr 7.78e-05 | 82s
+2026-09-17 18:28:31 | INFO    | epoch 14 | batch 1200/1252 | loss 0.5217 | acc 0.9385 | lr 7.77e-05 | 84s
+2026-09-17 18:28:32 | INFO    | epoch 14 | batch 1220/1252 | loss 0.5217 | acc 0.9383 | lr 7.77e-05 | 85s
+2026-09-17 18:28:34 | INFO    | epoch 14 | batch 1240/1252 | loss 0.5215 | acc 0.9384 | lr 7.76e-05 | 87s
+2026-09-17 18:28:34 | INFO    | epoch 14 | batch 1252/1252 | loss 0.5217 | acc 0.9383 | lr 7.76e-05 | 87s
+2026-09-17 18:28:44 | INFO    | epoch 14/40 done in 97s | train loss 0.5217 | train running patch (aug): accuracy=0.9383 precision=0.9365 recall=0.9348 f1=0.9356
+2026-09-17 18:28:44 | INFO    | epoch 14 train (eval, no aug) | loss 0.4259 | patch[7280]: accuracy=0.9865 precision=0.9874 recall=0.9852 f1=0.9862 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:28:44 | INFO    | epoch 14 val | loss 1.2025 | patch[8448]: accuracy=0.6636 precision=0.6463 recall=0.6352 f1=0.6378 | image[96]: accuracy=0.7292 precision=0.7200 recall=0.7080 f1=0.7098
+2026-09-17 18:28:44 | INFO    | val_patch_f1 = 0.6378 (best 0.6608 @ epoch 12)
+2026-09-17 18:28:46 | INFO    | epoch 15 | batch 20/1252 | loss 0.5212 | acc 0.9391 | lr 7.75e-05 | 1s
+2026-09-17 18:28:47 | INFO    | epoch 15 | batch 40/1252 | loss 0.5259 | acc 0.9352 | lr 7.75e-05 | 3s
+2026-09-17 18:28:48 | INFO    | epoch 15 | batch 60/1252 | loss 0.5149 | acc 0.9427 | lr 7.74e-05 | 4s
+2026-09-17 18:28:50 | INFO    | epoch 15 | batch 80/1252 | loss 0.5062 | acc 0.9492 | lr 7.74e-05 | 5s
+2026-09-17 18:28:51 | INFO    | epoch 15 | batch 100/1252 | loss 0.5092 | acc 0.9459 | lr 7.73e-05 | 7s
+2026-09-17 18:28:52 | INFO    | epoch 15 | batch 120/1252 | loss 0.5071 | acc 0.9474 | lr 7.72e-05 | 8s
+2026-09-17 18:28:54 | INFO    | epoch 15 | batch 140/1252 | loss 0.5106 | acc 0.9444 | lr 7.72e-05 | 10s
+2026-09-17 18:28:55 | INFO    | epoch 15 | batch 160/1252 | loss 0.5083 | acc 0.9447 | lr 7.71e-05 | 11s
+2026-09-17 18:28:57 | INFO    | epoch 15 | batch 180/1252 | loss 0.5100 | acc 0.9436 | lr 7.71e-05 | 12s
+2026-09-17 18:28:58 | INFO    | epoch 15 | batch 200/1252 | loss 0.5125 | acc 0.9413 | lr 7.70e-05 | 14s
+2026-09-17 18:28:59 | INFO    | epoch 15 | batch 220/1252 | loss 0.5122 | acc 0.9409 | lr 7.70e-05 | 15s
+2026-09-17 18:29:01 | INFO    | epoch 15 | batch 240/1252 | loss 0.5110 | acc 0.9421 | lr 7.69e-05 | 16s
+2026-09-17 18:29:02 | INFO    | epoch 15 | batch 260/1252 | loss 0.5083 | acc 0.9439 | lr 7.69e-05 | 18s
+2026-09-17 18:29:03 | INFO    | epoch 15 | batch 280/1252 | loss 0.5082 | acc 0.9440 | lr 7.68e-05 | 19s
+2026-09-17 18:29:05 | INFO    | epoch 15 | batch 300/1252 | loss 0.5086 | acc 0.9434 | lr 7.67e-05 | 21s
+2026-09-17 18:29:06 | INFO    | epoch 15 | batch 320/1252 | loss 0.5086 | acc 0.9436 | lr 7.67e-05 | 22s
+2026-09-17 18:29:08 | INFO    | epoch 15 | batch 340/1252 | loss 0.5085 | acc 0.9434 | lr 7.66e-05 | 23s
+2026-09-17 18:29:09 | INFO    | epoch 15 | batch 360/1252 | loss 0.5087 | acc 0.9440 | lr 7.66e-05 | 25s
+2026-09-17 18:29:10 | INFO    | epoch 15 | batch 380/1252 | loss 0.5082 | acc 0.9444 | lr 7.65e-05 | 26s
+2026-09-17 18:29:12 | INFO    | epoch 15 | batch 400/1252 | loss 0.5071 | acc 0.9452 | lr 7.65e-05 | 28s
+2026-09-17 18:29:13 | INFO    | epoch 15 | batch 420/1252 | loss 0.5081 | acc 0.9444 | lr 7.64e-05 | 29s
+2026-09-17 18:29:15 | INFO    | epoch 15 | batch 440/1252 | loss 0.5075 | acc 0.9447 | lr 7.64e-05 | 30s
+2026-09-17 18:29:16 | INFO    | epoch 15 | batch 460/1252 | loss 0.5069 | acc 0.9450 | lr 7.63e-05 | 32s
+2026-09-17 18:29:17 | INFO    | epoch 15 | batch 480/1252 | loss 0.5066 | acc 0.9451 | lr 7.62e-05 | 33s
+2026-09-17 18:29:19 | INFO    | epoch 15 | batch 500/1252 | loss 0.5073 | acc 0.9446 | lr 7.62e-05 | 35s
+2026-09-17 18:29:20 | INFO    | epoch 15 | batch 520/1252 | loss 0.5071 | acc 0.9446 | lr 7.61e-05 | 36s
+2026-09-17 18:29:22 | INFO    | epoch 15 | batch 540/1252 | loss 0.5067 | acc 0.9449 | lr 7.61e-05 | 38s
+2026-09-17 18:29:23 | INFO    | epoch 15 | batch 560/1252 | loss 0.5070 | acc 0.9450 | lr 7.60e-05 | 39s
+2026-09-17 18:29:25 | INFO    | epoch 15 | batch 580/1252 | loss 0.5073 | acc 0.9447 | lr 7.60e-05 | 40s
+2026-09-17 18:29:26 | INFO    | epoch 15 | batch 600/1252 | loss 0.5070 | acc 0.9450 | lr 7.59e-05 | 42s
+2026-09-17 18:29:28 | INFO    | epoch 15 | batch 620/1252 | loss 0.5065 | acc 0.9453 | lr 7.59e-05 | 43s
+2026-09-17 18:29:29 | INFO    | epoch 15 | batch 640/1252 | loss 0.5057 | acc 0.9456 | lr 7.58e-05 | 45s
+2026-09-17 18:29:30 | INFO    | epoch 15 | batch 660/1252 | loss 0.5061 | acc 0.9453 | lr 7.57e-05 | 46s
+2026-09-17 18:29:32 | INFO    | epoch 15 | batch 680/1252 | loss 0.5060 | acc 0.9453 | lr 7.57e-05 | 47s
+2026-09-17 18:29:33 | INFO    | epoch 15 | batch 700/1252 | loss 0.5057 | acc 0.9452 | lr 7.56e-05 | 49s
+2026-09-17 18:29:35 | INFO    | epoch 15 | batch 720/1252 | loss 0.5060 | acc 0.9452 | lr 7.56e-05 | 50s
+2026-09-17 18:29:36 | INFO    | epoch 15 | batch 740/1252 | loss 0.5065 | acc 0.9449 | lr 7.55e-05 | 52s
+2026-09-17 18:29:38 | INFO    | epoch 15 | batch 760/1252 | loss 0.5059 | acc 0.9452 | lr 7.55e-05 | 53s
+2026-09-17 18:29:39 | INFO    | epoch 15 | batch 780/1252 | loss 0.5064 | acc 0.9449 | lr 7.54e-05 | 55s
+2026-09-17 18:29:40 | INFO    | epoch 15 | batch 800/1252 | loss 0.5063 | acc 0.9449 | lr 7.53e-05 | 56s
+2026-09-17 18:29:42 | INFO    | epoch 15 | batch 820/1252 | loss 0.5068 | acc 0.9446 | lr 7.53e-05 | 57s
+2026-09-17 18:29:43 | INFO    | epoch 15 | batch 840/1252 | loss 0.5069 | acc 0.9444 | lr 7.52e-05 | 59s
+2026-09-17 18:29:44 | INFO    | epoch 15 | batch 860/1252 | loss 0.5077 | acc 0.9442 | lr 7.52e-05 | 60s
+2026-09-17 18:29:46 | INFO    | epoch 15 | batch 880/1252 | loss 0.5074 | acc 0.9442 | lr 7.51e-05 | 62s
+2026-09-17 18:29:47 | INFO    | epoch 15 | batch 900/1252 | loss 0.5077 | acc 0.9441 | lr 7.51e-05 | 63s
+2026-09-17 18:29:49 | INFO    | epoch 15 | batch 920/1252 | loss 0.5076 | acc 0.9442 | lr 7.50e-05 | 64s
+2026-09-17 18:29:50 | INFO    | epoch 15 | batch 940/1252 | loss 0.5076 | acc 0.9441 | lr 7.50e-05 | 66s
+2026-09-17 18:29:51 | INFO    | epoch 15 | batch 960/1252 | loss 0.5081 | acc 0.9438 | lr 7.49e-05 | 67s
+2026-09-17 18:29:53 | INFO    | epoch 15 | batch 980/1252 | loss 0.5086 | acc 0.9436 | lr 7.48e-05 | 69s
+2026-09-17 18:29:54 | INFO    | epoch 15 | batch 1000/1252 | loss 0.5080 | acc 0.9437 | lr 7.48e-05 | 70s
+2026-09-17 18:29:56 | INFO    | epoch 15 | batch 1020/1252 | loss 0.5076 | acc 0.9439 | lr 7.47e-05 | 71s
+2026-09-17 18:29:57 | INFO    | epoch 15 | batch 1040/1252 | loss 0.5075 | acc 0.9440 | lr 7.47e-05 | 73s
+2026-09-17 18:29:58 | INFO    | epoch 15 | batch 1060/1252 | loss 0.5077 | acc 0.9440 | lr 7.46e-05 | 74s
+2026-09-17 18:30:00 | INFO    | epoch 15 | batch 1080/1252 | loss 0.5081 | acc 0.9438 | lr 7.46e-05 | 75s
+2026-09-17 18:30:01 | INFO    | epoch 15 | batch 1100/1252 | loss 0.5083 | acc 0.9437 | lr 7.45e-05 | 77s
+2026-09-17 18:30:03 | INFO    | epoch 15 | batch 1120/1252 | loss 0.5082 | acc 0.9439 | lr 7.44e-05 | 78s
+2026-09-17 18:30:04 | INFO    | epoch 15 | batch 1140/1252 | loss 0.5078 | acc 0.9441 | lr 7.44e-05 | 80s
+2026-09-17 18:30:05 | INFO    | epoch 15 | batch 1160/1252 | loss 0.5077 | acc 0.9440 | lr 7.43e-05 | 81s
+2026-09-17 18:30:07 | INFO    | epoch 15 | batch 1180/1252 | loss 0.5077 | acc 0.9438 | lr 7.43e-05 | 83s
+2026-09-17 18:30:08 | INFO    | epoch 15 | batch 1200/1252 | loss 0.5077 | acc 0.9438 | lr 7.42e-05 | 84s
+2026-09-17 18:30:10 | INFO    | epoch 15 | batch 1220/1252 | loss 0.5075 | acc 0.9438 | lr 7.42e-05 | 85s
+2026-09-17 18:30:11 | INFO    | epoch 15 | batch 1240/1252 | loss 0.5072 | acc 0.9440 | lr 7.41e-05 | 87s
+2026-09-17 18:30:12 | INFO    | epoch 15 | batch 1252/1252 | loss 0.5074 | acc 0.9439 | lr 7.41e-05 | 88s
+2026-09-17 18:30:22 | INFO    | epoch 15/40 done in 97s | train loss 0.5074 | train running patch (aug): accuracy=0.9439 precision=0.9429 recall=0.9412 f1=0.9420
+2026-09-17 18:30:22 | INFO    | epoch 15 train (eval, no aug) | loss 0.4312 | patch[7280]: accuracy=0.9816 precision=0.9802 recall=0.9828 f1=0.9814 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:30:22 | INFO    | epoch 15 val | loss 1.2615 | patch[8448]: accuracy=0.6593 precision=0.6477 recall=0.6440 f1=0.6432 | image[96]: accuracy=0.7083 precision=0.6997 recall=0.6911 f1=0.6913
+2026-09-17 18:30:22 | INFO    | val_patch_f1 = 0.6432 (best 0.6608 @ epoch 12)
+2026-09-17 18:30:23 | INFO    | epoch 16 | batch 20/1252 | loss 0.5094 | acc 0.9516 | lr 7.40e-05 | 1s
+2026-09-17 18:30:25 | INFO    | epoch 16 | batch 40/1252 | loss 0.5167 | acc 0.9414 | lr 7.39e-05 | 3s
+2026-09-17 18:30:26 | INFO    | epoch 16 | batch 60/1252 | loss 0.5098 | acc 0.9453 | lr 7.39e-05 | 4s
+2026-09-17 18:30:27 | INFO    | epoch 16 | batch 80/1252 | loss 0.5095 | acc 0.9449 | lr 7.38e-05 | 6s
+2026-09-17 18:30:29 | INFO    | epoch 16 | batch 100/1252 | loss 0.5052 | acc 0.9466 | lr 7.38e-05 | 7s
+2026-09-17 18:30:30 | INFO    | epoch 16 | batch 120/1252 | loss 0.5006 | acc 0.9492 | lr 7.37e-05 | 9s
+2026-09-17 18:30:32 | INFO    | epoch 16 | batch 140/1252 | loss 0.4999 | acc 0.9491 | lr 7.37e-05 | 10s
+2026-09-17 18:30:33 | INFO    | epoch 16 | batch 160/1252 | loss 0.4988 | acc 0.9492 | lr 7.36e-05 | 12s
+2026-09-17 18:30:35 | INFO    | epoch 16 | batch 180/1252 | loss 0.4962 | acc 0.9505 | lr 7.35e-05 | 13s
+2026-09-17 18:30:36 | INFO    | epoch 16 | batch 200/1252 | loss 0.4971 | acc 0.9508 | lr 7.35e-05 | 14s
+2026-09-17 18:30:38 | INFO    | epoch 16 | batch 220/1252 | loss 0.4958 | acc 0.9514 | lr 7.34e-05 | 16s
+2026-09-17 18:30:39 | INFO    | epoch 16 | batch 240/1252 | loss 0.4965 | acc 0.9505 | lr 7.34e-05 | 17s
+2026-09-17 18:30:40 | INFO    | epoch 16 | batch 260/1252 | loss 0.4956 | acc 0.9517 | lr 7.33e-05 | 19s
+2026-09-17 18:30:42 | INFO    | epoch 16 | batch 280/1252 | loss 0.4964 | acc 0.9508 | lr 7.33e-05 | 20s
+2026-09-17 18:30:43 | INFO    | epoch 16 | batch 300/1252 | loss 0.4964 | acc 0.9507 | lr 7.32e-05 | 22s
+2026-09-17 18:30:45 | INFO    | epoch 16 | batch 320/1252 | loss 0.4976 | acc 0.9501 | lr 7.31e-05 | 23s
+2026-09-17 18:30:46 | INFO    | epoch 16 | batch 340/1252 | loss 0.4971 | acc 0.9502 | lr 7.31e-05 | 24s
+2026-09-17 18:30:48 | INFO    | epoch 16 | batch 360/1252 | loss 0.4978 | acc 0.9499 | lr 7.30e-05 | 26s
+2026-09-17 18:30:49 | INFO    | epoch 16 | batch 380/1252 | loss 0.4974 | acc 0.9501 | lr 7.30e-05 | 27s
+2026-09-17 18:30:50 | INFO    | epoch 16 | batch 400/1252 | loss 0.4991 | acc 0.9494 | lr 7.29e-05 | 29s
+2026-09-17 18:30:52 | INFO    | epoch 16 | batch 420/1252 | loss 0.4991 | acc 0.9490 | lr 7.28e-05 | 30s
+2026-09-17 18:30:53 | INFO    | epoch 16 | batch 440/1252 | loss 0.4984 | acc 0.9494 | lr 7.28e-05 | 32s
+2026-09-17 18:30:55 | INFO    | epoch 16 | batch 460/1252 | loss 0.4979 | acc 0.9493 | lr 7.27e-05 | 33s
+2026-09-17 18:30:56 | INFO    | epoch 16 | batch 480/1252 | loss 0.4975 | acc 0.9495 | lr 7.27e-05 | 34s
+2026-09-17 18:30:58 | INFO    | epoch 16 | batch 500/1252 | loss 0.4972 | acc 0.9496 | lr 7.26e-05 | 36s
+2026-09-17 18:30:59 | INFO    | epoch 16 | batch 520/1252 | loss 0.4979 | acc 0.9492 | lr 7.26e-05 | 37s
+2026-09-17 18:31:00 | INFO    | epoch 16 | batch 540/1252 | loss 0.4973 | acc 0.9498 | lr 7.25e-05 | 39s
+2026-09-17 18:31:02 | INFO    | epoch 16 | batch 560/1252 | loss 0.4967 | acc 0.9504 | lr 7.24e-05 | 40s
+2026-09-17 18:31:03 | INFO    | epoch 16 | batch 580/1252 | loss 0.4973 | acc 0.9498 | lr 7.24e-05 | 41s
+2026-09-17 18:31:05 | INFO    | epoch 16 | batch 600/1252 | loss 0.4965 | acc 0.9502 | lr 7.23e-05 | 43s
+2026-09-17 18:31:06 | INFO    | epoch 16 | batch 620/1252 | loss 0.4970 | acc 0.9499 | lr 7.23e-05 | 44s
+2026-09-17 18:31:07 | INFO    | epoch 16 | batch 640/1252 | loss 0.4975 | acc 0.9497 | lr 7.22e-05 | 46s
+2026-09-17 18:31:09 | INFO    | epoch 16 | batch 660/1252 | loss 0.4978 | acc 0.9493 | lr 7.21e-05 | 47s
+2026-09-17 18:31:10 | INFO    | epoch 16 | batch 680/1252 | loss 0.4977 | acc 0.9493 | lr 7.21e-05 | 48s
+2026-09-17 18:31:11 | INFO    | epoch 16 | batch 700/1252 | loss 0.4974 | acc 0.9493 | lr 7.20e-05 | 50s
+2026-09-17 18:31:13 | INFO    | epoch 16 | batch 720/1252 | loss 0.4966 | acc 0.9497 | lr 7.20e-05 | 51s
+2026-09-17 18:31:14 | INFO    | epoch 16 | batch 740/1252 | loss 0.4968 | acc 0.9497 | lr 7.19e-05 | 52s
+2026-09-17 18:31:16 | INFO    | epoch 16 | batch 760/1252 | loss 0.4971 | acc 0.9495 | lr 7.18e-05 | 54s
+2026-09-17 18:31:17 | INFO    | epoch 16 | batch 780/1252 | loss 0.4975 | acc 0.9491 | lr 7.18e-05 | 55s
+2026-09-17 18:31:19 | INFO    | epoch 16 | batch 800/1252 | loss 0.4974 | acc 0.9492 | lr 7.17e-05 | 57s
+2026-09-17 18:31:20 | INFO    | epoch 16 | batch 820/1252 | loss 0.4973 | acc 0.9494 | lr 7.17e-05 | 58s
+2026-09-17 18:31:21 | INFO    | epoch 16 | batch 840/1252 | loss 0.4973 | acc 0.9496 | lr 7.16e-05 | 60s
+2026-09-17 18:31:23 | INFO    | epoch 16 | batch 860/1252 | loss 0.4977 | acc 0.9494 | lr 7.16e-05 | 61s
+2026-09-17 18:31:24 | INFO    | epoch 16 | batch 880/1252 | loss 0.4979 | acc 0.9491 | lr 7.15e-05 | 62s
+2026-09-17 18:31:26 | INFO    | epoch 16 | batch 900/1252 | loss 0.4981 | acc 0.9491 | lr 7.14e-05 | 64s
+2026-09-17 18:31:27 | INFO    | epoch 16 | batch 920/1252 | loss 0.4979 | acc 0.9492 | lr 7.14e-05 | 65s
+2026-09-17 18:31:28 | INFO    | epoch 16 | batch 940/1252 | loss 0.4980 | acc 0.9491 | lr 7.13e-05 | 67s
+2026-09-17 18:31:30 | INFO    | epoch 16 | batch 960/1252 | loss 0.4981 | acc 0.9491 | lr 7.13e-05 | 68s
+2026-09-17 18:31:31 | INFO    | epoch 16 | batch 980/1252 | loss 0.4982 | acc 0.9491 | lr 7.12e-05 | 69s
+2026-09-17 18:31:33 | INFO    | epoch 16 | batch 1000/1252 | loss 0.4983 | acc 0.9492 | lr 7.11e-05 | 71s
+2026-09-17 18:31:34 | INFO    | epoch 16 | batch 1020/1252 | loss 0.4982 | acc 0.9491 | lr 7.11e-05 | 72s
+2026-09-17 18:31:36 | INFO    | epoch 16 | batch 1040/1252 | loss 0.4981 | acc 0.9492 | lr 7.10e-05 | 74s
+2026-09-17 18:31:37 | INFO    | epoch 16 | batch 1060/1252 | loss 0.4978 | acc 0.9495 | lr 7.10e-05 | 75s
+2026-09-17 18:31:38 | INFO    | epoch 16 | batch 1080/1252 | loss 0.4973 | acc 0.9498 | lr 7.09e-05 | 77s
+2026-09-17 18:31:40 | INFO    | epoch 16 | batch 1100/1252 | loss 0.4980 | acc 0.9495 | lr 7.08e-05 | 78s
+2026-09-17 18:31:41 | INFO    | epoch 16 | batch 1120/1252 | loss 0.4983 | acc 0.9493 | lr 7.08e-05 | 79s
+2026-09-17 18:31:43 | INFO    | epoch 16 | batch 1140/1252 | loss 0.4983 | acc 0.9493 | lr 7.07e-05 | 81s
+2026-09-17 18:31:44 | INFO    | epoch 16 | batch 1160/1252 | loss 0.4989 | acc 0.9490 | lr 7.07e-05 | 82s
+2026-09-17 18:31:45 | INFO    | epoch 16 | batch 1180/1252 | loss 0.4993 | acc 0.9489 | lr 7.06e-05 | 84s
+2026-09-17 18:31:47 | INFO    | epoch 16 | batch 1200/1252 | loss 0.4997 | acc 0.9487 | lr 7.05e-05 | 85s
+2026-09-17 18:31:48 | INFO    | epoch 16 | batch 1220/1252 | loss 0.4994 | acc 0.9489 | lr 7.05e-05 | 86s
+2026-09-17 18:31:50 | INFO    | epoch 16 | batch 1240/1252 | loss 0.5004 | acc 0.9484 | lr 7.04e-05 | 88s
+2026-09-17 18:31:50 | INFO    | epoch 16 | batch 1252/1252 | loss 0.5004 | acc 0.9484 | lr 7.04e-05 | 89s
+2026-09-17 18:32:00 | INFO    | epoch 16/40 done in 98s | train loss 0.5004 | train running patch (aug): accuracy=0.9484 precision=0.9471 recall=0.9458 f1=0.9464
+2026-09-17 18:32:00 | INFO    | epoch 16 train (eval, no aug) | loss 0.4201 | patch[7280]: accuracy=0.9880 precision=0.9883 recall=0.9873 f1=0.9877 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:32:00 | INFO    | epoch 16 val | loss 1.2208 | patch[8448]: accuracy=0.6626 precision=0.6518 recall=0.6430 f1=0.6445 | image[96]: accuracy=0.7500 precision=0.7362 recall=0.7346 f1=0.7335
+2026-09-17 18:32:00 | INFO    | val_patch_f1 = 0.6445 (best 0.6608 @ epoch 12)
+2026-09-17 18:32:02 | INFO    | epoch 17 | batch 20/1252 | loss 0.4676 | acc 0.9609 | lr 7.03e-05 | 1s
+2026-09-17 18:32:03 | INFO    | epoch 17 | batch 40/1252 | loss 0.4695 | acc 0.9609 | lr 7.03e-05 | 3s
+2026-09-17 18:32:04 | INFO    | epoch 17 | batch 60/1252 | loss 0.4781 | acc 0.9557 | lr 7.02e-05 | 4s
+2026-09-17 18:32:06 | INFO    | epoch 17 | batch 80/1252 | loss 0.4805 | acc 0.9570 | lr 7.01e-05 | 6s
+2026-09-17 18:32:07 | INFO    | epoch 17 | batch 100/1252 | loss 0.4826 | acc 0.9547 | lr 7.01e-05 | 7s
+2026-09-17 18:32:08 | INFO    | epoch 17 | batch 120/1252 | loss 0.4841 | acc 0.9547 | lr 7.00e-05 | 8s
+2026-09-17 18:32:10 | INFO    | epoch 17 | batch 140/1252 | loss 0.4854 | acc 0.9536 | lr 7.00e-05 | 10s
+2026-09-17 18:32:11 | INFO    | epoch 17 | batch 160/1252 | loss 0.4837 | acc 0.9549 | lr 6.99e-05 | 11s
+2026-09-17 18:32:13 | INFO    | epoch 17 | batch 180/1252 | loss 0.4837 | acc 0.9554 | lr 6.98e-05 | 13s
+2026-09-17 18:32:14 | INFO    | epoch 17 | batch 200/1252 | loss 0.4837 | acc 0.9555 | lr 6.98e-05 | 14s
+2026-09-17 18:32:15 | INFO    | epoch 17 | batch 220/1252 | loss 0.4837 | acc 0.9550 | lr 6.97e-05 | 15s
+2026-09-17 18:32:17 | INFO    | epoch 17 | batch 240/1252 | loss 0.4825 | acc 0.9561 | lr 6.97e-05 | 17s
+2026-09-17 18:32:18 | INFO    | epoch 17 | batch 260/1252 | loss 0.4824 | acc 0.9560 | lr 6.96e-05 | 18s
+2026-09-17 18:32:20 | INFO    | epoch 17 | batch 280/1252 | loss 0.4858 | acc 0.9542 | lr 6.95e-05 | 20s
+2026-09-17 18:32:21 | INFO    | epoch 17 | batch 300/1252 | loss 0.4857 | acc 0.9543 | lr 6.95e-05 | 21s
+2026-09-17 18:32:22 | INFO    | epoch 17 | batch 320/1252 | loss 0.4854 | acc 0.9544 | lr 6.94e-05 | 22s
+2026-09-17 18:32:24 | INFO    | epoch 17 | batch 340/1252 | loss 0.4851 | acc 0.9543 | lr 6.94e-05 | 24s
+2026-09-17 18:32:25 | INFO    | epoch 17 | batch 360/1252 | loss 0.4846 | acc 0.9548 | lr 6.93e-05 | 25s
+2026-09-17 18:32:27 | INFO    | epoch 17 | batch 380/1252 | loss 0.4853 | acc 0.9546 | lr 6.92e-05 | 27s
+2026-09-17 18:32:28 | INFO    | epoch 17 | batch 400/1252 | loss 0.4870 | acc 0.9534 | lr 6.92e-05 | 28s
+2026-09-17 18:32:29 | INFO    | epoch 17 | batch 420/1252 | loss 0.4873 | acc 0.9534 | lr 6.91e-05 | 29s
+2026-09-17 18:32:31 | INFO    | epoch 17 | batch 440/1252 | loss 0.4873 | acc 0.9533 | lr 6.91e-05 | 31s
+2026-09-17 18:32:32 | INFO    | epoch 17 | batch 460/1252 | loss 0.4867 | acc 0.9538 | lr 6.90e-05 | 32s
+2026-09-17 18:32:34 | INFO    | epoch 17 | batch 480/1252 | loss 0.4884 | acc 0.9530 | lr 6.89e-05 | 34s
+2026-09-17 18:32:35 | INFO    | epoch 17 | batch 500/1252 | loss 0.4883 | acc 0.9533 | lr 6.89e-05 | 35s
+2026-09-17 18:32:37 | INFO    | epoch 17 | batch 520/1252 | loss 0.4874 | acc 0.9537 | lr 6.88e-05 | 36s
+2026-09-17 18:32:38 | INFO    | epoch 17 | batch 540/1252 | loss 0.4872 | acc 0.9541 | lr 6.88e-05 | 38s
+2026-09-17 18:32:39 | INFO    | epoch 17 | batch 560/1252 | loss 0.4881 | acc 0.9537 | lr 6.87e-05 | 39s
+2026-09-17 18:32:41 | INFO    | epoch 17 | batch 580/1252 | loss 0.4883 | acc 0.9533 | lr 6.86e-05 | 41s
+2026-09-17 18:32:42 | INFO    | epoch 17 | batch 600/1252 | loss 0.4884 | acc 0.9530 | lr 6.86e-05 | 42s
+2026-09-17 18:32:44 | INFO    | epoch 17 | batch 620/1252 | loss 0.4880 | acc 0.9533 | lr 6.85e-05 | 44s
+2026-09-17 18:32:45 | INFO    | epoch 17 | batch 640/1252 | loss 0.4870 | acc 0.9537 | lr 6.85e-05 | 45s
+2026-09-17 18:32:46 | INFO    | epoch 17 | batch 660/1252 | loss 0.4869 | acc 0.9538 | lr 6.84e-05 | 46s
+2026-09-17 18:32:48 | INFO    | epoch 17 | batch 680/1252 | loss 0.4864 | acc 0.9540 | lr 6.83e-05 | 48s
+2026-09-17 18:32:49 | INFO    | epoch 17 | batch 700/1252 | loss 0.4868 | acc 0.9537 | lr 6.83e-05 | 49s
+2026-09-17 18:32:51 | INFO    | epoch 17 | batch 720/1252 | loss 0.4877 | acc 0.9532 | lr 6.82e-05 | 51s
+2026-09-17 18:32:52 | INFO    | epoch 17 | batch 740/1252 | loss 0.4875 | acc 0.9534 | lr 6.81e-05 | 52s
+2026-09-17 18:32:54 | INFO    | epoch 17 | batch 760/1252 | loss 0.4871 | acc 0.9536 | lr 6.81e-05 | 53s
+2026-09-17 18:32:55 | INFO    | epoch 17 | batch 780/1252 | loss 0.4874 | acc 0.9534 | lr 6.80e-05 | 55s
+2026-09-17 18:32:56 | INFO    | epoch 17 | batch 800/1252 | loss 0.4874 | acc 0.9534 | lr 6.80e-05 | 56s
+2026-09-17 18:32:58 | INFO    | epoch 17 | batch 820/1252 | loss 0.4869 | acc 0.9538 | lr 6.79e-05 | 58s
+2026-09-17 18:32:59 | INFO    | epoch 17 | batch 840/1252 | loss 0.4868 | acc 0.9540 | lr 6.78e-05 | 59s
+2026-09-17 18:33:01 | INFO    | epoch 17 | batch 860/1252 | loss 0.4862 | acc 0.9543 | lr 6.78e-05 | 60s
+2026-09-17 18:33:02 | INFO    | epoch 17 | batch 880/1252 | loss 0.4867 | acc 0.9541 | lr 6.77e-05 | 62s
+2026-09-17 18:33:03 | INFO    | epoch 17 | batch 900/1252 | loss 0.4867 | acc 0.9541 | lr 6.77e-05 | 63s
+2026-09-17 18:33:05 | INFO    | epoch 17 | batch 920/1252 | loss 0.4863 | acc 0.9543 | lr 6.76e-05 | 65s
+2026-09-17 18:33:06 | INFO    | epoch 17 | batch 940/1252 | loss 0.4862 | acc 0.9543 | lr 6.75e-05 | 66s
+2026-09-17 18:33:08 | INFO    | epoch 17 | batch 960/1252 | loss 0.4861 | acc 0.9544 | lr 6.75e-05 | 68s
+2026-09-17 18:33:09 | INFO    | epoch 17 | batch 980/1252 | loss 0.4861 | acc 0.9545 | lr 6.74e-05 | 69s
+2026-09-17 18:33:11 | INFO    | epoch 17 | batch 1000/1252 | loss 0.4860 | acc 0.9545 | lr 6.73e-05 | 71s
+2026-09-17 18:33:12 | INFO    | epoch 17 | batch 1020/1252 | loss 0.4857 | acc 0.9546 | lr 6.73e-05 | 72s
+2026-09-17 18:33:14 | INFO    | epoch 17 | batch 1040/1252 | loss 0.4858 | acc 0.9545 | lr 6.72e-05 | 73s
+2026-09-17 18:33:15 | INFO    | epoch 17 | batch 1060/1252 | loss 0.4861 | acc 0.9544 | lr 6.72e-05 | 75s
+2026-09-17 18:33:16 | INFO    | epoch 17 | batch 1080/1252 | loss 0.4863 | acc 0.9544 | lr 6.71e-05 | 76s
+2026-09-17 18:33:18 | INFO    | epoch 17 | batch 1100/1252 | loss 0.4862 | acc 0.9546 | lr 6.70e-05 | 78s
+2026-09-17 18:33:19 | INFO    | epoch 17 | batch 1120/1252 | loss 0.4861 | acc 0.9546 | lr 6.70e-05 | 79s
+2026-09-17 18:33:21 | INFO    | epoch 17 | batch 1140/1252 | loss 0.4860 | acc 0.9546 | lr 6.69e-05 | 80s
+2026-09-17 18:33:22 | INFO    | epoch 17 | batch 1160/1252 | loss 0.4863 | acc 0.9544 | lr 6.69e-05 | 82s
+2026-09-17 18:33:23 | INFO    | epoch 17 | batch 1180/1252 | loss 0.4859 | acc 0.9547 | lr 6.68e-05 | 83s
+2026-09-17 18:33:25 | INFO    | epoch 17 | batch 1200/1252 | loss 0.4862 | acc 0.9546 | lr 6.67e-05 | 85s
+2026-09-17 18:33:26 | INFO    | epoch 17 | batch 1220/1252 | loss 0.4865 | acc 0.9545 | lr 6.67e-05 | 86s
+2026-09-17 18:33:28 | INFO    | epoch 17 | batch 1240/1252 | loss 0.4862 | acc 0.9546 | lr 6.66e-05 | 87s
+2026-09-17 18:33:28 | INFO    | epoch 17 | batch 1252/1252 | loss 0.4862 | acc 0.9547 | lr 6.66e-05 | 88s
+2026-09-17 18:33:38 | INFO    | epoch 17/40 done in 98s | train loss 0.4862 | train running patch (aug): accuracy=0.9547 precision=0.9540 recall=0.9522 f1=0.9531
+2026-09-17 18:33:38 | INFO    | epoch 17 train (eval, no aug) | loss 0.4041 | patch[7280]: accuracy=0.9960 precision=0.9954 recall=0.9961 f1=0.9957 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:33:38 | INFO    | epoch 17 val | loss 1.2347 | patch[8448]: accuracy=0.6645 precision=0.6427 recall=0.6394 f1=0.6405 | image[96]: accuracy=0.7500 precision=0.7323 recall=0.7280 f1=0.7294
+2026-09-17 18:33:38 | INFO    | val_patch_f1 = 0.6405 (best 0.6608 @ epoch 12)
+2026-09-17 18:33:40 | INFO    | epoch 18 | batch 20/1252 | loss 0.4803 | acc 0.9609 | lr 6.65e-05 | 1s
+2026-09-17 18:33:41 | INFO    | epoch 18 | batch 40/1252 | loss 0.4769 | acc 0.9594 | lr 6.64e-05 | 3s
+2026-09-17 18:33:42 | INFO    | epoch 18 | batch 60/1252 | loss 0.4755 | acc 0.9604 | lr 6.64e-05 | 4s
+2026-09-17 18:33:44 | INFO    | epoch 18 | batch 80/1252 | loss 0.4760 | acc 0.9605 | lr 6.63e-05 | 6s
+2026-09-17 18:33:45 | INFO    | epoch 18 | batch 100/1252 | loss 0.4773 | acc 0.9587 | lr 6.63e-05 | 7s
+2026-09-17 18:33:47 | INFO    | epoch 18 | batch 120/1252 | loss 0.4784 | acc 0.9581 | lr 6.62e-05 | 8s
+2026-09-17 18:33:48 | INFO    | epoch 18 | batch 140/1252 | loss 0.4817 | acc 0.9558 | lr 6.61e-05 | 10s
+2026-09-17 18:33:49 | INFO    | epoch 18 | batch 160/1252 | loss 0.4831 | acc 0.9551 | lr 6.61e-05 | 11s
+2026-09-17 18:33:51 | INFO    | epoch 18 | batch 180/1252 | loss 0.4816 | acc 0.9563 | lr 6.60e-05 | 13s
+2026-09-17 18:33:52 | INFO    | epoch 18 | batch 200/1252 | loss 0.4808 | acc 0.9572 | lr 6.60e-05 | 14s
+2026-09-17 18:33:54 | INFO    | epoch 18 | batch 220/1252 | loss 0.4794 | acc 0.9580 | lr 6.59e-05 | 16s
+2026-09-17 18:33:55 | INFO    | epoch 18 | batch 240/1252 | loss 0.4789 | acc 0.9587 | lr 6.58e-05 | 17s
+2026-09-17 18:33:56 | INFO    | epoch 18 | batch 260/1252 | loss 0.4794 | acc 0.9588 | lr 6.58e-05 | 18s
+2026-09-17 18:33:58 | INFO    | epoch 18 | batch 280/1252 | loss 0.4785 | acc 0.9592 | lr 6.57e-05 | 20s
+2026-09-17 18:33:59 | INFO    | epoch 18 | batch 300/1252 | loss 0.4800 | acc 0.9585 | lr 6.56e-05 | 21s
+2026-09-17 18:34:01 | INFO    | epoch 18 | batch 320/1252 | loss 0.4802 | acc 0.9582 | lr 6.56e-05 | 23s
+2026-09-17 18:34:02 | INFO    | epoch 18 | batch 340/1252 | loss 0.4812 | acc 0.9577 | lr 6.55e-05 | 24s
+2026-09-17 18:34:03 | INFO    | epoch 18 | batch 360/1252 | loss 0.4813 | acc 0.9577 | lr 6.55e-05 | 25s
+2026-09-17 18:34:05 | INFO    | epoch 18 | batch 380/1252 | loss 0.4807 | acc 0.9582 | lr 6.54e-05 | 27s
+2026-09-17 18:34:06 | INFO    | epoch 18 | batch 400/1252 | loss 0.4803 | acc 0.9583 | lr 6.53e-05 | 28s
+2026-09-17 18:34:08 | INFO    | epoch 18 | batch 420/1252 | loss 0.4799 | acc 0.9582 | lr 6.53e-05 | 30s
+2026-09-17 18:34:09 | INFO    | epoch 18 | batch 440/1252 | loss 0.4794 | acc 0.9587 | lr 6.52e-05 | 31s
+2026-09-17 18:34:11 | INFO    | epoch 18 | batch 460/1252 | loss 0.4797 | acc 0.9585 | lr 6.51e-05 | 32s
+2026-09-17 18:34:12 | INFO    | epoch 18 | batch 480/1252 | loss 0.4789 | acc 0.9590 | lr 6.51e-05 | 34s
+2026-09-17 18:34:13 | INFO    | epoch 18 | batch 500/1252 | loss 0.4789 | acc 0.9590 | lr 6.50e-05 | 35s
+2026-09-17 18:34:15 | INFO    | epoch 18 | batch 520/1252 | loss 0.4792 | acc 0.9586 | lr 6.50e-05 | 37s
+2026-09-17 18:34:16 | INFO    | epoch 18 | batch 540/1252 | loss 0.4791 | acc 0.9583 | lr 6.49e-05 | 38s
+2026-09-17 18:34:18 | INFO    | epoch 18 | batch 560/1252 | loss 0.4791 | acc 0.9583 | lr 6.48e-05 | 39s
+2026-09-17 18:34:19 | INFO    | epoch 18 | batch 580/1252 | loss 0.4793 | acc 0.9582 | lr 6.48e-05 | 41s
+2026-09-17 18:34:20 | INFO    | epoch 18 | batch 600/1252 | loss 0.4789 | acc 0.9583 | lr 6.47e-05 | 42s
+2026-09-17 18:34:22 | INFO    | epoch 18 | batch 620/1252 | loss 0.4797 | acc 0.9580 | lr 6.46e-05 | 44s
+2026-09-17 18:34:23 | INFO    | epoch 18 | batch 640/1252 | loss 0.4794 | acc 0.9583 | lr 6.46e-05 | 45s
+2026-09-17 18:34:25 | INFO    | epoch 18 | batch 660/1252 | loss 0.4792 | acc 0.9583 | lr 6.45e-05 | 46s
+2026-09-17 18:34:26 | INFO    | epoch 18 | batch 680/1252 | loss 0.4793 | acc 0.9583 | lr 6.45e-05 | 48s
+2026-09-17 18:34:27 | INFO    | epoch 18 | batch 700/1252 | loss 0.4791 | acc 0.9585 | lr 6.44e-05 | 49s
+2026-09-17 18:34:29 | INFO    | epoch 18 | batch 720/1252 | loss 0.4792 | acc 0.9586 | lr 6.43e-05 | 50s
+2026-09-17 18:34:30 | INFO    | epoch 18 | batch 740/1252 | loss 0.4786 | acc 0.9589 | lr 6.43e-05 | 52s
+2026-09-17 18:34:31 | INFO    | epoch 18 | batch 760/1252 | loss 0.4790 | acc 0.9588 | lr 6.42e-05 | 53s
+2026-09-17 18:34:33 | INFO    | epoch 18 | batch 780/1252 | loss 0.4789 | acc 0.9587 | lr 6.41e-05 | 55s
+2026-09-17 18:34:34 | INFO    | epoch 18 | batch 800/1252 | loss 0.4788 | acc 0.9588 | lr 6.41e-05 | 56s
+2026-09-17 18:34:35 | INFO    | epoch 18 | batch 820/1252 | loss 0.4796 | acc 0.9584 | lr 6.40e-05 | 57s
+2026-09-17 18:34:37 | INFO    | epoch 18 | batch 840/1252 | loss 0.4799 | acc 0.9583 | lr 6.40e-05 | 59s
+2026-09-17 18:34:38 | INFO    | epoch 18 | batch 860/1252 | loss 0.4793 | acc 0.9585 | lr 6.39e-05 | 60s
+2026-09-17 18:34:40 | INFO    | epoch 18 | batch 880/1252 | loss 0.4797 | acc 0.9582 | lr 6.38e-05 | 61s
+2026-09-17 18:34:41 | INFO    | epoch 18 | batch 900/1252 | loss 0.4798 | acc 0.9582 | lr 6.38e-05 | 63s
+2026-09-17 18:34:42 | INFO    | epoch 18 | batch 920/1252 | loss 0.4798 | acc 0.9582 | lr 6.37e-05 | 64s
+2026-09-17 18:34:44 | INFO    | epoch 18 | batch 940/1252 | loss 0.4795 | acc 0.9583 | lr 6.36e-05 | 66s
+2026-09-17 18:34:45 | INFO    | epoch 18 | batch 960/1252 | loss 0.4790 | acc 0.9586 | lr 6.36e-05 | 67s
+2026-09-17 18:34:47 | INFO    | epoch 18 | batch 980/1252 | loss 0.4793 | acc 0.9586 | lr 6.35e-05 | 68s
+2026-09-17 18:34:48 | INFO    | epoch 18 | batch 1000/1252 | loss 0.4796 | acc 0.9586 | lr 6.34e-05 | 70s
+2026-09-17 18:34:49 | INFO    | epoch 18 | batch 1020/1252 | loss 0.4794 | acc 0.9586 | lr 6.34e-05 | 71s
+2026-09-17 18:34:51 | INFO    | epoch 18 | batch 1040/1252 | loss 0.4797 | acc 0.9584 | lr 6.33e-05 | 73s
+2026-09-17 18:34:52 | INFO    | epoch 18 | batch 1060/1252 | loss 0.4798 | acc 0.9584 | lr 6.33e-05 | 74s
+2026-09-17 18:34:54 | INFO    | epoch 18 | batch 1080/1252 | loss 0.4796 | acc 0.9585 | lr 6.32e-05 | 75s
+2026-09-17 18:34:55 | INFO    | epoch 18 | batch 1100/1252 | loss 0.4792 | acc 0.9587 | lr 6.31e-05 | 77s
+2026-09-17 18:34:56 | INFO    | epoch 18 | batch 1120/1252 | loss 0.4789 | acc 0.9589 | lr 6.31e-05 | 78s
+2026-09-17 18:34:58 | INFO    | epoch 18 | batch 1140/1252 | loss 0.4791 | acc 0.9588 | lr 6.30e-05 | 80s
+2026-09-17 18:34:59 | INFO    | epoch 18 | batch 1160/1252 | loss 0.4790 | acc 0.9588 | lr 6.29e-05 | 81s
+2026-09-17 18:35:01 | INFO    | epoch 18 | batch 1180/1252 | loss 0.4795 | acc 0.9584 | lr 6.29e-05 | 83s
+2026-09-17 18:35:02 | INFO    | epoch 18 | batch 1200/1252 | loss 0.4797 | acc 0.9584 | lr 6.28e-05 | 84s
+2026-09-17 18:35:04 | INFO    | epoch 18 | batch 1220/1252 | loss 0.4796 | acc 0.9584 | lr 6.28e-05 | 85s
+2026-09-17 18:35:05 | INFO    | epoch 18 | batch 1240/1252 | loss 0.4796 | acc 0.9585 | lr 6.27e-05 | 87s
+2026-09-17 18:35:06 | INFO    | epoch 18 | batch 1252/1252 | loss 0.4798 | acc 0.9585 | lr 6.27e-05 | 88s
+2026-09-17 18:35:16 | INFO    | epoch 18/40 done in 97s | train loss 0.4798 | train running patch (aug): accuracy=0.9585 precision=0.9576 recall=0.9565 f1=0.9570
+2026-09-17 18:35:16 | INFO    | epoch 18 train (eval, no aug) | loss 0.4078 | patch[7280]: accuracy=0.9933 precision=0.9928 recall=0.9940 f1=0.9934 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:35:16 | INFO    | epoch 18 val | loss 1.2546 | patch[8448]: accuracy=0.6638 precision=0.6429 recall=0.6407 f1=0.6412 | image[96]: accuracy=0.7292 precision=0.7109 recall=0.7098 f1=0.7101
+2026-09-17 18:35:16 | INFO    | val_patch_f1 = 0.6412 (best 0.6608 @ epoch 12)
+2026-09-17 18:35:17 | INFO    | epoch 19 | batch 20/1252 | loss 0.4780 | acc 0.9688 | lr 6.26e-05 | 2s
+2026-09-17 18:35:19 | INFO    | epoch 19 | batch 40/1252 | loss 0.4712 | acc 0.9680 | lr 6.25e-05 | 3s
+2026-09-17 18:35:20 | INFO    | epoch 19 | batch 60/1252 | loss 0.4748 | acc 0.9635 | lr 6.25e-05 | 5s
+2026-09-17 18:35:22 | INFO    | epoch 19 | batch 80/1252 | loss 0.4750 | acc 0.9621 | lr 6.24e-05 | 6s
+2026-09-17 18:35:23 | INFO    | epoch 19 | batch 100/1252 | loss 0.4748 | acc 0.9613 | lr 6.23e-05 | 7s
+2026-09-17 18:35:25 | INFO    | epoch 19 | batch 120/1252 | loss 0.4703 | acc 0.9643 | lr 6.23e-05 | 9s
+2026-09-17 18:35:26 | INFO    | epoch 19 | batch 140/1252 | loss 0.4735 | acc 0.9621 | lr 6.22e-05 | 10s
+2026-09-17 18:35:27 | INFO    | epoch 19 | batch 160/1252 | loss 0.4750 | acc 0.9607 | lr 6.21e-05 | 12s
+2026-09-17 18:35:29 | INFO    | epoch 19 | batch 180/1252 | loss 0.4767 | acc 0.9592 | lr 6.21e-05 | 13s
+2026-09-17 18:35:30 | INFO    | epoch 19 | batch 200/1252 | loss 0.4766 | acc 0.9597 | lr 6.20e-05 | 15s
+2026-09-17 18:35:32 | INFO    | epoch 19 | batch 220/1252 | loss 0.4782 | acc 0.9588 | lr 6.20e-05 | 16s
+2026-09-17 18:35:33 | INFO    | epoch 19 | batch 240/1252 | loss 0.4783 | acc 0.9587 | lr 6.19e-05 | 17s
+2026-09-17 18:35:35 | INFO    | epoch 19 | batch 260/1252 | loss 0.4785 | acc 0.9585 | lr 6.18e-05 | 19s
+2026-09-17 18:35:36 | INFO    | epoch 19 | batch 280/1252 | loss 0.4790 | acc 0.9583 | lr 6.18e-05 | 20s
+2026-09-17 18:35:37 | INFO    | epoch 19 | batch 300/1252 | loss 0.4793 | acc 0.9577 | lr 6.17e-05 | 22s
+2026-09-17 18:35:39 | INFO    | epoch 19 | batch 320/1252 | loss 0.4804 | acc 0.9572 | lr 6.16e-05 | 23s
+2026-09-17 18:35:40 | INFO    | epoch 19 | batch 340/1252 | loss 0.4795 | acc 0.9577 | lr 6.16e-05 | 24s
+2026-09-17 18:35:41 | INFO    | epoch 19 | batch 360/1252 | loss 0.4792 | acc 0.9579 | lr 6.15e-05 | 26s
+2026-09-17 18:35:43 | INFO    | epoch 19 | batch 380/1252 | loss 0.4800 | acc 0.9573 | lr 6.14e-05 | 27s
+2026-09-17 18:35:44 | INFO    | epoch 19 | batch 400/1252 | loss 0.4813 | acc 0.9567 | lr 6.14e-05 | 29s
+2026-09-17 18:35:46 | INFO    | epoch 19 | batch 420/1252 | loss 0.4809 | acc 0.9574 | lr 6.13e-05 | 30s
+2026-09-17 18:35:47 | INFO    | epoch 19 | batch 440/1252 | loss 0.4820 | acc 0.9567 | lr 6.13e-05 | 31s
+2026-09-17 18:35:48 | INFO    | epoch 19 | batch 460/1252 | loss 0.4821 | acc 0.9563 | lr 6.12e-05 | 33s
+2026-09-17 18:35:50 | INFO    | epoch 19 | batch 480/1252 | loss 0.4818 | acc 0.9564 | lr 6.11e-05 | 34s
+2026-09-17 18:35:51 | INFO    | epoch 19 | batch 500/1252 | loss 0.4810 | acc 0.9569 | lr 6.11e-05 | 36s
+2026-09-17 18:35:53 | INFO    | epoch 19 | batch 520/1252 | loss 0.4799 | acc 0.9575 | lr 6.10e-05 | 37s
+2026-09-17 18:35:54 | INFO    | epoch 19 | batch 540/1252 | loss 0.4796 | acc 0.9578 | lr 6.09e-05 | 38s
+2026-09-17 18:35:55 | INFO    | epoch 19 | batch 560/1252 | loss 0.4796 | acc 0.9580 | lr 6.09e-05 | 40s
+2026-09-17 18:35:57 | INFO    | epoch 19 | batch 580/1252 | loss 0.4799 | acc 0.9578 | lr 6.08e-05 | 41s
+2026-09-17 18:35:58 | INFO    | epoch 19 | batch 600/1252 | loss 0.4791 | acc 0.9585 | lr 6.07e-05 | 42s
+2026-09-17 18:36:00 | INFO    | epoch 19 | batch 620/1252 | loss 0.4789 | acc 0.9585 | lr 6.07e-05 | 44s
+2026-09-17 18:36:01 | INFO    | epoch 19 | batch 640/1252 | loss 0.4783 | acc 0.9588 | lr 6.06e-05 | 45s
+2026-09-17 18:36:02 | INFO    | epoch 19 | batch 660/1252 | loss 0.4775 | acc 0.9591 | lr 6.05e-05 | 47s
+2026-09-17 18:36:04 | INFO    | epoch 19 | batch 680/1252 | loss 0.4780 | acc 0.9588 | lr 6.05e-05 | 48s
+2026-09-17 18:36:05 | INFO    | epoch 19 | batch 700/1252 | loss 0.4782 | acc 0.9587 | lr 6.04e-05 | 49s
+2026-09-17 18:36:07 | INFO    | epoch 19 | batch 720/1252 | loss 0.4780 | acc 0.9588 | lr 6.04e-05 | 51s
+2026-09-17 18:36:08 | INFO    | epoch 19 | batch 740/1252 | loss 0.4778 | acc 0.9590 | lr 6.03e-05 | 52s
+2026-09-17 18:36:09 | INFO    | epoch 19 | batch 760/1252 | loss 0.4777 | acc 0.9590 | lr 6.02e-05 | 54s
+2026-09-17 18:36:11 | INFO    | epoch 19 | batch 780/1252 | loss 0.4778 | acc 0.9591 | lr 6.02e-05 | 55s
+2026-09-17 18:36:12 | INFO    | epoch 19 | batch 800/1252 | loss 0.4781 | acc 0.9589 | lr 6.01e-05 | 57s
+2026-09-17 18:36:14 | INFO    | epoch 19 | batch 820/1252 | loss 0.4774 | acc 0.9593 | lr 6.00e-05 | 58s
+2026-09-17 18:36:15 | INFO    | epoch 19 | batch 840/1252 | loss 0.4776 | acc 0.9592 | lr 6.00e-05 | 59s
+2026-09-17 18:36:16 | INFO    | epoch 19 | batch 860/1252 | loss 0.4775 | acc 0.9592 | lr 5.99e-05 | 61s
+2026-09-17 18:36:18 | INFO    | epoch 19 | batch 880/1252 | loss 0.4782 | acc 0.9587 | lr 5.98e-05 | 62s
+2026-09-17 18:36:19 | INFO    | epoch 19 | batch 900/1252 | loss 0.4779 | acc 0.9588 | lr 5.98e-05 | 64s
+2026-09-17 18:36:21 | INFO    | epoch 19 | batch 920/1252 | loss 0.4776 | acc 0.9590 | lr 5.97e-05 | 65s
+2026-09-17 18:36:22 | INFO    | epoch 19 | batch 940/1252 | loss 0.4769 | acc 0.9594 | lr 5.97e-05 | 66s
+2026-09-17 18:36:24 | INFO    | epoch 19 | batch 960/1252 | loss 0.4769 | acc 0.9593 | lr 5.96e-05 | 68s
+2026-09-17 18:36:25 | INFO    | epoch 19 | batch 980/1252 | loss 0.4768 | acc 0.9594 | lr 5.95e-05 | 69s
+2026-09-17 18:36:26 | INFO    | epoch 19 | batch 1000/1252 | loss 0.4765 | acc 0.9595 | lr 5.95e-05 | 71s
+2026-09-17 18:36:28 | INFO    | epoch 19 | batch 1020/1252 | loss 0.4762 | acc 0.9597 | lr 5.94e-05 | 72s
+2026-09-17 18:36:29 | INFO    | epoch 19 | batch 1040/1252 | loss 0.4761 | acc 0.9598 | lr 5.93e-05 | 74s
+2026-09-17 18:36:31 | INFO    | epoch 19 | batch 1060/1252 | loss 0.4758 | acc 0.9600 | lr 5.93e-05 | 75s
+2026-09-17 18:36:32 | INFO    | epoch 19 | batch 1080/1252 | loss 0.4761 | acc 0.9598 | lr 5.92e-05 | 76s
+2026-09-17 18:36:34 | INFO    | epoch 19 | batch 1100/1252 | loss 0.4763 | acc 0.9597 | lr 5.91e-05 | 78s
+2026-09-17 18:36:35 | INFO    | epoch 19 | batch 1120/1252 | loss 0.4768 | acc 0.9596 | lr 5.91e-05 | 79s
+2026-09-17 18:36:36 | INFO    | epoch 19 | batch 1140/1252 | loss 0.4766 | acc 0.9597 | lr 5.90e-05 | 81s
+2026-09-17 18:36:38 | INFO    | epoch 19 | batch 1160/1252 | loss 0.4769 | acc 0.9595 | lr 5.89e-05 | 82s
+2026-09-17 18:36:39 | INFO    | epoch 19 | batch 1180/1252 | loss 0.4771 | acc 0.9592 | lr 5.89e-05 | 84s
+2026-09-17 18:36:41 | INFO    | epoch 19 | batch 1200/1252 | loss 0.4772 | acc 0.9591 | lr 5.88e-05 | 85s
+2026-09-17 18:36:42 | INFO    | epoch 19 | batch 1220/1252 | loss 0.4772 | acc 0.9591 | lr 5.88e-05 | 86s
+2026-09-17 18:36:43 | INFO    | epoch 19 | batch 1240/1252 | loss 0.4769 | acc 0.9593 | lr 5.87e-05 | 88s
+2026-09-17 18:36:44 | INFO    | epoch 19 | batch 1252/1252 | loss 0.4769 | acc 0.9594 | lr 5.86e-05 | 88s
+2026-09-17 18:36:54 | INFO    | epoch 19/40 done in 98s | train loss 0.4769 | train running patch (aug): accuracy=0.9594 precision=0.9588 recall=0.9571 f1=0.9579
+2026-09-17 18:36:54 | INFO    | epoch 19 train (eval, no aug) | loss 0.4052 | patch[7280]: accuracy=0.9952 precision=0.9950 recall=0.9955 f1=0.9953 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:36:54 | INFO    | epoch 19 val | loss 1.2199 | patch[8448]: accuracy=0.6715 precision=0.6456 recall=0.6450 f1=0.6446 | image[96]: accuracy=0.7292 precision=0.6950 recall=0.6951 f1=0.6947
+2026-09-17 18:36:54 | INFO    | val_patch_f1 = 0.6446 (best 0.6608 @ epoch 12)
+2026-09-17 18:36:55 | INFO    | epoch 20 | batch 20/1252 | loss 0.4618 | acc 0.9688 | lr 5.86e-05 | 1s
+2026-09-17 18:36:57 | INFO    | epoch 20 | batch 40/1252 | loss 0.4602 | acc 0.9719 | lr 5.85e-05 | 3s
+2026-09-17 18:36:58 | INFO    | epoch 20 | batch 60/1252 | loss 0.4546 | acc 0.9734 | lr 5.85e-05 | 4s
+2026-09-17 18:37:00 | INFO    | epoch 20 | batch 80/1252 | loss 0.4562 | acc 0.9723 | lr 5.84e-05 | 6s
+2026-09-17 18:37:01 | INFO    | epoch 20 | batch 100/1252 | loss 0.4613 | acc 0.9684 | lr 5.83e-05 | 7s
+2026-09-17 18:37:03 | INFO    | epoch 20 | batch 120/1252 | loss 0.4609 | acc 0.9682 | lr 5.83e-05 | 9s
+2026-09-17 18:37:04 | INFO    | epoch 20 | batch 140/1252 | loss 0.4599 | acc 0.9685 | lr 5.82e-05 | 10s
+2026-09-17 18:37:05 | INFO    | epoch 20 | batch 160/1252 | loss 0.4633 | acc 0.9664 | lr 5.81e-05 | 12s
+2026-09-17 18:37:07 | INFO    | epoch 20 | batch 180/1252 | loss 0.4631 | acc 0.9672 | lr 5.81e-05 | 13s
+2026-09-17 18:37:08 | INFO    | epoch 20 | batch 200/1252 | loss 0.4625 | acc 0.9678 | lr 5.80e-05 | 14s
+2026-09-17 18:37:10 | INFO    | epoch 20 | batch 220/1252 | loss 0.4608 | acc 0.9689 | lr 5.79e-05 | 16s
+2026-09-17 18:37:11 | INFO    | epoch 20 | batch 240/1252 | loss 0.4602 | acc 0.9686 | lr 5.79e-05 | 17s
+2026-09-17 18:37:13 | INFO    | epoch 20 | batch 260/1252 | loss 0.4602 | acc 0.9684 | lr 5.78e-05 | 19s
+2026-09-17 18:37:14 | INFO    | epoch 20 | batch 280/1252 | loss 0.4600 | acc 0.9686 | lr 5.77e-05 | 20s
+2026-09-17 18:37:15 | INFO    | epoch 20 | batch 300/1252 | loss 0.4618 | acc 0.9677 | lr 5.77e-05 | 21s
+2026-09-17 18:37:17 | INFO    | epoch 20 | batch 320/1252 | loss 0.4612 | acc 0.9682 | lr 5.76e-05 | 23s
+2026-09-17 18:37:18 | INFO    | epoch 20 | batch 340/1252 | loss 0.4615 | acc 0.9678 | lr 5.75e-05 | 24s
+2026-09-17 18:37:20 | INFO    | epoch 20 | batch 360/1252 | loss 0.4619 | acc 0.9674 | lr 5.75e-05 | 26s
+2026-09-17 18:37:21 | INFO    | epoch 20 | batch 380/1252 | loss 0.4614 | acc 0.9676 | lr 5.74e-05 | 27s
+2026-09-17 18:37:22 | INFO    | epoch 20 | batch 400/1252 | loss 0.4618 | acc 0.9673 | lr 5.74e-05 | 28s
+2026-09-17 18:37:24 | INFO    | epoch 20 | batch 420/1252 | loss 0.4612 | acc 0.9678 | lr 5.73e-05 | 30s
+2026-09-17 18:37:25 | INFO    | epoch 20 | batch 440/1252 | loss 0.4618 | acc 0.9676 | lr 5.72e-05 | 31s
+2026-09-17 18:37:27 | INFO    | epoch 20 | batch 460/1252 | loss 0.4617 | acc 0.9673 | lr 5.72e-05 | 33s
+2026-09-17 18:37:28 | INFO    | epoch 20 | batch 480/1252 | loss 0.4616 | acc 0.9674 | lr 5.71e-05 | 34s
+2026-09-17 18:37:29 | INFO    | epoch 20 | batch 500/1252 | loss 0.4621 | acc 0.9672 | lr 5.70e-05 | 36s
+2026-09-17 18:37:31 | INFO    | epoch 20 | batch 520/1252 | loss 0.4628 | acc 0.9666 | lr 5.70e-05 | 37s
+2026-09-17 18:37:32 | INFO    | epoch 20 | batch 540/1252 | loss 0.4636 | acc 0.9660 | lr 5.69e-05 | 38s
+2026-09-17 18:37:34 | INFO    | epoch 20 | batch 560/1252 | loss 0.4626 | acc 0.9666 | lr 5.68e-05 | 40s
+2026-09-17 18:37:35 | INFO    | epoch 20 | batch 580/1252 | loss 0.4621 | acc 0.9670 | lr 5.68e-05 | 41s
+2026-09-17 18:37:37 | INFO    | epoch 20 | batch 600/1252 | loss 0.4613 | acc 0.9673 | lr 5.67e-05 | 43s
+2026-09-17 18:37:38 | INFO    | epoch 20 | batch 620/1252 | loss 0.4627 | acc 0.9667 | lr 5.66e-05 | 44s
+2026-09-17 18:37:40 | INFO    | epoch 20 | batch 640/1252 | loss 0.4626 | acc 0.9668 | lr 5.66e-05 | 46s
+2026-09-17 18:37:41 | INFO    | epoch 20 | batch 660/1252 | loss 0.4630 | acc 0.9670 | lr 5.65e-05 | 47s
+2026-09-17 18:37:43 | INFO    | epoch 20 | batch 680/1252 | loss 0.4628 | acc 0.9671 | lr 5.64e-05 | 49s
+2026-09-17 18:37:44 | INFO    | epoch 20 | batch 700/1252 | loss 0.4629 | acc 0.9670 | lr 5.64e-05 | 51s
+2026-09-17 18:37:46 | INFO    | epoch 20 | batch 720/1252 | loss 0.4632 | acc 0.9669 | lr 5.63e-05 | 52s
+2026-09-17 18:37:47 | INFO    | epoch 20 | batch 740/1252 | loss 0.4629 | acc 0.9668 | lr 5.63e-05 | 54s
+2026-09-17 18:37:49 | INFO    | epoch 20 | batch 760/1252 | loss 0.4632 | acc 0.9667 | lr 5.62e-05 | 55s
+2026-09-17 18:37:50 | INFO    | epoch 20 | batch 780/1252 | loss 0.4635 | acc 0.9665 | lr 5.61e-05 | 57s
+2026-09-17 18:37:52 | INFO    | epoch 20 | batch 800/1252 | loss 0.4633 | acc 0.9667 | lr 5.61e-05 | 58s
+2026-09-17 18:37:53 | INFO    | epoch 20 | batch 820/1252 | loss 0.4638 | acc 0.9666 | lr 5.60e-05 | 59s
+2026-09-17 18:37:55 | INFO    | epoch 20 | batch 840/1252 | loss 0.4639 | acc 0.9663 | lr 5.59e-05 | 61s
+2026-09-17 18:37:56 | INFO    | epoch 20 | batch 860/1252 | loss 0.4636 | acc 0.9663 | lr 5.59e-05 | 62s
+2026-09-17 18:37:58 | INFO    | epoch 20 | batch 880/1252 | loss 0.4638 | acc 0.9662 | lr 5.58e-05 | 64s
+2026-09-17 18:37:59 | INFO    | epoch 20 | batch 900/1252 | loss 0.4638 | acc 0.9662 | lr 5.57e-05 | 65s
+2026-09-17 18:38:01 | INFO    | epoch 20 | batch 920/1252 | loss 0.4635 | acc 0.9664 | lr 5.57e-05 | 67s
+2026-09-17 18:38:02 | INFO    | epoch 20 | batch 940/1252 | loss 0.4636 | acc 0.9663 | lr 5.56e-05 | 68s
+2026-09-17 18:38:04 | INFO    | epoch 20 | batch 960/1252 | loss 0.4637 | acc 0.9662 | lr 5.55e-05 | 70s
+2026-09-17 18:38:05 | INFO    | epoch 20 | batch 980/1252 | loss 0.4643 | acc 0.9658 | lr 5.55e-05 | 71s
+2026-09-17 18:38:07 | INFO    | epoch 20 | batch 1000/1252 | loss 0.4642 | acc 0.9658 | lr 5.54e-05 | 73s
+2026-09-17 18:38:08 | INFO    | epoch 20 | batch 1020/1252 | loss 0.4645 | acc 0.9656 | lr 5.53e-05 | 74s
+2026-09-17 18:38:10 | INFO    | epoch 20 | batch 1040/1252 | loss 0.4643 | acc 0.9657 | lr 5.53e-05 | 76s
+2026-09-17 18:38:11 | INFO    | epoch 20 | batch 1060/1252 | loss 0.4642 | acc 0.9657 | lr 5.52e-05 | 77s
+2026-09-17 18:38:12 | INFO    | epoch 20 | batch 1080/1252 | loss 0.4643 | acc 0.9658 | lr 5.51e-05 | 79s
+2026-09-17 18:38:14 | INFO    | epoch 20 | batch 1100/1252 | loss 0.4642 | acc 0.9658 | lr 5.51e-05 | 80s
+2026-09-17 18:38:15 | INFO    | epoch 20 | batch 1120/1252 | loss 0.4644 | acc 0.9657 | lr 5.50e-05 | 81s
+2026-09-17 18:38:17 | INFO    | epoch 20 | batch 1140/1252 | loss 0.4643 | acc 0.9657 | lr 5.50e-05 | 83s
+2026-09-17 18:38:18 | INFO    | epoch 20 | batch 1160/1252 | loss 0.4641 | acc 0.9658 | lr 5.49e-05 | 84s
+2026-09-17 18:38:20 | INFO    | epoch 20 | batch 1180/1252 | loss 0.4644 | acc 0.9657 | lr 5.48e-05 | 86s
+2026-09-17 18:38:21 | INFO    | epoch 20 | batch 1200/1252 | loss 0.4646 | acc 0.9657 | lr 5.48e-05 | 87s
+2026-09-17 18:38:23 | INFO    | epoch 20 | batch 1220/1252 | loss 0.4644 | acc 0.9659 | lr 5.47e-05 | 89s
+2026-09-17 18:38:24 | INFO    | epoch 20 | batch 1240/1252 | loss 0.4646 | acc 0.9658 | lr 5.46e-05 | 90s
+2026-09-17 18:38:25 | INFO    | epoch 20 | batch 1252/1252 | loss 0.4647 | acc 0.9658 | lr 5.46e-05 | 91s
+2026-09-17 18:38:35 | INFO    | epoch 20/40 done in 101s | train loss 0.4647 | train running patch (aug): accuracy=0.9658 precision=0.9651 recall=0.9641 f1=0.9646
+2026-09-17 18:38:35 | INFO    | epoch 20 train (eval, no aug) | loss 0.4005 | patch[7280]: accuracy=0.9964 precision=0.9962 recall=0.9963 f1=0.9963 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:38:35 | INFO    | epoch 20 val | loss 1.2108 | patch[8448]: accuracy=0.6863 precision=0.6579 recall=0.6566 f1=0.6568 | image[96]: accuracy=0.7604 precision=0.7400 recall=0.7380 f1=0.7382
+2026-09-17 18:38:35 | INFO    | val_patch_f1 = 0.6568 (best 0.6608 @ epoch 12)
+2026-09-17 18:38:36 | INFO    | epoch 21 | batch 20/1252 | loss 0.4652 | acc 0.9625 | lr 5.45e-05 | 2s
+2026-09-17 18:38:38 | INFO    | epoch 21 | batch 40/1252 | loss 0.4756 | acc 0.9586 | lr 5.45e-05 | 3s
+2026-09-17 18:38:39 | INFO    | epoch 21 | batch 60/1252 | loss 0.4686 | acc 0.9625 | lr 5.44e-05 | 4s
+2026-09-17 18:38:40 | INFO    | epoch 21 | batch 80/1252 | loss 0.4659 | acc 0.9641 | lr 5.43e-05 | 6s
+2026-09-17 18:38:42 | INFO    | epoch 21 | batch 100/1252 | loss 0.4654 | acc 0.9650 | lr 5.43e-05 | 7s
+2026-09-17 18:38:43 | INFO    | epoch 21 | batch 120/1252 | loss 0.4633 | acc 0.9674 | lr 5.42e-05 | 9s
+2026-09-17 18:38:45 | INFO    | epoch 21 | batch 140/1252 | loss 0.4617 | acc 0.9688 | lr 5.41e-05 | 10s
+2026-09-17 18:38:46 | INFO    | epoch 21 | batch 160/1252 | loss 0.4633 | acc 0.9672 | lr 5.41e-05 | 11s
+2026-09-17 18:38:47 | INFO    | epoch 21 | batch 180/1252 | loss 0.4618 | acc 0.9682 | lr 5.40e-05 | 13s
+2026-09-17 18:38:49 | INFO    | epoch 21 | batch 200/1252 | loss 0.4633 | acc 0.9677 | lr 5.39e-05 | 14s
+2026-09-17 18:38:50 | INFO    | epoch 21 | batch 220/1252 | loss 0.4639 | acc 0.9675 | lr 5.39e-05 | 16s
+2026-09-17 18:38:52 | INFO    | epoch 21 | batch 240/1252 | loss 0.4630 | acc 0.9680 | lr 5.38e-05 | 17s
+2026-09-17 18:38:53 | INFO    | epoch 21 | batch 260/1252 | loss 0.4624 | acc 0.9683 | lr 5.37e-05 | 19s
+2026-09-17 18:38:55 | INFO    | epoch 21 | batch 280/1252 | loss 0.4625 | acc 0.9683 | lr 5.37e-05 | 20s
+2026-09-17 18:38:56 | INFO    | epoch 21 | batch 300/1252 | loss 0.4614 | acc 0.9694 | lr 5.36e-05 | 21s
+2026-09-17 18:38:57 | INFO    | epoch 21 | batch 320/1252 | loss 0.4624 | acc 0.9688 | lr 5.35e-05 | 23s
+2026-09-17 18:38:59 | INFO    | epoch 21 | batch 340/1252 | loss 0.4624 | acc 0.9687 | lr 5.35e-05 | 24s
+2026-09-17 18:39:00 | INFO    | epoch 21 | batch 360/1252 | loss 0.4619 | acc 0.9686 | lr 5.34e-05 | 26s
+2026-09-17 18:39:02 | INFO    | epoch 21 | batch 380/1252 | loss 0.4605 | acc 0.9694 | lr 5.33e-05 | 27s
+2026-09-17 18:39:03 | INFO    | epoch 21 | batch 400/1252 | loss 0.4602 | acc 0.9691 | lr 5.33e-05 | 28s
+2026-09-17 18:39:04 | INFO    | epoch 21 | batch 420/1252 | loss 0.4596 | acc 0.9691 | lr 5.32e-05 | 30s
+2026-09-17 18:39:06 | INFO    | epoch 21 | batch 440/1252 | loss 0.4594 | acc 0.9692 | lr 5.32e-05 | 31s
+2026-09-17 18:39:07 | INFO    | epoch 21 | batch 460/1252 | loss 0.4603 | acc 0.9690 | lr 5.31e-05 | 33s
+2026-09-17 18:39:09 | INFO    | epoch 21 | batch 480/1252 | loss 0.4601 | acc 0.9692 | lr 5.30e-05 | 34s
+2026-09-17 18:39:10 | INFO    | epoch 21 | batch 500/1252 | loss 0.4596 | acc 0.9695 | lr 5.30e-05 | 35s
+2026-09-17 18:39:11 | INFO    | epoch 21 | batch 520/1252 | loss 0.4596 | acc 0.9693 | lr 5.29e-05 | 37s
+2026-09-17 18:39:13 | INFO    | epoch 21 | batch 540/1252 | loss 0.4589 | acc 0.9695 | lr 5.28e-05 | 38s
+2026-09-17 18:39:14 | INFO    | epoch 21 | batch 560/1252 | loss 0.4587 | acc 0.9698 | lr 5.28e-05 | 40s
+2026-09-17 18:39:16 | INFO    | epoch 21 | batch 580/1252 | loss 0.4586 | acc 0.9699 | lr 5.27e-05 | 41s
+2026-09-17 18:39:17 | INFO    | epoch 21 | batch 600/1252 | loss 0.4584 | acc 0.9697 | lr 5.26e-05 | 43s
+2026-09-17 18:39:19 | INFO    | epoch 21 | batch 620/1252 | loss 0.4582 | acc 0.9699 | lr 5.26e-05 | 44s
+2026-09-17 18:39:20 | INFO    | epoch 21 | batch 640/1252 | loss 0.4580 | acc 0.9700 | lr 5.25e-05 | 46s
+2026-09-17 18:39:22 | INFO    | epoch 21 | batch 660/1252 | loss 0.4586 | acc 0.9696 | lr 5.24e-05 | 47s
+2026-09-17 18:39:23 | INFO    | epoch 21 | batch 680/1252 | loss 0.4588 | acc 0.9697 | lr 5.24e-05 | 48s
+2026-09-17 18:39:24 | INFO    | epoch 21 | batch 700/1252 | loss 0.4592 | acc 0.9694 | lr 5.23e-05 | 50s
+2026-09-17 18:39:26 | INFO    | epoch 21 | batch 720/1252 | loss 0.4590 | acc 0.9696 | lr 5.22e-05 | 51s
+2026-09-17 18:39:27 | INFO    | epoch 21 | batch 740/1252 | loss 0.4592 | acc 0.9695 | lr 5.22e-05 | 53s
+2026-09-17 18:39:29 | INFO    | epoch 21 | batch 760/1252 | loss 0.4597 | acc 0.9692 | lr 5.21e-05 | 54s
+2026-09-17 18:39:30 | INFO    | epoch 21 | batch 780/1252 | loss 0.4597 | acc 0.9692 | lr 5.20e-05 | 56s
+2026-09-17 18:39:32 | INFO    | epoch 21 | batch 800/1252 | loss 0.4592 | acc 0.9695 | lr 5.20e-05 | 57s
+2026-09-17 18:39:33 | INFO    | epoch 21 | batch 820/1252 | loss 0.4598 | acc 0.9691 | lr 5.19e-05 | 58s
+2026-09-17 18:39:34 | INFO    | epoch 21 | batch 840/1252 | loss 0.4600 | acc 0.9689 | lr 5.18e-05 | 60s
+2026-09-17 18:39:36 | INFO    | epoch 21 | batch 860/1252 | loss 0.4602 | acc 0.9689 | lr 5.18e-05 | 61s
+2026-09-17 18:39:37 | INFO    | epoch 21 | batch 880/1252 | loss 0.4600 | acc 0.9691 | lr 5.17e-05 | 63s
+2026-09-17 18:39:39 | INFO    | epoch 21 | batch 900/1252 | loss 0.4598 | acc 0.9690 | lr 5.17e-05 | 64s
+2026-09-17 18:39:40 | INFO    | epoch 21 | batch 920/1252 | loss 0.4601 | acc 0.9690 | lr 5.16e-05 | 65s
+2026-09-17 18:39:41 | INFO    | epoch 21 | batch 940/1252 | loss 0.4598 | acc 0.9691 | lr 5.15e-05 | 67s
+2026-09-17 18:39:43 | INFO    | epoch 21 | batch 960/1252 | loss 0.4596 | acc 0.9693 | lr 5.15e-05 | 68s
+2026-09-17 18:39:44 | INFO    | epoch 21 | batch 980/1252 | loss 0.4595 | acc 0.9693 | lr 5.14e-05 | 69s
+2026-09-17 18:39:45 | INFO    | epoch 21 | batch 1000/1252 | loss 0.4600 | acc 0.9691 | lr 5.13e-05 | 71s
+2026-09-17 18:39:47 | INFO    | epoch 21 | batch 1020/1252 | loss 0.4599 | acc 0.9690 | lr 5.13e-05 | 72s
+2026-09-17 18:39:48 | INFO    | epoch 21 | batch 1040/1252 | loss 0.4595 | acc 0.9692 | lr 5.12e-05 | 74s
+2026-09-17 18:39:50 | INFO    | epoch 21 | batch 1060/1252 | loss 0.4594 | acc 0.9693 | lr 5.11e-05 | 75s
+2026-09-17 18:39:51 | INFO    | epoch 21 | batch 1080/1252 | loss 0.4592 | acc 0.9694 | lr 5.11e-05 | 76s
+2026-09-17 18:39:52 | INFO    | epoch 21 | batch 1100/1252 | loss 0.4588 | acc 0.9696 | lr 5.10e-05 | 78s
+2026-09-17 18:39:54 | INFO    | epoch 21 | batch 1120/1252 | loss 0.4589 | acc 0.9695 | lr 5.09e-05 | 79s
+2026-09-17 18:39:55 | INFO    | epoch 21 | batch 1140/1252 | loss 0.4587 | acc 0.9696 | lr 5.09e-05 | 81s
+2026-09-17 18:39:57 | INFO    | epoch 21 | batch 1160/1252 | loss 0.4584 | acc 0.9696 | lr 5.08e-05 | 82s
+2026-09-17 18:39:58 | INFO    | epoch 21 | batch 1180/1252 | loss 0.4584 | acc 0.9696 | lr 5.07e-05 | 83s
+2026-09-17 18:39:59 | INFO    | epoch 21 | batch 1200/1252 | loss 0.4581 | acc 0.9698 | lr 5.07e-05 | 85s
+2026-09-17 18:40:01 | INFO    | epoch 21 | batch 1220/1252 | loss 0.4580 | acc 0.9697 | lr 5.06e-05 | 86s
+2026-09-17 18:40:02 | INFO    | epoch 21 | batch 1240/1252 | loss 0.4579 | acc 0.9698 | lr 5.05e-05 | 87s
+2026-09-17 18:40:03 | INFO    | epoch 21 | batch 1252/1252 | loss 0.4581 | acc 0.9697 | lr 5.05e-05 | 88s
+2026-09-17 18:40:13 | INFO    | epoch 21/40 done in 98s | train loss 0.4581 | train running patch (aug): accuracy=0.9697 precision=0.9690 recall=0.9681 f1=0.9685
+2026-09-17 18:40:13 | INFO    | epoch 21 train (eval, no aug) | loss 0.3993 | patch[7280]: accuracy=0.9973 precision=0.9969 recall=0.9974 f1=0.9971 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:40:13 | INFO    | epoch 21 val | loss 1.2874 | patch[8448]: accuracy=0.6570 precision=0.6426 recall=0.6346 f1=0.6363 | image[96]: accuracy=0.7292 precision=0.7159 recall=0.7088 f1=0.7104
+2026-09-17 18:40:13 | INFO    | val_patch_f1 = 0.6363 (best 0.6608 @ epoch 12)
+2026-09-17 18:40:14 | INFO    | epoch 22 | batch 20/1252 | loss 0.4622 | acc 0.9641 | lr 5.04e-05 | 1s
+2026-09-17 18:40:16 | INFO    | epoch 22 | batch 40/1252 | loss 0.4587 | acc 0.9656 | lr 5.04e-05 | 3s
+2026-09-17 18:40:17 | INFO    | epoch 22 | batch 60/1252 | loss 0.4662 | acc 0.9646 | lr 5.03e-05 | 4s
+2026-09-17 18:40:18 | INFO    | epoch 22 | batch 80/1252 | loss 0.4611 | acc 0.9680 | lr 5.02e-05 | 6s
+2026-09-17 18:40:20 | INFO    | epoch 22 | batch 100/1252 | loss 0.4568 | acc 0.9700 | lr 5.02e-05 | 7s
+2026-09-17 18:40:21 | INFO    | epoch 22 | batch 120/1252 | loss 0.4536 | acc 0.9716 | lr 5.01e-05 | 9s
+2026-09-17 18:40:23 | INFO    | epoch 22 | batch 140/1252 | loss 0.4523 | acc 0.9719 | lr 5.00e-05 | 10s
+2026-09-17 18:40:24 | INFO    | epoch 22 | batch 160/1252 | loss 0.4517 | acc 0.9727 | lr 5.00e-05 | 11s
+2026-09-17 18:40:26 | INFO    | epoch 22 | batch 180/1252 | loss 0.4537 | acc 0.9715 | lr 4.99e-05 | 13s
+2026-09-17 18:40:27 | INFO    | epoch 22 | batch 200/1252 | loss 0.4534 | acc 0.9720 | lr 4.98e-05 | 14s
+2026-09-17 18:40:28 | INFO    | epoch 22 | batch 220/1252 | loss 0.4529 | acc 0.9723 | lr 4.98e-05 | 16s
+2026-09-17 18:40:30 | INFO    | epoch 22 | batch 240/1252 | loss 0.4528 | acc 0.9719 | lr 4.97e-05 | 17s
+2026-09-17 18:40:31 | INFO    | epoch 22 | batch 260/1252 | loss 0.4524 | acc 0.9722 | lr 4.97e-05 | 19s
+2026-09-17 18:40:33 | INFO    | epoch 22 | batch 280/1252 | loss 0.4533 | acc 0.9717 | lr 4.96e-05 | 20s
+2026-09-17 18:40:34 | INFO    | epoch 22 | batch 300/1252 | loss 0.4530 | acc 0.9718 | lr 4.95e-05 | 21s
+2026-09-17 18:40:36 | INFO    | epoch 22 | batch 320/1252 | loss 0.4511 | acc 0.9728 | lr 4.95e-05 | 23s
+2026-09-17 18:40:37 | INFO    | epoch 22 | batch 340/1252 | loss 0.4517 | acc 0.9722 | lr 4.94e-05 | 24s
+2026-09-17 18:40:38 | INFO    | epoch 22 | batch 360/1252 | loss 0.4512 | acc 0.9720 | lr 4.93e-05 | 26s
+2026-09-17 18:40:40 | INFO    | epoch 22 | batch 380/1252 | loss 0.4509 | acc 0.9720 | lr 4.93e-05 | 27s
+2026-09-17 18:40:41 | INFO    | epoch 22 | batch 400/1252 | loss 0.4511 | acc 0.9719 | lr 4.92e-05 | 29s
+2026-09-17 18:40:43 | INFO    | epoch 22 | batch 420/1252 | loss 0.4504 | acc 0.9724 | lr 4.91e-05 | 30s
+2026-09-17 18:40:44 | INFO    | epoch 22 | batch 440/1252 | loss 0.4503 | acc 0.9725 | lr 4.91e-05 | 32s
+2026-09-17 18:40:46 | INFO    | epoch 22 | batch 460/1252 | loss 0.4499 | acc 0.9725 | lr 4.90e-05 | 33s
+2026-09-17 18:40:47 | INFO    | epoch 22 | batch 480/1252 | loss 0.4507 | acc 0.9724 | lr 4.89e-05 | 34s
+2026-09-17 18:40:48 | INFO    | epoch 22 | batch 500/1252 | loss 0.4501 | acc 0.9725 | lr 4.89e-05 | 36s
+2026-09-17 18:40:50 | INFO    | epoch 22 | batch 520/1252 | loss 0.4510 | acc 0.9719 | lr 4.88e-05 | 37s
+2026-09-17 18:40:51 | INFO    | epoch 22 | batch 540/1252 | loss 0.4506 | acc 0.9725 | lr 4.87e-05 | 39s
+2026-09-17 18:40:53 | INFO    | epoch 22 | batch 560/1252 | loss 0.4505 | acc 0.9724 | lr 4.87e-05 | 40s
+2026-09-17 18:40:54 | INFO    | epoch 22 | batch 580/1252 | loss 0.4500 | acc 0.9727 | lr 4.86e-05 | 41s
+2026-09-17 18:40:55 | INFO    | epoch 22 | batch 600/1252 | loss 0.4501 | acc 0.9727 | lr 4.85e-05 | 42s
+2026-09-17 18:40:56 | INFO    | epoch 22 | batch 620/1252 | loss 0.4510 | acc 0.9721 | lr 4.85e-05 | 44s
+2026-09-17 18:40:58 | INFO    | epoch 22 | batch 640/1252 | loss 0.4510 | acc 0.9719 | lr 4.84e-05 | 45s
+2026-09-17 18:40:59 | INFO    | epoch 22 | batch 660/1252 | loss 0.4515 | acc 0.9717 | lr 4.83e-05 | 46s
+2026-09-17 18:41:00 | INFO    | epoch 22 | batch 680/1252 | loss 0.4514 | acc 0.9720 | lr 4.83e-05 | 48s
+2026-09-17 18:41:01 | INFO    | epoch 22 | batch 700/1252 | loss 0.4514 | acc 0.9721 | lr 4.82e-05 | 49s
+2026-09-17 18:41:03 | INFO    | epoch 22 | batch 720/1252 | loss 0.4510 | acc 0.9724 | lr 4.81e-05 | 50s
+2026-09-17 18:41:04 | INFO    | epoch 22 | batch 740/1252 | loss 0.4504 | acc 0.9726 | lr 4.81e-05 | 51s
+2026-09-17 18:41:05 | INFO    | epoch 22 | batch 760/1252 | loss 0.4509 | acc 0.9722 | lr 4.80e-05 | 53s
+2026-09-17 18:41:07 | INFO    | epoch 22 | batch 780/1252 | loss 0.4514 | acc 0.9720 | lr 4.80e-05 | 54s
+2026-09-17 18:41:08 | INFO    | epoch 22 | batch 800/1252 | loss 0.4512 | acc 0.9722 | lr 4.79e-05 | 55s
+2026-09-17 18:41:09 | INFO    | epoch 22 | batch 820/1252 | loss 0.4517 | acc 0.9720 | lr 4.78e-05 | 57s
+2026-09-17 18:41:11 | INFO    | epoch 22 | batch 840/1252 | loss 0.4519 | acc 0.9720 | lr 4.78e-05 | 58s
+2026-09-17 18:41:12 | INFO    | epoch 22 | batch 860/1252 | loss 0.4517 | acc 0.9721 | lr 4.77e-05 | 60s
+2026-09-17 18:41:14 | INFO    | epoch 22 | batch 880/1252 | loss 0.4518 | acc 0.9719 | lr 4.76e-05 | 61s
+2026-09-17 18:41:15 | INFO    | epoch 22 | batch 900/1252 | loss 0.4521 | acc 0.9719 | lr 4.76e-05 | 62s
+2026-09-17 18:41:16 | INFO    | epoch 22 | batch 920/1252 | loss 0.4520 | acc 0.9720 | lr 4.75e-05 | 64s
+2026-09-17 18:41:18 | INFO    | epoch 22 | batch 940/1252 | loss 0.4523 | acc 0.9718 | lr 4.74e-05 | 65s
+2026-09-17 18:41:19 | INFO    | epoch 22 | batch 960/1252 | loss 0.4524 | acc 0.9718 | lr 4.74e-05 | 67s
+2026-09-17 18:41:21 | INFO    | epoch 22 | batch 980/1252 | loss 0.4524 | acc 0.9717 | lr 4.73e-05 | 68s
+2026-09-17 18:41:22 | INFO    | epoch 22 | batch 1000/1252 | loss 0.4525 | acc 0.9716 | lr 4.72e-05 | 70s
+2026-09-17 18:41:24 | INFO    | epoch 22 | batch 1020/1252 | loss 0.4525 | acc 0.9718 | lr 4.72e-05 | 71s
+2026-09-17 18:41:25 | INFO    | epoch 22 | batch 1040/1252 | loss 0.4526 | acc 0.9716 | lr 4.71e-05 | 72s
+2026-09-17 18:41:26 | INFO    | epoch 22 | batch 1060/1252 | loss 0.4525 | acc 0.9717 | lr 4.70e-05 | 74s
+2026-09-17 18:41:28 | INFO    | epoch 22 | batch 1080/1252 | loss 0.4523 | acc 0.9718 | lr 4.70e-05 | 75s
+2026-09-17 18:41:29 | INFO    | epoch 22 | batch 1100/1252 | loss 0.4524 | acc 0.9717 | lr 4.69e-05 | 77s
+2026-09-17 18:41:31 | INFO    | epoch 22 | batch 1120/1252 | loss 0.4522 | acc 0.9718 | lr 4.68e-05 | 78s
+2026-09-17 18:41:32 | INFO    | epoch 22 | batch 1140/1252 | loss 0.4524 | acc 0.9718 | lr 4.68e-05 | 79s
+2026-09-17 18:41:34 | INFO    | epoch 22 | batch 1160/1252 | loss 0.4521 | acc 0.9719 | lr 4.67e-05 | 81s
+2026-09-17 18:41:35 | INFO    | epoch 22 | batch 1180/1252 | loss 0.4523 | acc 0.9718 | lr 4.66e-05 | 82s
+2026-09-17 18:41:37 | INFO    | epoch 22 | batch 1200/1252 | loss 0.4524 | acc 0.9717 | lr 4.66e-05 | 84s
+2026-09-17 18:41:38 | INFO    | epoch 22 | batch 1220/1252 | loss 0.4523 | acc 0.9717 | lr 4.65e-05 | 85s
+2026-09-17 18:41:39 | INFO    | epoch 22 | batch 1240/1252 | loss 0.4526 | acc 0.9716 | lr 4.65e-05 | 87s
+2026-09-17 18:41:40 | INFO    | epoch 22 | batch 1252/1252 | loss 0.4526 | acc 0.9717 | lr 4.64e-05 | 88s
+2026-09-17 18:41:50 | INFO    | epoch 22/40 done in 97s | train loss 0.4526 | train running patch (aug): accuracy=0.9717 precision=0.9711 recall=0.9699 f1=0.9705
+2026-09-17 18:41:50 | INFO    | epoch 22 train (eval, no aug) | loss 0.3962 | patch[7280]: accuracy=0.9985 precision=0.9982 recall=0.9985 f1=0.9984 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:41:50 | INFO    | epoch 22 val | loss 1.2933 | patch[8448]: accuracy=0.6583 precision=0.6366 recall=0.6331 f1=0.6343 | image[96]: accuracy=0.7188 precision=0.7012 recall=0.6989 f1=0.6984
+2026-09-17 18:41:50 | INFO    | val_patch_f1 = 0.6343 (best 0.6608 @ epoch 12)
+2026-09-17 18:41:50 | INFO    | Early stopping: no val_patch_f1 improvement for 10 epochs
+2026-09-17 18:41:50 | INFO    | Training finished: best val_patch_f1=0.6608 at epoch 12
+2026-09-17 18:41:50 | INFO    | Loaded model_best.pt (epoch 12) for final evaluation
+2026-09-17 18:41:55 | INFO    | FINAL train | loss 0.4303 | patch[7280]: accuracy=0.9853 precision=0.9830 recall=0.9857 f1=0.9843 | image[455]: accuracy=1.0000 precision=1.0000 recall=1.0000 f1=1.0000
+2026-09-17 18:41:55 | INFO    | FINAL train patch-level per class:
+     class    prec     rec      f1      n
+         G  0.9877  0.9769  0.9823   1648
+        GP  0.9894  0.9912  0.9903   1696
+         M  0.9943  0.9893  0.9918   1408
+         T  0.9904  0.9817  0.9860   1584
+     clear  0.9531  0.9894  0.9709    944
+rows = true, cols = predicted
+           G    GP     M     T clear
+     G  1610     1     6     4    27
+    GP     2  1681     0     9     4
+     M     5     0  1393     2     8
+     T     4    17     1  1555     7
+ clear     9     0     1     0   934
+2026-09-17 18:41:55 | INFO    | FINAL train image-level per class:
+     class    prec     rec      f1      n
+         G  1.0000  1.0000  1.0000    103
+        GP  1.0000  1.0000  1.0000    106
+         M  1.0000  1.0000  1.0000     88
+         T  1.0000  1.0000  1.0000     99
+     clear  1.0000  1.0000  1.0000     59
+rows = true, cols = predicted
+           G    GP     M     T clear
+     G   103     0     0     0     0
+    GP     0   106     0     0     0
+     M     0     0    88     0     0
+     T     0     0     0    99     0
+ clear     0     0     0     0    59
+2026-09-17 18:42:00 | INFO    | FINAL val | loss 1.1817 | patch[8448]: accuracy=0.6795 precision=0.6654 recall=0.6598 f1=0.6608 | image[96]: accuracy=0.7396 precision=0.7291 recall=0.7255 f1=0.7244
+2026-09-17 18:42:00 | INFO    | FINAL val patch-level per class:
+     class    prec     rec      f1      n
+         G  0.6929  0.6921  0.6925   1936
+        GP  0.7585  0.7464  0.7524   1936
+         M  0.7773  0.6681  0.7186   1672
+         T  0.7278  0.7305  0.7291   1848
+     clear  0.3705  0.4621  0.4113   1056
+rows = true, cols = predicted
+           G    GP     M     T clear
+     G  1340    43    80    57   416
+    GP     8  1445    20   223   240
+     M   248    18  1117   139   150
+     T    82   292   101  1350    23
+ clear   256   107   119    86   488
+2026-09-17 18:42:00 | INFO    | FINAL val image-level per class:
+     class    prec     rec      f1      n
+         G  0.7727  0.7727  0.7727     22
+        GP  0.8500  0.7727  0.8095     22
+         M  0.8235  0.7368  0.7778     19
+         T  0.7619  0.7619  0.7619     21
+     clear  0.4375  0.5833  0.5000     12
+rows = true, cols = predicted
+           G    GP     M     T clear
+     G    17     0     1     0     4
+    GP     0    17     0     2     3
+     M     2     0    14     1     2
+     T     1     3     1    16     0
+ clear     2     0     1     2     7
+2026-09-17 18:42:08 | INFO    | FINAL test | loss 1.2185 | patch[9064]: accuracy=0.6435 precision=0.6498 recall=0.6442 f1=0.6391 | image[103]: accuracy=0.7282 precision=0.7397 recall=0.7277 f1=0.7234
+2026-09-17 18:42:08 | INFO    | FINAL test patch-level per class:
+     class    prec     rec      f1      n
+         G  0.6363  0.6423  0.6393   2024
+        GP  0.7824  0.5942  0.6755   2112
+         M  0.7245  0.6216  0.6691   1760
+         T  0.6774  0.7169  0.6966   1936
+     clear  0.4284  0.6461  0.5152   1232
+rows = true, cols = predicted
+           G    GP     M     T clear
+     G  1300    10   132   100   482
+    GP    32  1255    53   407   365
+     M   314    35  1094   136   181
+     T   100   300   114  1388    34
+ clear   297     4   117    18   796
+2026-09-17 18:42:08 | INFO    | FINAL test image-level per class:
+     class    prec     rec      f1      n
+         G  0.7083  0.7391  0.7234     23
+        GP  0.8889  0.6667  0.7619     24
+         M  0.8750  0.7000  0.7778     20
+         T  0.7500  0.8182  0.7826     22
+     clear  0.4762  0.7143  0.5714     14
+rows = true, cols = predicted
+           G    GP     M     T clear
+     G    17     0     0     1     5
+    GP     0    16     0     4     4
+     M     3     0    14     1     2
+     T     1     2     1    18     0
+ clear     3     0     1     0    10
+2026-09-17 18:42:08 | INFO    | Total time: 2197s | results in logs/no_augmentations_20260917_180531
