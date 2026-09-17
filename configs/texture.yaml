@@ -1,79 +1,123 @@
+# Эксперимент: классификация текстур FastViT-T8 на патчах 224x224.
+#
+# Изображения train/val/test режутся на патчи по сетке. К train-патчам
+# применяются аугментации (повороты, гауссов блюр, гауссов шум). Метрики
+# (accuracy / precision / recall / f1) считаются на патчах (основная
+# метрика) и на целых изображениях (агрегация предсказаний патчей).
+
 seed: 42
+# auto | cpu | cuda
+device: auto
 
 dataset:
   root: data/dataset2_exp_prepared
-  # Re-split train/val/test by capture group so frames of the same
-  # sample never leak across splits. split_seed is independent of
-  # the training seed so hyperparameter sweeps stay comparable.
+  # На диске сплит сделан по файлам, и кадры одного образца
+  # (``15_11_17(2-1)пп(20)-1-3`` и ``-2-4``) попадают в разные сплиты.
+  # regroup: true пересобирает train/val/test в памяти по группам кадров,
+  # regroup: false берёт папки train/val/test как есть.
   regroup: true
   group_by: sample
   split_seed: 42
   train_ratio: 0.7
   val_ratio: 0.15
   test_ratio: 0.15
-  patch_size: 224
-  overlap: 0.5
-  # Shrink the whole image by this factor before cutting patches:
-  # 1.0 = native scale (300 patches/image), 3.0 => a 224 patch spans
-  # ~30% of the image width (~15 patches/image, much more context).
-  downscale: 1.0
   grayscale: true
-  normalize: true
-  cache_size: 256
-  augmentation:
-    enabled: true
-    hflip_prob: 0.5
-    vflip_prob: 0.5
-    rot90_prob: 0.75
-    rotation_degrees: 0.0
-    blur_prob: 0.2
-    blur_kernel_size: 5
-    noise_prob: 0.2
-    noise_std: 0.05
+  # Ограничение числа изображений на класс в каждом сплите (для smoke-тестов).
+  max_images_per_class: null
+
+patches:
+  size: 224
+  # Перекрытие соседних патчей сетки, 0 <= overlap < 1.
+  train_overlap: 0.0
+  eval_overlap: 0.0
+  # Добавлять патчи, прижатые к правому/нижнему краю, чтобы покрыть всё
+  # изображение, даже если размер не кратен шагу сетки.
+  include_edges: true
+  # Сколько случайных патчей сетки брать с каждого train-изображения за
+  # эпоху. null = все патчи каждую эпоху.
+  train_patches_per_image: 16
+  # Режим дополнения при выходе патча за границы изображения: reflect | replicate.
+  pad_mode: reflect
+  # Нормализация патча (в градациях серого один канал).
+  normalize:
+    mean: [0.5]
+    std: [0.5]
+  # LRU-кэш декодированных изображений (шт.) в каждом воркере DataLoader.
+  cache_size: 512
+
+augmentation:
+  enabled: true
+  rotation:
+    prob: 1.0
+    # Случайный поворот на кратный 90 градусам угол (без потери пикселей).
+    rot90: true
+    # Дополнительный поворот на произвольный угол в [-degrees, degrees].
+    # Чтобы не было чёрных углов, из изображения вырезается патч
+    # с запасом (size * sqrt(2)), поворачивается и обрезается до size.
+    # 0 отключает произвольный поворот.
+    degrees: 15.0
+  hflip_prob: 0.5
+  vflip_prob: 0.5
+  gaussian_blur:
+    prob: 0.3
+    kernel_size: 5
+    sigma: [0.1, 2.0]
+  gaussian_noise:
+    prob: 0.3
+    # Стандартное отклонение шума в единицах яркости [0, 1].
+    std: 0.03
 
 model:
-  num_classes: 5
+  name: fastvit_t8
   pretrained: true
+  dropout: 0.2
+  drop_path_rate: 0.1
+  # Обучать только классификационную голову.
   freeze_backbone: false
-  dropout: 0.3
-  drop_path_rate: 0.2
 
 train:
-  lr: 0.0001
-  min_lr: 0.00001
-  weight_decay: 0.05
-  # If set, backbone uses this LR and the head uses `lr`. Cosine scales both.
-  # backbone_lr: 0.00001
-  max_grad_norm: 1.0
+  epochs: 40
   batch_size: 32
-  epochs: 100
-  num_workers: 4
-  epoch_fraction: 1.0
-  balanced_per_image: true
-  with_replacement: false
-  aggregation: average_probability
+  lr: 1.0e-4
+  # LR для backbone (голова использует lr). null = единый lr.
+  backbone_lr: null
+  weight_decay: 0.05
+  # Линейный разогрев, далее косинусное затухание до min_lr (по шагам).
+  warmup_epochs: 2
+  min_lr: 1.0e-6
   label_smoothing: 0.1
-  weighted_loss: true
-  class_weight_power: 0.5
+  # Взвешивать классы в loss обратно пропорционально числу изображений.
+  class_weights: false
+  max_grad_norm: 1.0
+  num_workers: 4
+  # Mixed precision (только на CUDA).
+  amp: true
 
 evaluation:
-  # Select checkpoints by patch-level val F1 (the task metric).
-  selection_metric: val_f1
-  early_stopping_patience: 15
+  batch_size: 64
+  num_workers: 4
+  # Агрегация предсказаний патчей в предсказание изображения:
+  # mean_prob | majority_vote
+  aggregation: mean_prob
+  # Усреднение precision/recall/f1: macro | weighted | micro
+  metrics_average: macro
+  # Метрика выбора лучшего чекпоинта и ранней остановки:
+  # val_patch_f1 | val_patch_accuracy | val_image_f1 | val_image_accuracy | val_loss
+  selection_metric: val_patch_f1
+  early_stopping_patience: 10
   min_delta: 0.0
-  # Held-out test is scored once at the end on the best/SWA weights.
-  eval_test: end
-  eval_val_every: 1
-  tta: true
-  eval_train: false
-  eval_train_every: 1
-  # Average the N best val checkpoints rather than the last (overfit) ones.
-  swa_window: 5
-  swa_mode: best
-  swa_eval_every: 0
+  # Считать ли на лучшем чекпоинте метрики на train (без аугментаций).
+  eval_train_at_end: false
 
 logging:
   save_dir: logs/runs
-  run_name: texture
-  unique_dir: true
+  run_name: fastvit_t8_patches
+  # Добавлять к имени запуска метку времени.
+  timestamp_dir: true
   log_file: experiment.log
+  # Метрики по эпохам (train/val, патчи и изображения).
+  metrics_csv: metrics.csv
+  # Итоговые метрики лучшего чекпоинта на val/test (патчи и изображения).
+  final_csv: final_metrics.csv
+  log_every_n_batches: 20
+  save_last: true
