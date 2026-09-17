@@ -1,0 +1,68 @@
+{
+  "selection_metric": "val_f1",
+  "best_epoch": 23,
+  "best_score": 0.3383595764258192,
+  "stopped_epoch": 35,
+  "eval_test": "end",
+  "best_val": {
+    "val_loss": 1.8119917258284146,
+    "val_accuracy": 0.3983082706766917,
+    "val_precision": 0.3483758706433575,
+    "val_recall": 0.340952380952381,
+    "val_f1": 0.3383595764258192,
+    "val_image_accuracy": 0.47368421052631576,
+    "val_image_precision": 0.41818181818181815,
+    "val_image_recall": 0.4068627450980392,
+    "val_image_f1": 0.40006617038875103
+  },
+  "best_test": {
+    "test_loss": 1.4011052609546109,
+    "test_accuracy": 0.5065337763012182,
+    "test_precision": 0.49692204107204085,
+    "test_recall": 0.5014880551131523,
+    "test_f1": 0.49636759753676757,
+    "test_image_accuracy": 0.5813953488372093,
+    "test_image_precision": 0.5801534360543649,
+    "test_image_recall": 0.5716079854809438,
+    "test_image_f1": 0.5671883433173756
+  },
+  "swa_val": {
+    "swa_val_loss": 1.7676329667406872,
+    "swa_val_accuracy": 0.39266917293233083,
+    "swa_val_precision": 0.33448325328841794,
+    "swa_val_recall": 0.3382735760971055,
+    "swa_val_f1": 0.32754200808090667,
+    "swa_val_image_accuracy": 0.42105263157894735,
+    "swa_val_image_precision": 0.3477777777777778,
+    "swa_val_image_recall": 0.3639869281045751,
+    "swa_val_image_f1": 0.34860998650472336
+  },
+  "swa_test": {
+    "swa_test_loss": 1.3716710278890194,
+    "swa_test_accuracy": 0.5100775193798449,
+    "swa_test_precision": 0.5015100631312587,
+    "swa_test_recall": 0.5014678469572947,
+    "swa_test_f1": 0.49822357319677046,
+    "swa_test_image_accuracy": 0.5736434108527132,
+    "swa_test_image_precision": 0.5687133481414388,
+    "swa_test_image_recall": 0.5583090484832771,
+    "swa_test_image_f1": 0.5554830653844889
+  },
+  "selected_weights": "best",
+  "selected_test": {
+    "test_loss": 1.4011052609546109,
+    "test_accuracy": 0.5065337763012182,
+    "test_precision": 0.49692204107204085,
+    "test_recall": 0.5014880551131523,
+    "test_f1": 0.49636759753676757,
+    "test_image_accuracy": 0.5813953488372093,
+    "test_image_precision": 0.5801534360543649,
+    "test_image_recall": 0.5716079854809438,
+    "test_image_f1": 0.5671883433173756
+  },
+  "test_image_f1": 0.5671883433173756,
+  "test_f1": 0.49636759753676757,
+  "val_image_f1": 0.40006617038875103,
+  "val_f1": 0.3383595764258192,
+  "swa_val_score": 0.32754200808090667
+}

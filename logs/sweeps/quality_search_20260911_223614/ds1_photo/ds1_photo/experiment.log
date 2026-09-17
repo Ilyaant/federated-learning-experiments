@@ -1,0 +1,18 @@
+2026-09-11 22:36:14,895 | INFO | src.trainer.history | File logging initialized: /app/logs/sweeps/quality_search_20260911_223614/ds1_photo/ds1_photo/experiment.log
+2026-09-11 22:36:14,898 | INFO | __main__ | Wrote resolved config to logs/sweeps/quality_search_20260911_223614/ds1_photo/ds1_photo/config.yaml
+2026-09-11 22:36:14,898 | INFO | __main__ | Experiment started at 2026-09-11 22:36:14 save_dir=logs/sweeps/quality_search_20260911_223614/ds1_photo/ds1_photo
+2026-09-11 22:36:14,902 | INFO | __main__ | Starting training device=cpu
+2026-09-11 22:36:15,084 | INFO | timm.models._builder | Loading pretrained weights from Hugging Face hub (timm/fastvit_t8.apple_in1k)
+2026-09-11 22:36:15,359 | INFO | httpx | HTTP Request: GET https://huggingface.co/api/agent-harnesses "HTTP/1.1 200 OK"
+2026-09-11 22:36:15,510 | INFO | httpx | HTTP Request: HEAD https://huggingface.co/timm/fastvit_t8.apple_in1k/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+2026-09-11 22:36:15,513 | INFO | timm.models._hub | [timm/fastvit_t8.apple_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+2026-09-11 22:36:15,536 | INFO | timm.models._builder | Converted input conv stem.0.conv_kxk.0.conv pretrained weights from 3 to 1 channel(s)
+2026-09-11 22:36:15,536 | INFO | timm.models._builder | Converted input conv stem.0.conv_scale.conv pretrained weights from 3 to 1 channel(s)
+2026-09-11 22:36:15,550 | INFO | timm.models._builder | Missing keys (head.fc.weight, head.fc.bias) discovered while loading pretrained weights. This is expected if model is being adapted.
+2026-09-11 22:36:15,554 | INFO | __main__ | Train TexturePatchDataset(images=449, patches=134700, active=134700, patch_size=224, overlap=0.5, downscale=1.0)
+2026-09-11 22:36:15,555 | INFO | __main__ | Val TexturePatchDataset(images=76, patches=22800, active=22800, patch_size=224, overlap=0.5, downscale=1.0)
+2026-09-11 22:36:15,555 | INFO | __main__ | Test TexturePatchDataset(images=129, patches=38700, active=38700, patch_size=224, overlap=0.5, downscale=1.0)
+2026-09-11 22:36:15,555 | INFO | __main__ | Split counts {'train': {'images': 449, 'groups': 51}, 'val': {'images': 76, 'groups': 9}, 'test': {'images': 129, 'groups': 15}} group_by=sample
+2026-09-11 22:36:15,555 | INFO | __main__ | Using class distribution {0: 103, 1: 105, 2: 91, 3: 94, 4: 56} with weights [0.9162, 0.9074, 0.9747, 0.9591, 1.2426]
+2026-09-11 22:36:15,562 | INFO | src.trainer.trainer | Starting training for 60 epochs on cpu (selection=val_f1, eval_test=end)
+2026-09-11 22:36:15,562 | INFO | src.trainer.trainer | Epoch 1/60 learning rate set to 0.0001
