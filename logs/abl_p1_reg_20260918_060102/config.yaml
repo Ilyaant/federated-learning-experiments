@@ -13,7 +13,7 @@ dataset:
 patches:
   size: 224
   train_overlap: 0.5
-  eval_overlap: 0.5
+  eval_overlap: 0.0
   include_edges: true
   train_patches_per_image: null
   pad_mode: reflect
@@ -32,7 +32,7 @@ augmentation:
   hflip_prob: 0.5
   vflip_prob: 0.5
   gaussian_blur:
-    prob: 0.3
+    prob: 0
     kernel_size: 5
     sigma:
     - 0.1
@@ -43,8 +43,8 @@ augmentation:
 model:
   name: fastvit_t8
   pretrained: true
-  dropout: 0.2
-  drop_path_rate: 0.1
+  dropout: 0.35
+  drop_path_rate: 0.2
   freeze_backbone: false
 train:
   epochs: 40
@@ -72,7 +72,7 @@ evaluation:
   eval_train_at_end: true
 logging:
   save_dir: logs
-  run_name: abl_overlap_train05_eval05
+  run_name: abl_p1_reg
   timestamp_dir: true
   log_file: experiment.log
   metrics_csv: metrics.csv

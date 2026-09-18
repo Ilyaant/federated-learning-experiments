@@ -1,0 +1,81 @@
+seed: 42
+device: auto
+dataset:
+  root: data/dataset2_exp_prepared
+  regroup: false
+  group_by: sample
+  split_seed: 42
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  grayscale: true
+  max_images_per_class: null
+patches:
+  size: 224
+  train_overlap: 0.5
+  eval_overlap: 0.0
+  include_edges: true
+  train_patches_per_image: null
+  pad_mode: reflect
+  normalize:
+    mean:
+    - 0.5
+    std:
+    - 0.5
+  cache_size: 512
+augmentation:
+  enabled: true
+  rotation:
+    prob: 1.0
+    rot90: true
+    degrees: 15.0
+  hflip_prob: 0.5
+  vflip_prob: 0.5
+  gaussian_blur:
+    prob: 0
+    kernel_size: 5
+    sigma:
+    - 0.1
+    - 2.0
+  gaussian_noise:
+    prob: 0.3
+    std: 0.03
+model:
+  name: fastvit_t8
+  pretrained: true
+  dropout: 0.2
+  drop_path_rate: 0.1
+  freeze_backbone: false
+train:
+  epochs: 40
+  batch_size: 32
+  lr: 0.0001
+  backbone_lr: null
+  weight_decay: 0.05
+  warmup_epochs: 2
+  min_lr: 1.0e-06
+  label_smoothing: 0
+  class_weights: false
+  max_grad_norm: 1.0
+  num_workers: 4
+  amp: true
+evaluation:
+  batch_size: 64
+  num_workers: 4
+  aggregation: mean_prob
+  metrics_average: macro
+  selection_metric: val_patch_f1
+  early_stopping_patience: 10
+  min_delta: 0.0
+  eval_train_every: 1
+  train_eval_patches_per_image: 16
+  eval_train_at_end: true
+logging:
+  save_dir: logs
+  run_name: abl_p1_ls0
+  timestamp_dir: true
+  log_file: experiment.log
+  metrics_csv: metrics.csv
+  final_csv: final_metrics.csv
+  log_every_n_batches: 20
+  save_last: true
