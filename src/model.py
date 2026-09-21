@@ -8,6 +8,7 @@ from torch import nn
 
 from .hipervit import HIPERVIT_NAMES, build_hipervit
 from .twistnet import TwistNet
+from .vortex import VORTEX_NAMES, build_vortex
 
 _TEXTURE_CNN_NAMES = {"texture_cnn", "tcnn"}
 _TWISTNET_NAMES = {"twistnet18", "twistnet", "twistnet2d", "twistnet_2d"}
@@ -73,13 +74,15 @@ class TextureCNN(nn.Module):
 
 
 def build_model(model_cfg: dict, num_classes: int, in_chans: int) -> nn.Module:
-    """FastViT (any timm model), Texture CNN, TwistNet-2D, or HiPerViT.
+    """FastViT (any timm model), Texture CNN, TwistNet-2D, HiPerViT, or VORTEX.
 
     With ``in_chans=1`` timm folds the pretrained RGB stem weights into a
     single channel, so ImageNet features are kept for grayscale input.
     ``texture_cnn`` / ``tcnn`` and ``twistnet18`` are trained from scratch.
     ``hipervit`` keeps a pretrained ViT backbone when ``pretrained`` is true
     and trains the statistical-token fusion head from scratch.
+    ``vortex`` freezes the ViT and trains only the linear head on the
+    orderless token encoding.
     """
     name = str(model_cfg.get("name", "fastvit_t8")).lower().replace("-", "_")
     if name in _TEXTURE_CNN_NAMES:
@@ -104,6 +107,8 @@ def build_model(model_cfg: dict, num_classes: int, in_chans: int) -> nn.Module:
         )
     elif name in HIPERVIT_NAMES:
         model = build_hipervit(model_cfg, num_classes=num_classes, in_chans=in_chans)
+    elif name in VORTEX_NAMES:
+        model = build_vortex(model_cfg, num_classes=num_classes, in_chans=in_chans)
     else:
         model = timm.create_model(
             name,

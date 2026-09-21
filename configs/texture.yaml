@@ -68,7 +68,7 @@ augmentation:
     std: 0.03
 
 model:
-  # fastvit_* и другие имена timm, texture_cnn / tcnn, twistnet18, либо hipervit.
+  # fastvit_* и другие имена timm, texture_cnn / tcnn, twistnet18, hipervit, vortex.
   # T-CNN: depth 1..5 (по умолчанию 3), pretrained: false, dropout 0.5, fc_dim 4096.
   # TwistNet-18: pretrained: false; num_heads 4, c_red 8, stem_type resnet.
   # HiPerViT: backbone (по умолчанию vit_small_patch14_dinov2.lvd142m),
@@ -79,6 +79,9 @@ model:
   # используются; у HiPerViT они задают dropout только в блоках fusion.
   # Голова HiPerViT (SRM, Perceiver, классификатор) учится с train.lr,
   # ViT — с train.backbone_lr, если он задан.
+  # VORTEX: backbone (по умолчанию vit_base_patch16_224.orig_in21k) заморожен,
+  # m — число RAE в супе (16), rae_hidden 1. Учится только линейная голова.
+  # model.train_backbone: true включает обучение ViT. dropout — только головы.
   name: fastvit_t8
   pretrained: true
   dropout: 0.2
