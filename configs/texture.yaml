@@ -68,6 +68,9 @@ augmentation:
     std: 0.03
 
 model:
+  # fastvit_* и другие имена timm, либо texture_cnn / tcnn
+  # (T-CNN: depth 1..5, по умолчанию 3; pretrained: false;
+  # dropout 0.5; fc_dim 4096). drop_path_rate у texture_cnn не используется.
   name: fastvit_t8
   pretrained: true
   dropout: 0.2
