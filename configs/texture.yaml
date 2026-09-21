@@ -68,10 +68,17 @@ augmentation:
     std: 0.03
 
 model:
-  # fastvit_* и другие имена timm, texture_cnn / tcnn, либо twistnet18.
+  # fastvit_* и другие имена timm, texture_cnn / tcnn, twistnet18, либо hipervit.
   # T-CNN: depth 1..5 (по умолчанию 3), pretrained: false, dropout 0.5, fc_dim 4096.
   # TwistNet-18: pretrained: false; num_heads 4, c_red 8, stem_type resnet.
-  # dropout и drop_path_rate у этих двух сетей не используются.
+  # HiPerViT: backbone (по умолчанию vit_small_patch14_dinov2.lvd142m),
+  # stages — номера блоков ViT с 1 (по умолчанию [1, 5]), sketch_dim 512,
+  # num_latents 64, topology interact_distill | distill_interact | late_fusion.
+  # global_size и local_size: null = размер патча. В статье глобальный вид 448
+  # и локальный кроп 224. dropout и drop_path_rate у T-CNN и TwistNet не
+  # используются; у HiPerViT они задают dropout только в блоках fusion.
+  # Голова HiPerViT (SRM, Perceiver, классификатор) учится с train.lr,
+  # ViT — с train.backbone_lr, если он задан.
   name: fastvit_t8
   pretrained: true
   dropout: 0.2

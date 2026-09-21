@@ -6,6 +6,7 @@ import timm
 import torch
 from torch import nn
 
+from .hipervit import HIPERVIT_NAMES, build_hipervit
 from .twistnet import TwistNet
 
 _TEXTURE_CNN_NAMES = {"texture_cnn", "tcnn"}
@@ -72,11 +73,13 @@ class TextureCNN(nn.Module):
 
 
 def build_model(model_cfg: dict, num_classes: int, in_chans: int) -> nn.Module:
-    """FastViT (any timm model), Texture CNN, or TwistNet-2D.
+    """FastViT (any timm model), Texture CNN, TwistNet-2D, or HiPerViT.
 
     With ``in_chans=1`` timm folds the pretrained RGB stem weights into a
     single channel, so ImageNet features are kept for grayscale input.
     ``texture_cnn`` / ``tcnn`` and ``twistnet18`` are trained from scratch.
+    ``hipervit`` keeps a pretrained ViT backbone when ``pretrained`` is true
+    and trains the statistical-token fusion head from scratch.
     """
     name = str(model_cfg.get("name", "fastvit_t8")).lower().replace("-", "_")
     if name in _TEXTURE_CNN_NAMES:
@@ -99,6 +102,8 @@ def build_model(model_cfg: dict, num_classes: int, in_chans: int) -> nn.Module:
             c_red=int(model_cfg.get("c_red", 8)),
             stem_type=str(model_cfg.get("stem_type", "resnet")),
         )
+    elif name in HIPERVIT_NAMES:
+        model = build_hipervit(model_cfg, num_classes=num_classes, in_chans=in_chans)
     else:
         model = timm.create_model(
             name,
