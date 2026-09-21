@@ -68,9 +68,10 @@ augmentation:
     std: 0.03
 
 model:
-  # fastvit_* и другие имена timm, либо texture_cnn / tcnn
-  # (T-CNN: depth 1..5, по умолчанию 3; pretrained: false;
-  # dropout 0.5; fc_dim 4096). drop_path_rate у texture_cnn не используется.
+  # fastvit_* и другие имена timm, texture_cnn / tcnn, либо twistnet18.
+  # T-CNN: depth 1..5 (по умолчанию 3), pretrained: false, dropout 0.5, fc_dim 4096.
+  # TwistNet-18: pretrained: false; num_heads 4, c_red 8, stem_type resnet.
+  # dropout и drop_path_rate у этих двух сетей не используются.
   name: fastvit_t8
   pretrained: true
   dropout: 0.2

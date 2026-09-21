@@ -6,7 +6,10 @@ import timm
 import torch
 from torch import nn
 
+from .twistnet import TwistNet
+
 _TEXTURE_CNN_NAMES = {"texture_cnn", "tcnn"}
+_TWISTNET_NAMES = {"twistnet18", "twistnet", "twistnet2d", "twistnet_2d"}
 
 
 class TextureCNN(nn.Module):
@@ -69,13 +72,13 @@ class TextureCNN(nn.Module):
 
 
 def build_model(model_cfg: dict, num_classes: int, in_chans: int) -> nn.Module:
-    """FastViT (any timm model) or Texture CNN, adapted to ``in_chans`` and ``num_classes``.
+    """FastViT (any timm model), Texture CNN, or TwistNet-2D.
 
     With ``in_chans=1`` timm folds the pretrained RGB stem weights into a
     single channel, so ImageNet features are kept for grayscale input.
-    ``texture_cnn`` / ``tcnn`` is trained from scratch: it has no checkpoint.
+    ``texture_cnn`` / ``tcnn`` and ``twistnet18`` are trained from scratch.
     """
-    name = model_cfg.get("name", "fastvit_t8")
+    name = str(model_cfg.get("name", "fastvit_t8")).lower().replace("-", "_")
     if name in _TEXTURE_CNN_NAMES:
         if model_cfg.get("pretrained", False):
             raise ValueError("texture_cnn has no pretrained checkpoint; set model.pretrained: false")
@@ -85,6 +88,16 @@ def build_model(model_cfg: dict, num_classes: int, in_chans: int) -> nn.Module:
             depth=int(model_cfg.get("depth", 3)),
             dropout=float(model_cfg.get("dropout", 0.5)),
             fc_dim=int(model_cfg.get("fc_dim", 4096)),
+        )
+    elif name in _TWISTNET_NAMES:
+        if model_cfg.get("pretrained", False):
+            raise ValueError("twistnet18 has no pretrained checkpoint; set model.pretrained: false")
+        model = TwistNet(
+            num_classes=num_classes,
+            in_chans=in_chans,
+            num_heads=int(model_cfg.get("num_heads", 4)),
+            c_red=int(model_cfg.get("c_red", 8)),
+            stem_type=str(model_cfg.get("stem_type", "resnet")),
         )
     else:
         model = timm.create_model(
