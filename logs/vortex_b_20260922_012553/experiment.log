@@ -1,0 +1,16 @@
+2026-09-22 01:25:53 | INFO    | Run directory: logs/vortex_b_20260922_012553
+2026-09-22 01:25:53 | INFO    | Device: cuda | torch 2.8.0+cu128 | threads 10
+2026-09-22 01:25:53 | INFO    | Seed: 42
+2026-09-22 01:25:53 | INFO    | Classes (5): ['G', 'GP', 'M', 'T', 'clear']
+2026-09-22 01:25:53 | INFO    | Split: regroup=False group_by=none counts={'train': {'images': 455, 'groups': None}, 'val': {'images': 96, 'groups': None}, 'test': {'images': 103, 'groups': None}}
+2026-09-22 01:25:53 | INFO    | Patches: size 224 | train overlap 0.50 | eval overlap 0.00 | train patches/image/epoch None
+2026-09-22 01:25:53 | INFO    | Train transform: RandomRotate90 -> RandomHorizontalFlip -> RandomVerticalFlip -> AddGaussianNoise -> Normalize
+2026-09-22 01:25:53 | INFO    | Eval transform:  Normalize
+2026-09-22 01:25:53 | INFO    | train      455 images, 136500 patches | images per class {'G': 103, 'GP': 106, 'M': 88, 'T': 99, 'clear': 59} | patches per class {'G': 30900, 'GP': 31800, 'M': 26400, 'T': 29700, 'clear': 17700}
+2026-09-22 01:25:53 | INFO    | val        96 images, 8448 patches | images per class {'G': 22, 'GP': 22, 'M': 19, 'T': 21, 'clear': 12} | patches per class {'G': 1936, 'GP': 1936, 'M': 1672, 'T': 1848, 'clear': 1056}
+2026-09-22 01:25:53 | INFO    | test       103 images, 9064 patches | images per class {'G': 23, 'GP': 24, 'M': 20, 'T': 22, 'clear': 14} | patches per class {'G': 2024, 'GP': 2112, 'M': 1760, 'T': 1936, 'clear': 1232}
+2026-09-22 01:25:53 | INFO    | Datasets built in 0.2s
+2026-09-22 01:25:53 | INFO    | Train patches per epoch: 136500 (4266 batches of 32)
+2026-09-22 01:25:53 | INFO    | Train eval (no aug): every 1 epoch(s) on 7280 patches (16 per image)
+2026-09-22 01:26:05 | INFO    | Model: vortex | pretrained=True | params 85.41M (trainable 0.00M)
+2026-09-22 01:26:05 | INFO    | Training 40 epochs | selection metric val_patch_f1 | patience 10 | amp True

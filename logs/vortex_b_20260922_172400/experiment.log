@@ -1,0 +1,24 @@
+2026-09-22 17:24:00 | INFO    | Run directory: logs/vortex_b_20260922_172400
+2026-09-22 17:24:00 | INFO    | Device: cpu | torch 2.8.0+cu128 | threads 10
+2026-09-22 17:24:00 | INFO    | Seed: 42
+2026-09-22 17:24:00 | INFO    | Classes (5): ['G', 'GP', 'M', 'T', 'clear']
+2026-09-22 17:24:00 | INFO    | Split: regroup=False group_by=none counts={'train': {'images': 455, 'groups': None}, 'val': {'images': 96, 'groups': None}, 'test': {'images': 103, 'groups': None}}
+2026-09-22 17:24:00 | INFO    | Patches: size 224 | train overlap 0.50 | eval overlap 0.00 | train patches/image/epoch None
+2026-09-22 17:24:00 | INFO    | Train transform: RandomRotate90 -> RandomHorizontalFlip -> RandomVerticalFlip -> AddGaussianNoise -> Normalize
+2026-09-22 17:24:00 | INFO    | Eval transform:  Normalize
+2026-09-22 17:24:00 | INFO    | train      455 images, 136500 patches | images per class {'G': 103, 'GP': 106, 'M': 88, 'T': 99, 'clear': 59} | patches per class {'G': 30900, 'GP': 31800, 'M': 26400, 'T': 29700, 'clear': 17700}
+2026-09-22 17:24:00 | INFO    | val        96 images, 8448 patches | images per class {'G': 22, 'GP': 22, 'M': 19, 'T': 21, 'clear': 12} | patches per class {'G': 1936, 'GP': 1936, 'M': 1672, 'T': 1848, 'clear': 1056}
+2026-09-22 17:24:00 | INFO    | test       103 images, 9064 patches | images per class {'G': 23, 'GP': 24, 'M': 20, 'T': 22, 'clear': 14} | patches per class {'G': 2024, 'GP': 2112, 'M': 1760, 'T': 1936, 'clear': 1232}
+2026-09-22 17:24:00 | INFO    | Datasets built in 0.2s
+2026-09-22 17:24:00 | INFO    | Train patches per epoch: 136500 (4266 batches of 32)
+2026-09-22 17:24:00 | INFO    | Train eval (no aug): every 1 epoch(s) on 7280 patches (16 per image)
+2026-09-22 17:24:03 | INFO    | Model: vortex | pretrained=True | params 85.41M (trainable 0.00M)
+2026-09-22 17:24:03 | INFO    | Training 40 epochs | selection metric val_patch_f1 | patience 10 | amp False
+2026-09-22 17:25:39 | INFO    | epoch 1 | batch 20/4266 | loss 1.6037 | acc 0.2516 | lr 1.00e-06 | 96s
+2026-09-22 17:27:07 | INFO    | epoch 1 | batch 40/4266 | loss 1.6010 | acc 0.2648 | lr 1.00e-06 | 183s
+2026-09-22 17:28:34 | INFO    | epoch 1 | batch 60/4266 | loss 1.6019 | acc 0.2625 | lr 1.00e-06 | 270s
+2026-09-22 17:30:00 | INFO    | epoch 1 | batch 80/4266 | loss 1.6036 | acc 0.2559 | lr 1.00e-06 | 357s
+2026-09-22 17:31:28 | INFO    | epoch 1 | batch 100/4266 | loss 1.6035 | acc 0.2534 | lr 1.18e-06 | 444s
+2026-09-22 17:32:55 | INFO    | epoch 1 | batch 120/4266 | loss 1.6032 | acc 0.2544 | lr 1.42e-06 | 531s
+2026-09-22 17:34:21 | INFO    | epoch 1 | batch 140/4266 | loss 1.6041 | acc 0.2493 | lr 1.65e-06 | 617s
+2026-09-22 17:35:45 | INFO    | epoch 1 | batch 160/4266 | loss 1.6038 | acc 0.2482 | lr 1.89e-06 | 702s
