@@ -79,10 +79,15 @@ class RandomizedAutoencoder(nn.Module):
         self.register_buffer("bias", torch.ones(hidden))
 
     def forward(self, tokens: torch.Tensor) -> torch.Tensor:
-        """``tokens`` is ``[B, N, D]``. Returns decoder weights ``[B, Q*D]``."""
-        values = tokens.float()
-        hidden = torch.sigmoid(F.linear(values, self.weight, self.bias))
-        solution = torch.linalg.lstsq(hidden, values).solution
+        """``tokens`` is ``[B, N, D]``. Returns decoder weights ``[B, Q*D]``.
+
+        Least squares is not valid in float16, and CUDA autocast would cast the
+        projection to half while the explicit ``float()`` tokens stay float32.
+        """
+        with torch.autocast(device_type=tokens.device.type, enabled=False):
+            values = tokens.float()
+            hidden = torch.sigmoid(F.linear(values, self.weight.float(), self.bias.float()))
+            solution = torch.linalg.lstsq(hidden, values).solution
         return solution.reshape(solution.shape[0], -1).to(dtype=tokens.dtype)
 
 
