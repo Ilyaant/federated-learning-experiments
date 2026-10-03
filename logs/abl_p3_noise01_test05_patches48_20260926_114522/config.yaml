@@ -13,9 +13,9 @@ dataset:
 patches:
   size: 224
   train_overlap: 0.5
-  eval_overlap: 0.0
+  eval_overlap: 0.5
   include_edges: true
-  train_patches_per_image: null
+  train_patches_per_image: 48
   pad_mode: reflect
   normalize:
     mean:
@@ -41,16 +41,13 @@ augmentation:
     prob: 0.3
     std: 0.01
 model:
-  name: vortex
+  name: fastvit_t8
   pretrained: true
-  dropout: 0.0
+  dropout: 0.2
   drop_path_rate: 0.1
   freeze_backbone: false
-  backbone: vit_base_patch16_224.orig_in21k
-  m: 16
-  rae_hidden: 1
 train:
-  epochs: 40
+  epochs: 55
   batch_size: 32
   lr: 0.0001
   backbone_lr: null
@@ -64,7 +61,7 @@ train:
   amp: true
 evaluation:
   batch_size: 64
-  num_workers: 4
+  num_workers: 0
   aggregation: mean_prob
   metrics_average: macro
   selection_metric: val_patch_f1
@@ -75,7 +72,7 @@ evaluation:
   eval_train_at_end: true
 logging:
   save_dir: logs
-  run_name: vortex_b
+  run_name: abl_p3_noise01_test05_patches48
   timestamp_dir: true
   log_file: experiment.log
   metrics_csv: metrics.csv

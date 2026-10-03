@@ -1,0 +1,18 @@
+{
+  "group_by": "none",
+  "regroup": false,
+  "counts": {
+    "train": {
+      "images": 455,
+      "groups": null
+    },
+    "val": {
+      "images": 96,
+      "groups": null
+    },
+    "test": {
+      "images": 103,
+      "groups": null
+    }
+  }
+}
