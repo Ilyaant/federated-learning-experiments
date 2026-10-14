@@ -17,17 +17,17 @@ dataset:
     vflip_prob: 0.5
     rot90_prob: 0.75
     rotation_degrees: 0.0
-    blur_prob: 0.2
+    blur_prob: 0
     blur_kernel_size: 5
-    noise_prob: 0.2
-    noise_std: 0.05
+    noise_prob: 0.3
+    noise_std: 0.01
 
 model:
   num_classes: 5
   pretrained: true
   freeze_backbone: false
-  dropout: 0.3
-  drop_path_rate: 0.2
+  dropout: 0.2
+  drop_path_rate: 0.1
 
 train:
   lr: 0.0001
@@ -69,7 +69,7 @@ server:
   address: 127.0.0.1:8080
 
 logging:
-  save_dir: logs/exp_new_aug_20260910_downscale1
+  save_dir: logs/exp_new_aug_20261011_256
   log_file: experiment.log
 
 simulation:
