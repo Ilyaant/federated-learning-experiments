@@ -14,7 +14,13 @@ from .config import Config, get_path, save_config, validate_config
 from .dataset import PerImagePatchSampler, TexturePatchDataset, limit_images_per_class
 from .logging_utils import save_json, setup_logger
 from .model import build_model, count_parameters, resolve_device
-from .preprocessing import SPLIT_NAMES, find_classes, load_splits, write_split_manifest
+from .preprocessing import (
+    SPLIT_NAMES,
+    find_classes,
+    load_cifar100_splits,
+    load_splits,
+    write_split_manifest,
+)
 from .trainer import Trainer
 from .transforms import (
     build_eval_transform,
@@ -54,31 +60,54 @@ def resolve_class_names(root: Path) -> list[str]:
     return find_classes(train_root if train_root.is_dir() else root)
 
 
+def is_cifar100_dataset(ds_cfg: dict) -> bool:
+    name = str(ds_cfg.get("name", "")).lower().replace("-", "").replace("_", "")
+    if name == "cifar100":
+        return True
+    root = str(ds_cfg.get("root", "")).lower().replace("-", "").replace("_", "")
+    return "cifar100" in root
+
+
 def build_datasets(config: Config) -> Tuple[Dict[str, TexturePatchDataset], dict, list[str]]:
     ds_cfg = config.get("dataset", {})
     patch_cfg = config.get("patches", {})
     aug_cfg = config.get("augmentation", {})
 
-    root = Path(ds_cfg.get("root", "data/dataset2_exp_prepared"))
-    class_names = resolve_class_names(root)
-    if not class_names:
-        raise FileNotFoundError(f"No class folders found under {root}")
+    cifar100 = is_cifar100_dataset(ds_cfg)
+    if cifar100:
+        root = Path(ds_cfg.get("root", "data/cifar100"))
+        samples, manifest, class_names = load_cifar100_splits(
+            root,
+            regroup=bool(ds_cfg.get("regroup", False)),
+            group_by=ds_cfg.get("group_by", "sample"),
+            train_ratio=float(ds_cfg.get("train_ratio", 0.7)),
+            val_ratio=float(ds_cfg.get("val_ratio", 0.15)),
+            test_ratio=float(ds_cfg.get("test_ratio", 0.15)),
+            seed=int(ds_cfg.get("split_seed", 42)),
+            download=bool(ds_cfg.get("download", True)),
+        )
+    else:
+        root = Path(ds_cfg.get("root", "data/dataset2_exp_prepared"))
+        class_names = resolve_class_names(root)
+        if not class_names:
+            raise FileNotFoundError(f"No class folders found under {root}")
 
-    samples, manifest = load_splits(
-        root,
-        regroup=bool(ds_cfg.get("regroup", True)),
-        group_by=ds_cfg.get("group_by", "sample"),
-        train_ratio=float(ds_cfg.get("train_ratio", 0.7)),
-        val_ratio=float(ds_cfg.get("val_ratio", 0.15)),
-        test_ratio=float(ds_cfg.get("test_ratio", 0.15)),
-        seed=int(ds_cfg.get("split_seed", 42)),
-    )
+        samples, manifest = load_splits(
+            root,
+            regroup=bool(ds_cfg.get("regroup", True)),
+            group_by=ds_cfg.get("group_by", "sample"),
+            train_ratio=float(ds_cfg.get("train_ratio", 0.7)),
+            val_ratio=float(ds_cfg.get("val_ratio", 0.15)),
+            test_ratio=float(ds_cfg.get("test_ratio", 0.15)),
+            seed=int(ds_cfg.get("split_seed", 42)),
+        )
     max_per_class = ds_cfg.get("max_images_per_class")
     samples = {split: limit_images_per_class(items, max_per_class) for split, items in samples.items()}
 
-    grayscale = bool(ds_cfg.get("grayscale", True))
+    grayscale = bool(ds_cfg.get("grayscale", False if cifar100 else True))
     channels = 1 if grayscale else 3
-    patch_size = int(patch_cfg.get("size", 224))
+    slice_patches = False if cifar100 else bool(patch_cfg.get("enabled", True))
+    patch_size = int(patch_cfg.get("size") or 224)
     normalize_cfg = patch_cfg.get("normalize")
 
     common = dict(
@@ -87,8 +116,18 @@ def build_datasets(config: Config) -> Tuple[Dict[str, TexturePatchDataset], dict
         grayscale=grayscale,
         pad_mode=patch_cfg.get("pad_mode", "reflect"),
         cache_size=int(patch_cfg.get("cache_size", 512)),
+        slice_patches=slice_patches,
     )
-    train_transform = build_train_transform(aug_cfg, normalize_cfg, patch_size, channels)
+    transform_size = patch_size
+    if not slice_patches and samples["train"]:
+        first_src = samples["train"][0][0]
+        if isinstance(first_src, np.ndarray):
+            transform_size = int(first_src.shape[1])
+        elif isinstance(first_src, Path):
+            from .patches import read_image_size
+            transform_size = int(read_image_size(first_src)[0])
+
+    train_transform = build_train_transform(aug_cfg, normalize_cfg, transform_size, channels)
     eval_transform = build_eval_transform(normalize_cfg, channels)
 
     datasets = {
@@ -217,11 +256,17 @@ def run_experiment(config: Config, dry_run: bool = False) -> Dict[str, object]:
         "Split: regroup=%s group_by=%s counts=%s",
         manifest.get("regroup"), manifest.get("group_by"), manifest.get("counts"),
     )
-    logger.info(
-        "Patches: size %d | train overlap %.2f | eval overlap %.2f | train patches/image/epoch %s",
-        datasets["train"].patch_size, datasets["train"].grid.overlap,
-        datasets["val"].grid.overlap, get_path(config, "patches.train_patches_per_image"),
-    )
+    if datasets["train"].slice_patches:
+        logger.info(
+            "Patches: size %d | train overlap %.2f | eval overlap %.2f | train patches/image/epoch %s",
+            datasets["train"].patch_size, datasets["train"].grid.overlap,
+            datasets["val"].grid.overlap, get_path(config, "patches.train_patches_per_image"),
+        )
+    else:
+        logger.info(
+            "Patches: disabled (whole images %dx%d)",
+            datasets["train"].patch_size, datasets["train"].patch_size,
+        )
     logger.info("Train transform: %s", describe_transform(datasets["train"].transform))
     logger.info("Eval transform:  %s", describe_transform(datasets["val"].transform))
     for split in SPLIT_NAMES:
@@ -243,7 +288,7 @@ def run_experiment(config: Config, dry_run: bool = False) -> Dict[str, object]:
     model = build_model(
         config.get("model", {}),
         num_classes=len(class_names),
-        in_chans=1 if get_path(config, "dataset.grayscale", True) else 3,
+        in_chans=1 if datasets["train"].grayscale else 3,
     )
     total, trainable = count_parameters(model)
     logger.info(

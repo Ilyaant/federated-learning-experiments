@@ -10,22 +10,26 @@ seed: 42
 device: auto
 
 dataset:
-  root: data/dataset2_exp_prepared
+  # cifar100 | texture (для локальной папки, например data/dataset2_exp_prepared)
+  name: cifar100
+  root: data/cifar-100-python
   # На диске сплит сделан по файлам, и кадры одного образца
   # (``15_11_17(2-1)пп(20)-1-3`` и ``-2-4``) попадают в разные сплиты.
   # regroup: true пересобирает train/val/test в памяти по группам кадров,
-  # regroup: false берёт папки train/val/test как есть.
+  # regroup: false берёт стандартный сплит (для CIFAR-100 выделяет val_ratio из train).
   regroup: false
   group_by: sample
   split_seed: 42
   train_ratio: 0.7
   val_ratio: 0.15
   test_ratio: 0.15
-  grayscale: true
+  grayscale: false
   # Ограничение числа изображений на класс в каждом сплите (для smoke-тестов).
   max_images_per_class: null
 
 patches:
+  # Для CIFAR-100 нарезка на фрагменты отключена (используются целые изображения).
+  enabled: false
   size: 224
   # Перекрытие соседних патчей сетки, 0 <= overlap < 1.
   train_overlap: 0.0
@@ -133,7 +137,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_patches_all_patches_overlap_0.5
+  run_name: cifar100_fastvit_t8
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log

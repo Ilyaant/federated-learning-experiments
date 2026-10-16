@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from collections import Counter, OrderedDict
 from pathlib import Path
-from typing import Callable, Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
+from PIL import Image
 import torch
 from torch.utils.data import Dataset, Sampler
+from torchvision.transforms import functional as TF
 
 from .patches import (
     PatchGrid,
@@ -16,21 +18,46 @@ from .patches import (
     read_image_size,
 )
 
-Sample = Tuple[Path, int]
+ImageSource = Union[Path, np.ndarray, torch.Tensor]
+Sample = Tuple[ImageSource, int]
 PatchEntry = Tuple[int, int, int]  # image index, x, y
 
 
-class TexturePatchDataset(Dataset):
-    """Grid patches of whole texture images.
+def _sample_image_size(source: ImageSource) -> Tuple[int, int]:
+    if isinstance(source, np.ndarray):
+        height, width = source.shape[:2]
+        return int(width), int(height)
+    if isinstance(source, torch.Tensor):
+        height, width = source.shape[-2:]
+        return int(width), int(height)
+    return read_image_size(source)
 
-    Every item is one ``patch_size`` square taken from the grid of one image.
+
+def _decode_source_uint8(source: ImageSource, grayscale: bool) -> torch.Tensor:
+    if isinstance(source, np.ndarray):
+        if grayscale:
+            img = Image.fromarray(source).convert("L")
+            return TF.pil_to_tensor(img)
+        if source.ndim == 2:
+            return torch.from_numpy(source).unsqueeze(0).expand(3, -1, -1).contiguous()
+        return torch.from_numpy(source).permute(2, 0, 1).contiguous()
+    if isinstance(source, torch.Tensor):
+        return source
+    return load_image_uint8(source, grayscale)
+
+
+class TexturePatchDataset(Dataset):
+    """Grid patches of whole texture images (or whole images when ``slice_patches=False``).
+
+    Every item is one ``patch_size`` square taken from the grid of one image,
+    or the whole image when patch slicing is disabled.
     Images are decoded lazily and kept in a per-worker LRU cache as ``uint8``
     so that cutting many patches from the same image is cheap.
     """
 
     def __init__(
         self,
-        samples: Sequence[Tuple[str | Path, int]],
+        samples: Sequence[Tuple[str | Path | np.ndarray | torch.Tensor, int]],
         patch_size: int = 224,
         overlap: float = 0.0,
         include_edges: bool = True,
@@ -39,25 +66,45 @@ class TexturePatchDataset(Dataset):
         rotation_context: bool = False,
         pad_mode: str = "reflect",
         cache_size: int = 512,
+        slice_patches: bool = True,
     ):
-        self.samples: List[Sample] = [(Path(p), int(label)) for p, label in samples]
+        self.samples: List[Sample] = [
+            (p if isinstance(p, (np.ndarray, torch.Tensor)) else Path(p), int(label))
+            for p, label in samples
+        ]
+        self.slice_patches = bool(slice_patches)
         self.grid = PatchGrid(patch_size, overlap, include_edges)
         self.grayscale = grayscale
         self.transform = transform
         self.pad_mode = pad_mode
         self.cache_size = int(cache_size)
-        self.context_size = (
-            context_size_for_rotation(patch_size) if rotation_context else None
-        )
+        self.rotation_context = bool(rotation_context)
 
         self.image_sizes: List[Tuple[int, int]] = [
-            read_image_size(path) for path, _ in self.samples
+            _sample_image_size(source) for source, _ in self.samples
         ]
+        effective_size = (
+            patch_size
+            if self.slice_patches or not self.image_sizes
+            else self.image_sizes[0][0]
+        )
+        self._effective_patch_size = int(effective_size)
+        self.context_size = (
+            context_size_for_rotation(self._effective_patch_size)
+            if self.rotation_context
+            else None
+        )
+
         self.patches: List[PatchEntry] = []
         self.patches_by_image: List[List[int]] = []
         for image_idx, (width, height) in enumerate(self.image_sizes):
+            coords = (
+                self.grid.coordinates(width, height)
+                if self.slice_patches
+                else [(0, 0)]
+            )
             indices = []
-            for x, y in self.grid.coordinates(width, height):
+            for x, y in coords:
                 indices.append(len(self.patches))
                 self.patches.append((image_idx, x, y))
             self.patches_by_image.append(indices)
@@ -67,7 +114,7 @@ class TexturePatchDataset(Dataset):
     # ----------------------------------------------------------------- info
     @property
     def patch_size(self) -> int:
-        return self.grid.patch_size
+        return self._effective_patch_size if not self.slice_patches else self.grid.patch_size
 
     @property
     def num_images(self) -> int:
@@ -96,7 +143,7 @@ class TexturePatchDataset(Dataset):
             self._cache.move_to_end(image_idx)
             return self._cache[image_idx]
 
-        tensor = load_image_uint8(self.samples[image_idx][0], self.grayscale)
+        tensor = _decode_source_uint8(self.samples[image_idx][0], self.grayscale)
         if self.cache_size > 0:
             self._cache[image_idx] = tensor
             while len(self._cache) > self.cache_size:
@@ -109,15 +156,30 @@ class TexturePatchDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict[str, object]:
         image_idx, x, y = self.patches[idx]
         _, label = self.samples[image_idx]
+        image = self._load_image(image_idx)
 
-        patch = extract_patch(
-            self._load_image(image_idx),
-            x,
-            y,
-            self.patch_size,
-            context_size=self.context_size,
-            pad_mode=self.pad_mode,
-        )
+        if self.slice_patches:
+            patch = extract_patch(
+                image,
+                x,
+                y,
+                self.patch_size,
+                context_size=self.context_size,
+                pad_mode=self.pad_mode,
+            )
+        elif self.context_size is not None:
+            side = max(image.shape[-2], image.shape[-1])
+            patch = extract_patch(
+                image,
+                0,
+                0,
+                side,
+                context_size=context_size_for_rotation(side),
+                pad_mode=self.pad_mode,
+            )
+        else:
+            patch = image.float().div_(255.0) if image.dtype == torch.uint8 else image.float()
+
         if self.transform is not None:
             patch = self.transform(patch)
 
@@ -133,6 +195,7 @@ class TexturePatchDataset(Dataset):
         return (
             f"{self.__class__.__name__}(images={self.num_images}, "
             f"patches={self.num_patches}, patch_size={self.patch_size}, "
+            f"slice_patches={self.slice_patches}, "
             f"overlap={self.grid.overlap}, context={self.context_size})"
         )
 

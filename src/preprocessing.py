@@ -8,6 +8,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
 
+import numpy as np
+import torchvision
 from PIL import Image, ImageOps
 
 VALID_EXTENSIONS = {
@@ -281,6 +283,90 @@ def load_splits(
     )
     manifest["regroup"] = True
     return _to_indexed_samples(assigned), manifest
+
+
+def load_cifar100_splits(
+    dataset_root: str | Path = "data/cifar100",
+    regroup: bool = False,
+    group_by: str = "sample",
+    train_ratio: float = 0.7,
+    val_ratio: float = 0.15,
+    test_ratio: float = 0.15,
+    seed: int = 42,
+    download: bool = True,
+) -> Tuple[Dict[str, List[Tuple[np.ndarray | Path, int]]], dict, List[str]]:
+    """Load CIFAR-100 and split into train/val/test without cutting patches."""
+    root = Path(dataset_root)
+    if root.is_dir() and not (root / "cifar-100-python").is_dir():
+        train_root = root / "train"
+        folder_classes = find_classes(train_root if train_root.is_dir() else root)
+        if folder_classes and folder_classes != ["cifar-100-python"]:
+            samples, manifest = load_splits(
+                root,
+                regroup=regroup,
+                group_by=group_by,
+                train_ratio=train_ratio,
+                val_ratio=val_ratio,
+                test_ratio=test_ratio,
+                seed=seed,
+            )
+            manifest["dataset"] = "cifar100"
+            return samples, manifest, folder_classes  # type: ignore[return-value]
+
+    train_ds = torchvision.datasets.CIFAR100(root=str(root), train=True, download=download)
+    test_ds = torchvision.datasets.CIFAR100(root=str(root), train=False, download=download)
+    class_names = list(train_ds.classes)
+
+    rng = random.Random(seed)
+    assigned: Dict[str, List[Tuple[np.ndarray, int]]] = {split: [] for split in SPLIT_NAMES}
+
+    if regroup:
+        if abs(train_ratio + val_ratio + test_ratio - 1.0) > 1e-6:
+            raise ValueError("train + val + test must equal 1")
+        per_class: Dict[int, List[Tuple[np.ndarray, int]]] = defaultdict(list)
+        for img, label in zip(train_ds.data, train_ds.targets):
+            per_class[int(label)].append((img, int(label)))
+        for img, label in zip(test_ds.data, test_ds.targets):
+            per_class[int(label)].append((img, int(label)))
+
+        for cls in sorted(per_class):
+            items = list(per_class[cls])
+            rng.shuffle(items)
+            n_train, n_val, n_test = _split_counts(len(items), train_ratio, val_ratio)
+            assigned["train"].extend(items[:n_train])
+            assigned["val"].extend(items[n_train : n_train + n_val])
+            assigned["test"].extend(items[n_train + n_val : n_train + n_val + n_test])
+    else:
+        per_class = defaultdict(list)
+        for img, label in zip(train_ds.data, train_ds.targets):
+            per_class[int(label)].append((img, int(label)))
+
+        val_frac = val_ratio if 0.0 < val_ratio < 1.0 else 0.15
+        for cls in sorted(per_class):
+            items = list(per_class[cls])
+            rng.shuffle(items)
+            n_val = max(1, int(round(len(items) * val_frac))) if len(items) > 1 else 0
+            n_train = len(items) - n_val
+            assigned["train"].extend(items[:n_train])
+            assigned["val"].extend(items[n_train:])
+
+        for img, label in zip(test_ds.data, test_ds.targets):
+            assigned["test"].append((img, int(label)))
+
+    manifest = {
+        "dataset": "cifar100",
+        "group_by": "none",
+        "regroup": regroup,
+        "split_seed": seed,
+        "train_ratio": train_ratio,
+        "val_ratio": val_ratio,
+        "test_ratio": test_ratio,
+        "counts": {
+            split: {"images": len(items), "groups": None}
+            for split, items in assigned.items()
+        },
+    }
+    return assigned, manifest, class_names
 
 
 def write_split_manifest(manifest: dict, path: str | Path) -> None:

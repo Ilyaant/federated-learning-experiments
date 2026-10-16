@@ -76,7 +76,8 @@ def validate_config(config: Config) -> List[str]:
         if not 0 <= float(overlap) < 1:
             problems.append(f"patches.{split_key} must satisfy 0 <= overlap < 1")
 
-    if int(get_path(config, "patches.size", 224)) <= 0:
+    patch_size = get_path(config, "patches.size", 224)
+    if patch_size is not None and int(patch_size) <= 0:
         problems.append("patches.size must be positive")
 
     ratios = [
