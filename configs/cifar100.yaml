@@ -25,7 +25,8 @@ dataset:
   max_images_per_class: null
 
 patches:
-  # Для CIFAR-100 нарезка на фрагменты отключена (используются целые изображения).
+  # Для CIFAR-100 нарезка на фрагменты отключена. Целые изображения
+  # бикубически ресайзятся до size перед аугментацией и оценкой.
   enabled: false
   size: 224
   train_overlap: 0.0
@@ -39,7 +40,7 @@ patches:
   cache_size: 512
 
 augmentation:
-  enabled: true
+  enabled: false
   rotation:
     prob: 1.0
     rot90: true
@@ -89,7 +90,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_cifar100_centralized
+  run_name: fastvit_t8_cifar100_centralized_resize224_no_aug
   timestamp_dir: true
   log_file: experiment.log
   metrics_csv: metrics.csv

@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 import torch
 from torch.utils.data import Dataset, Sampler
+from torchvision.transforms import InterpolationMode
 from torchvision.transforms import functional as TF
 
 from .patches import (
@@ -46,11 +47,31 @@ def _decode_source_uint8(source: ImageSource, grayscale: bool) -> torch.Tensor:
     return load_image_uint8(source, grayscale)
 
 
+def _to_float_image(image: torch.Tensor) -> torch.Tensor:
+    if image.dtype == torch.uint8:
+        return image.float().div(255.0)
+    return image.float()
+
+
+def _resize_square(image: torch.Tensor, size: int) -> torch.Tensor:
+    """Bicubic resize to ``size x size``. Values are kept in ``[0, 1]``."""
+    if image.shape[-2] == size and image.shape[-1] == size:
+        return image
+    resized = TF.resize(
+        image,
+        [size, size],
+        interpolation=InterpolationMode.BICUBIC,
+        antialias=True,
+    )
+    return resized.clamp(0.0, 1.0)
+
+
 class TexturePatchDataset(Dataset):
     """Grid patches of whole texture images (or whole images when ``slice_patches=False``).
 
     Every item is one ``patch_size`` square taken from the grid of one image,
-    or the whole image when patch slicing is disabled.
+    or the whole image when patch slicing is disabled. ``resize_to`` scales
+    that whole image to a square before augmentation (used for CIFAR-100).
     Images are decoded lazily and kept in a per-worker LRU cache as ``uint8``
     so that cutting many patches from the same image is cheap.
     """
@@ -67,6 +88,7 @@ class TexturePatchDataset(Dataset):
         pad_mode: str = "reflect",
         cache_size: int = 512,
         slice_patches: bool = True,
+        resize_to: Optional[int] = None,
     ):
         self.samples: List[Sample] = [
             (p if isinstance(p, (np.ndarray, torch.Tensor)) else Path(p), int(label))
@@ -79,15 +101,21 @@ class TexturePatchDataset(Dataset):
         self.pad_mode = pad_mode
         self.cache_size = int(cache_size)
         self.rotation_context = bool(rotation_context)
+        self.resize_to = int(resize_to) if resize_to else None
+        if self.resize_to is not None and self.slice_patches:
+            raise ValueError("resize_to applies to whole images; disable patch slicing")
+        if self.resize_to is not None and self.resize_to <= 0:
+            raise ValueError("resize_to must be positive")
 
         self.image_sizes: List[Tuple[int, int]] = [
             _sample_image_size(source) for source, _ in self.samples
         ]
-        effective_size = (
-            patch_size
-            if self.slice_patches or not self.image_sizes
-            else self.image_sizes[0][0]
-        )
+        if self.resize_to is not None:
+            effective_size = self.resize_to
+        elif self.slice_patches or not self.image_sizes:
+            effective_size = patch_size
+        else:
+            effective_size = self.image_sizes[0][0]
         self._effective_patch_size = int(effective_size)
         self.context_size = (
             context_size_for_rotation(self._effective_patch_size)
@@ -167,18 +195,22 @@ class TexturePatchDataset(Dataset):
                 context_size=self.context_size,
                 pad_mode=self.pad_mode,
             )
-        elif self.context_size is not None:
-            side = max(image.shape[-2], image.shape[-1])
-            patch = extract_patch(
-                image,
-                0,
-                0,
-                side,
-                context_size=context_size_for_rotation(side),
-                pad_mode=self.pad_mode,
-            )
         else:
-            patch = image.float().div_(255.0) if image.dtype == torch.uint8 else image.float()
+            image = _to_float_image(image)
+            if self.resize_to is not None:
+                image = _resize_square(image, self.resize_to)
+            if self.context_size is not None:
+                side = max(image.shape[-2], image.shape[-1])
+                patch = extract_patch(
+                    image,
+                    0,
+                    0,
+                    side,
+                    context_size=context_size_for_rotation(side),
+                    pad_mode=self.pad_mode,
+                )
+            else:
+                patch = image
 
         if self.transform is not None:
             patch = self.transform(patch)

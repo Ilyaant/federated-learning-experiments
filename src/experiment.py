@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import shutil
 import time
 from datetime import datetime
 from pathlib import Path
@@ -12,7 +13,7 @@ from torch.utils.data import DataLoader
 
 from .config import Config, get_path, save_config, validate_config
 from .dataset import PerImagePatchSampler, TexturePatchDataset, limit_images_per_class
-from .logging_utils import save_json, setup_logger
+from .logging_utils import get_logger, save_json, setup_logger
 from .model import build_model, count_parameters, resolve_device
 from .preprocessing import (
     SPLIT_NAMES,
@@ -110,6 +111,9 @@ def build_datasets(config: Config) -> Tuple[Dict[str, TexturePatchDataset], dict
     patch_size = int(patch_cfg.get("size") or 224)
     normalize_cfg = patch_cfg.get("normalize")
 
+    # CIFAR frames stay whole images; scale them to patches.size so the
+    # backbone sees its training resolution instead of the native 32x32.
+    resize_to = patch_size if cifar100 else None
     common = dict(
         patch_size=patch_size,
         include_edges=bool(patch_cfg.get("include_edges", True)),
@@ -117,9 +121,10 @@ def build_datasets(config: Config) -> Tuple[Dict[str, TexturePatchDataset], dict
         pad_mode=patch_cfg.get("pad_mode", "reflect"),
         cache_size=int(patch_cfg.get("cache_size", 512)),
         slice_patches=slice_patches,
+        resize_to=resize_to,
     )
     transform_size = patch_size
-    if not slice_patches and samples["train"]:
+    if not slice_patches and resize_to is None and samples["train"]:
         first_src = samples["train"][0][0]
         if isinstance(first_src, np.ndarray):
             transform_size = int(first_src.shape[1])
@@ -156,6 +161,38 @@ def build_datasets(config: Config) -> Tuple[Dict[str, TexturePatchDataset], dict
     return datasets, manifest, class_names
 
 
+def _shared_memory_bytes() -> int:
+    try:
+        return int(shutil.disk_usage("/dev/shm").total)
+    except OSError:
+        return 0
+
+
+def _sample_bytes(dataset: TexturePatchDataset) -> int:
+    channels = 1 if dataset.grayscale else 3
+    side = int(dataset.patch_size)
+    return channels * side * side * 4
+
+
+def _fit_workers(requested: int, batch_size: int, sample_bytes: int, shm_bytes: int) -> Tuple[int, int]:
+    """Pick workers and prefetch so queued batches stay inside /dev/shm.
+
+    DataLoader workers place prefetched batches in shared memory. A 224x224
+    batch is large enough to overflow the 64MB default and kill a worker
+    with a bus error.
+    """
+    requested = max(0, int(requested))
+    if requested == 0 or shm_bytes <= 0:
+        return requested, 2
+    budget = int(shm_bytes * 0.5)
+    batch_bytes = max(1, int(batch_size)) * max(1, int(sample_bytes))
+    for prefetch in (2, 1):
+        workers = min(requested, budget // (batch_bytes * prefetch))
+        if workers >= 1:
+            return int(workers), prefetch
+    return 0, 2
+
+
 def build_loaders(
     config: Config,
     datasets: Dict[str, TexturePatchDataset],
@@ -175,13 +212,34 @@ def build_loaders(
     generator = torch.Generator()
     generator.manual_seed(seed)
 
-    train_workers = int(train_cfg.get("num_workers", 0))
-    eval_workers = int(eval_cfg.get("num_workers", train_workers))
+    requested_train = int(train_cfg.get("num_workers", 0))
+    requested_eval = int(eval_cfg.get("num_workers", requested_train))
+    sample_bytes = _sample_bytes(datasets["train"])
+    shm_bytes = _shared_memory_bytes()
+    train_batch = int(train_cfg.get("batch_size", 32))
+    eval_batch = int(eval_cfg.get("batch_size", 64))
+    train_workers, train_prefetch = _fit_workers(requested_train, train_batch, sample_bytes, shm_bytes)
+    eval_workers, eval_prefetch = _fit_workers(requested_eval, eval_batch, sample_bytes, shm_bytes)
+    if train_workers != requested_train or eval_workers != requested_eval:
+        get_logger().info(
+            "DataLoader workers reduced to fit /dev/shm (%dMB): "
+            "train %d -> %d (prefetch %d), eval %d -> %d (prefetch %d)",
+            shm_bytes // (1024 * 1024),
+            requested_train, train_workers, train_prefetch if train_workers else 0,
+            requested_eval, eval_workers, eval_prefetch if eval_workers else 0,
+        )
+
+    train_kwargs = {}
+    if train_workers > 0:
+        train_kwargs["prefetch_factor"] = train_prefetch
+    eval_kwargs = {}
+    if eval_workers > 0:
+        eval_kwargs["prefetch_factor"] = eval_prefetch
 
     loaders = {
         "train": DataLoader(
             datasets["train"],
-            batch_size=int(train_cfg.get("batch_size", 32)),
+            batch_size=train_batch,
             sampler=train_sampler,
             num_workers=train_workers,
             pin_memory=pin_memory,
@@ -189,17 +247,19 @@ def build_loaders(
             persistent_workers=train_workers > 0,
             worker_init_fn=_worker_init,
             generator=generator,
+            **train_kwargs,
         )
     }
     for split in ("val", "test"):
         loaders[split] = DataLoader(
             datasets[split],
-            batch_size=int(eval_cfg.get("batch_size", 64)),
+            batch_size=eval_batch,
             shuffle=False,
             num_workers=eval_workers,
             pin_memory=pin_memory,
             persistent_workers=False,
             worker_init_fn=_worker_init,
+            **eval_kwargs,
         )
 
     # Train scored in eval mode: a fixed (seeded, never reshuffled) subset of
@@ -212,12 +272,13 @@ def build_loaders(
     )
     loaders["train_eval"] = DataLoader(
         datasets["train_eval"],
-        batch_size=int(eval_cfg.get("batch_size", 64)),
+        batch_size=eval_batch,
         sampler=train_eval_sampler,
         num_workers=eval_workers,
         pin_memory=pin_memory,
         persistent_workers=False,
         worker_init_fn=_worker_init,
+        **eval_kwargs,
     )
     return loaders, train_sampler
 
@@ -263,10 +324,18 @@ def run_experiment(config: Config, dry_run: bool = False) -> Dict[str, object]:
             datasets["val"].grid.overlap, get_path(config, "patches.train_patches_per_image"),
         )
     else:
-        logger.info(
-            "Patches: disabled (whole images %dx%d)",
-            datasets["train"].patch_size, datasets["train"].patch_size,
-        )
+        if datasets["train"].resize_to:
+            native = datasets["train"].image_sizes[0]
+            logger.info(
+                "Patches: disabled (whole images resized %dx%d -> %dx%d)",
+                native[0], native[1],
+                datasets["train"].resize_to, datasets["train"].resize_to,
+            )
+        else:
+            logger.info(
+                "Patches: disabled (whole images %dx%d)",
+                datasets["train"].patch_size, datasets["train"].patch_size,
+            )
     logger.info("Train transform: %s", describe_transform(datasets["train"].transform))
     logger.info("Eval transform:  %s", describe_transform(datasets["val"].transform))
     for split in SPLIT_NAMES:
