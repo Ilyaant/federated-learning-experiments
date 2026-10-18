@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import random
 from collections import defaultdict
-from typing import Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 import numpy as np
 
-Sample = Tuple[str, int]
+Sample = Tuple[Any, int]
 
 
 def _empty_partitions(num_clients: int) -> Dict[int, List[Sample]]:
@@ -94,13 +94,10 @@ class FederatedPartitioner:
                     np.cumsum(proportions) * len(class_samples)
                 ).astype(int)[:-1]
 
-                for client, chunk in enumerate(
-                    np.split(
-                        np.array(class_samples, dtype=object),
-                        split_points,
-                    )
-                ):
-                    partitions[client].extend(chunk.tolist())
+                boundaries = [0, *split_points.tolist(), len(class_samples)]
+                for client in range(self.num_clients):
+                    start, end = boundaries[client], boundaries[client + 1]
+                    partitions[client].extend(class_samples[start:end])
 
             if min(len(p) for p in partitions.values()) >= min_size:
                 for client in partitions:

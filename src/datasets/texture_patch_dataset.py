@@ -3,29 +3,33 @@ from __future__ import annotations
 import math
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
+from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
 from .patch_extractor import PatchExtractor
 
-Sample = Tuple[Path, int]
+ImageSource = Union[Path, np.ndarray, torch.Tensor, Image.Image]
+Sample = Tuple[ImageSource, int]
 PatchEntry = Tuple[int, int, int]
 
 
 class TexturePatchDataset(Dataset):
     """
-    Lazy patch dataset for federated learning.
+    Lazy patch (or whole-image) dataset for federated learning.
 
-    Stores image paths and patch coordinates; loads images on demand.
+    Stores image sources and patch coordinates; loads images on demand.
+    When ``slice_patches=False``, each image is returned as a single whole
+    frame (optionally resized to ``resize_to x resize_to``).
     Supports optional epoch subsampling (training) and LRU image caching.
     """
 
     def __init__(
         self,
-        samples: Sequence[Tuple[str | Path, int]],
+        samples: Sequence[Tuple[Union[str, Path, np.ndarray, torch.Tensor, Image.Image], int]],
         patch_size: int = 224,
         overlap: float = 0.5,
         grayscale: bool = True,
@@ -37,16 +41,24 @@ class TexturePatchDataset(Dataset):
         seed: int = 42,
         cache_size: int = 64,
         downscale: float = 1.0,
+        slice_patches: bool = True,
+        resize_to: Optional[int] = None,
     ):
         self.samples: List[Sample] = [
-            (Path(path), int(label)) for path, label in samples
+            (
+                source
+                if isinstance(source, (np.ndarray, torch.Tensor, Image.Image))
+                else Path(source),
+                int(label),
+            )
+            for source, label in samples
         ]
         self.transform = transform
         self.epoch_fraction = epoch_fraction
         self.balanced_per_image = balanced_per_image
         self.with_replacement = with_replacement
         self.seed = seed
-        self.cache_size = cache_size
+        self.cache_size = int(cache_size)
 
         self.extractor = PatchExtractor(
             patch_size=patch_size,
@@ -54,11 +66,13 @@ class TexturePatchDataset(Dataset):
             grayscale=grayscale,
             normalize=normalize,
             downscale=downscale,
+            slice_patches=slice_patches,
+            resize_to=resize_to,
         )
 
         self._all_patches: List[PatchEntry] = []
         self._active_patches: List[PatchEntry] = []
-        self._image_cache: OrderedDict[str, torch.Tensor] = OrderedDict()
+        self._image_cache: OrderedDict[int, torch.Tensor] = OrderedDict()
 
         self._build_patch_index()
         self.set_epoch(0)
@@ -104,17 +118,19 @@ class TexturePatchDataset(Dataset):
         rng.shuffle(active)
         self._active_patches = active
 
-    def _load_image(self, path: Path) -> torch.Tensor:
+    def _load_image(self, image_idx: int) -> torch.Tensor:
         """Load, normalize and cache the full image tensor, so that
         extracting each of its patches is a cheap slicing operation."""
-        key = str(path)
+        source = self.samples[image_idx][0]
+        if self.cache_size <= 0 or not self.extractor.slice_patches:
+            return self.extractor.load_image(source)
 
-        if key in self._image_cache:
-            self._image_cache.move_to_end(key)
-            return self._image_cache[key]
+        if image_idx in self._image_cache:
+            self._image_cache.move_to_end(image_idx)
+            return self._image_cache[image_idx]
 
-        tensor = self.extractor.load_image(path)
-        self._image_cache[key] = tensor
+        tensor = self.extractor.load_image(source)
+        self._image_cache[image_idx] = tensor
 
         if len(self._image_cache) > self.cache_size:
             self._image_cache.popitem(last=False)
@@ -126,10 +142,10 @@ class TexturePatchDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict[str, object]:
         image_idx, x, y = self._active_patches[idx]
-        path, label = self.samples[image_idx]
+        _, label = self.samples[image_idx]
 
         patch = self.extractor.extract_patch(
-            self._load_image(path),
+            self._load_image(image_idx),
             x,
             y,
         )
@@ -175,6 +191,8 @@ class TexturePatchDataset(Dataset):
             seed=self.seed,
             cache_size=self.cache_size,
             downscale=self.extractor.downscale,
+            slice_patches=self.extractor.slice_patches,
+            resize_to=self.extractor.resize_to,
         )
 
     def __repr__(self) -> str:
@@ -184,6 +202,8 @@ class TexturePatchDataset(Dataset):
             f"patches={self.num_patches}, "
             f"active={len(self)}, "
             f"patch_size={self.extractor.patch_size}, "
+            f"slice_patches={self.extractor.slice_patches}, "
+            f"resize_to={self.extractor.resize_to}, "
             f"overlap={self.extractor.overlap}, "
             f"downscale={self.extractor.downscale})"
         )

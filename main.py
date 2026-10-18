@@ -12,7 +12,7 @@ from flwr.common import Context
 from flwr.common.constant import PARTITION_ID_KEY
 
 from src.datasets.partition import FederatedPartitioner
-from src.datasets.preprocessing import load_split
+from src.datasets.preprocessing import is_cifar100_dataset, load_split
 from src.datasets.texture_patch_dataset import TexturePatchDataset
 from src.models import create_model
 from src.trainer.client import FlowerClient
@@ -94,16 +94,47 @@ class AddGaussianNoise:
         return tensor
 
 def patch_kwargs_from_config(cfg: dict) -> dict:
-    """Patch extraction settings shared by every dataset in the run."""
+    """Patch extraction / whole-image resize settings shared by every dataset in the run."""
+    ds_cfg = cfg["dataset"]
+    cifar100 = is_cifar100_dataset(ds_cfg)
+    patch_size = int(ds_cfg.get("patch_size", 224))
+    if "slice_patches" in ds_cfg:
+        slice_patches = bool(ds_cfg["slice_patches"])
+    elif "patches_enabled" in ds_cfg:
+        slice_patches = bool(ds_cfg["patches_enabled"])
+    else:
+        slice_patches = not cifar100
+
+    resize_to = ds_cfg.get(
+        "resize_to",
+        patch_size if (cifar100 or not slice_patches) else None,
+    )
     return {
-        "patch_size": cfg["dataset"]["patch_size"],
-        "overlap": cfg["dataset"]["overlap"],
-        "grayscale": cfg["dataset"]["grayscale"],
-        "normalize": cfg["dataset"]["normalize"],
-        "cache_size": cfg["dataset"].get("cache_size", 64),
-        "downscale": cfg["dataset"].get("downscale", 1.0),
+        "patch_size": patch_size,
+        "overlap": float(ds_cfg.get("overlap", 0.0 if not slice_patches else 0.5)),
+        "grayscale": bool(ds_cfg.get("grayscale", False if cifar100 else True)),
+        "normalize": bool(ds_cfg.get("normalize", True)),
+        "cache_size": int(ds_cfg.get("cache_size", 64)),
+        "downscale": float(ds_cfg.get("downscale", 1.0)),
+        "slice_patches": slice_patches,
+        "resize_to": int(resize_to) if resize_to is not None else None,
         "seed": cfg["seed"],
     }
+
+
+def load_dataset_split(cfg: dict, split: str):
+    ds_cfg = cfg["dataset"]
+    return load_split(
+        ds_cfg["root"],
+        split,
+        dataset_name=ds_cfg.get("name"),
+        regroup=bool(ds_cfg.get("regroup", False)),
+        train_ratio=float(ds_cfg.get("train_ratio", 0.7)),
+        val_ratio=float(ds_cfg.get("val_ratio", 0.15)),
+        test_ratio=float(ds_cfg.get("test_ratio", 0.15)),
+        seed=int(ds_cfg.get("split_seed", cfg.get("seed", 42))),
+        download=bool(ds_cfg.get("download", False)),
+    )
 
 
 def build_train_transform(cfg: dict):
@@ -129,7 +160,6 @@ def build_train_transform(cfg: dict):
 
 
 def build_datasets(cfg: dict, client_id: int):
-    root = cfg["dataset"]["root"]
     num_clients = cfg["federated"]["num_clients"]
     seed = cfg["seed"]
     strategy = cfg["federated"].get("partition", "stratified")
@@ -137,19 +167,19 @@ def build_datasets(cfg: dict, client_id: int):
     train_transform = build_train_transform(cfg)
 
     train_partitions = partition_split(
-        load_split(root, "train"),
+        load_dataset_split(cfg, "train"),
         num_clients,
         seed,
         strategy,
     )
     val_partitions = partition_split(
-        load_split(root, "val"),
+        load_dataset_split(cfg, "val"),
         num_clients,
         seed,
         strategy,
     )
     test_partitions = partition_split(
-        load_split(root, "test"),
+        load_dataset_split(cfg, "test"),
         num_clients,
         seed,
         strategy,
@@ -178,10 +208,12 @@ def build_datasets(cfg: dict, client_id: int):
 
 
 def build_model(cfg: dict):
+    ds_cfg = cfg["dataset"]
+    cifar100 = is_cifar100_dataset(ds_cfg)
     return create_model(
-        num_classes=cfg["model"]["num_classes"],
+        num_classes=cfg["model"].get("num_classes", 100 if cifar100 else 5),
         pretrained=cfg["model"]["pretrained"],
-        grayscale=cfg["dataset"]["grayscale"],
+        grayscale=bool(ds_cfg.get("grayscale", False if cifar100 else True)),
         freeze_backbone=cfg["model"]["freeze_backbone"],
         dropout=cfg["model"]["dropout"],
         drop_path_rate=cfg["model"]["drop_path_rate"],
@@ -197,11 +229,14 @@ def build_flower_client(
     train_dataset, val_dataset, test_dataset = build_datasets(cfg, client_id)
     model = build_model(cfg).to(device)
 
-    num_classes = cfg["model"]["num_classes"]
+    num_classes = cfg["model"].get(
+        "num_classes",
+        100 if is_cifar100_dataset(cfg["dataset"]) else 5,
+    )
     weights = None
     if cfg["train"].get("weighted_loss", True):
         global_distribution: dict[int, int] = {}
-        for _, label in load_split(cfg["dataset"]["root"], "train"):
+        for _, label in load_dataset_split(cfg, "train"):
             global_distribution[label] = (
                 global_distribution.get(label, 0) + 1
             )
@@ -268,7 +303,6 @@ def build_central_eval_fn(cfg: dict):
     def _setup():
         device = get_device()
         patch_kwargs = patch_kwargs_from_config(cfg)
-        root = cfg["dataset"]["root"]
         loader_kwargs = {
             "batch_size": cfg["train"]["batch_size"],
             "shuffle": False,
@@ -279,7 +313,7 @@ def build_central_eval_fn(cfg: dict):
         state["model"] = build_model(cfg).to(device)
         state["loaders"] = {
             split: torch.utils.data.DataLoader(
-                TexturePatchDataset(load_split(root, split), **patch_kwargs),
+                TexturePatchDataset(load_dataset_split(cfg, split), **patch_kwargs),
                 **loader_kwargs,
             )
             for split in ("val", "test")

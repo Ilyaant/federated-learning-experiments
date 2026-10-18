@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import flwr as fl
 import math
@@ -17,6 +18,47 @@ from .utils import get_device
 
 
 logger = logging.getLogger(__name__)
+
+
+def _shared_memory_bytes() -> int:
+    try:
+        return int(shutil.disk_usage("/dev/shm").total)
+    except OSError:
+        return 0
+
+
+def _sample_bytes(dataset) -> int:
+    extractor = getattr(dataset, "extractor", None)
+    grayscale = getattr(extractor, "grayscale", False) if extractor else False
+    channels = 1 if grayscale else 3
+    side = int(
+        (
+            getattr(extractor, "resize_to", None)
+            or getattr(extractor, "patch_size", 224)
+        )
+        if extractor
+        else 224
+    )
+    return channels * side * side * 4
+
+
+def _fit_workers(
+    requested: int,
+    batch_size: int,
+    sample_bytes: int,
+    shm_bytes: int,
+) -> Tuple[int, int]:
+    """Pick workers and prefetch so queued batches stay inside /dev/shm."""
+    requested = max(0, int(requested))
+    if requested == 0 or shm_bytes <= 0:
+        return requested, 2
+    budget = int(shm_bytes * 0.5)
+    batch_bytes = max(1, int(batch_size)) * max(1, int(sample_bytes))
+    for prefetch in (2, 1):
+        workers = min(requested, budget // (batch_bytes * prefetch))
+        if workers >= 1:
+            return int(workers), prefetch
+    return 0, 2
 
 
 def _create_client_logger(
@@ -129,11 +171,26 @@ class FlowerClient(fl.client.NumPyClient):
 
         # persistent_workers is intentionally off: workers must be
         # re-forked each epoch to pick up set_epoch() resampling.
+        effective_workers, prefetch = _fit_workers(
+            num_workers,
+            batch_size,
+            _sample_bytes(train_dataset),
+            _shared_memory_bytes(),
+        )
+        if effective_workers != num_workers:
+            self.logger.info(
+                "DataLoader workers reduced %d -> %d (prefetch %d) to fit /dev/shm",
+                num_workers,
+                effective_workers,
+                prefetch if effective_workers else 0,
+            )
         loader_kwargs = {
             "batch_size": batch_size,
-            "num_workers": num_workers,
+            "num_workers": effective_workers,
             "pin_memory": torch.cuda.is_available(),
         }
+        if effective_workers > 0:
+            loader_kwargs["prefetch_factor"] = prefetch
 
         self.train_loader = DataLoader(
             train_dataset,

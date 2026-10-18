@@ -1,18 +1,28 @@
 seed: 42
 
 dataset:
-  root: data/dataset2_exp_prepared
+  # cifar100 | texture (например, root: data/dataset2_exp_prepared)
+  name: cifar100
+  root: data
+  download: false
+  regroup: false
+  split_seed: 42
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  slice_patches: false
+  resize_to: 224
   patch_size: 224
-  overlap: 0.5
+  overlap: 0.0
   # Shrink the whole image by this factor before cutting patches:
   # 1.0 = native scale (300 patches/image), 3.0 => a 224 patch spans
   # ~30% of the image width (~15 patches/image, much more context).
   downscale: 1.0
-  grayscale: true
+  grayscale: false
   normalize: true
   cache_size: 64
   augmentation:
-    enabled: true
+    enabled: false
     hflip_prob: 0.5
     vflip_prob: 0.5
     rot90_prob: 0.75
@@ -23,7 +33,7 @@ dataset:
     noise_std: 0.01
 
 model:
-  num_classes: 5
+  num_classes: 100
   pretrained: true
   freeze_backbone: false
   dropout: 0.2
@@ -44,13 +54,13 @@ train:
   with_replacement: false
   aggregation: average_probability
   label_smoothing: 0.1
-  weighted_loss: true
+  weighted_loss: false
   class_weight_power: 0.5
 
 evaluation:
   # Average predictions over the 8 dihedral (flip/rot90) views of each
   # patch for val/test metrics. Costs 8x eval compute on those splits.
-  tta: true
+  tta: false
   # Server-side weight averaging: keep the mean of the last N aggregated
   # global models (SWA over rounds). 0 disables. The averaged model is
   # evaluated centrally on the full val/test splits every round
@@ -69,7 +79,7 @@ server:
   address: 127.0.0.1:8080
 
 logging:
-  save_dir: logs/exp_new_aug_20261011_256
+  save_dir: logs/cifar100_federated_resize224_no_aug
   log_file: experiment.log
 
 simulation:
