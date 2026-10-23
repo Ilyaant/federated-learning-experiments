@@ -251,6 +251,7 @@ def main(config: Config):
     logging.info(f"Test accuracy: {test_acc:.4f}")
     logging.info(f"Test F1-score: {test_f1:.4f}")
 
+    os.makedirs("models", exist_ok=True)
     torch.save(model.state_dict(), f"models/brodatz_{config.model}.pth")
 
 
