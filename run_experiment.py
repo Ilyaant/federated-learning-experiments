@@ -27,7 +27,8 @@ class Config:
     epochs: int = 25
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model: str = 'mobilenetv5'
+    model: str = 'fastvit_t8'
+    pretrained: bool = True
 
 
 @pyrallis.wrap()
@@ -113,14 +114,14 @@ def main(config: Config):
     if config.model == 'fastvit_t8':
         model = timm.create_model(
             "fastvit_t8",
-            pretrained=True,
+            pretrained=config.pretrained,
             num_classes=NUM_CLASSES
         )
     
     if config.model == 'fastvit_s12':
         model = timm.create_model(
             "fastvit_s12",
-            pretrained=True,
+            pretrained=config.pretrained,
             num_classes=NUM_CLASSES
         )
 
@@ -128,13 +129,13 @@ def main(config: Config):
         with torch.serialization.safe_globals([argparse.Namespace]):
             model = fastervit.create_model(
                 'faster_vit_0_224',
-                pretrained=True,
+                pretrained=config.pretrained,
             )
     
     if config.model == 'mobilenetv5':
         model = timm.create_model(
             "hf_hub:timm/mobilenetv5_300m.gemma3n",
-            pretrained=True,
+            pretrained=config.pretrained,
             num_classes=NUM_CLASSES
         )
 
