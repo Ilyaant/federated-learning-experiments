@@ -29,6 +29,7 @@ class Config:
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model: str = 'fastvit_t8'
     pretrained: bool = True
+    n_workers: int = 4
 
 
 @pyrallis.wrap()
@@ -80,19 +81,19 @@ def main(config: Config):
         train_dataset,
         batch_size=config.batch_size,
         shuffle=True,
-        num_workers=4
+        num_workers=config.n_workers
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=config.batch_size,
         shuffle=False,
-        num_workers=4
+        num_workers=config.n_workers
     )
     test_loader = DataLoader(
         test_dataset,
         batch_size=config.batch_size,
         shuffle=False,
-        num_workers=4
+        num_workers=config.n_workers
     )
 
     NUM_CLASSES = len(train_dataset.classes)
