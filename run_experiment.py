@@ -24,7 +24,7 @@ class Config:
     data_dir: str = "data/brodatz_exp"
     batch_size: int = 32
     image_size: int = 224
-    epochs: int = 25
+    epochs: int = 40
     lr: float = 1e-4
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model: str = 'fastvit_t8'
