@@ -35,11 +35,11 @@ train:
   weight_decay: 0.05
   max_grad_norm: 1.0
   batch_size: 32
-  local_epochs: 1
+  local_epochs: 3
   num_workers: 4
   # With downscale=3 there are only ~30 patches/image, so the per-epoch
   # subsampling that fought redundancy at native scale is not needed.
-  epoch_fraction: 1.0
+  epoch_fraction: 0.4
   balanced_per_image: true
   with_replacement: false
   aggregation: average_probability
@@ -69,7 +69,7 @@ server:
   address: 127.0.0.1:8080
 
 logging:
-  save_dir: logs/exp_new_aug_20261011_256
+  save_dir: logs/exp_new_aug_20261023_3epochs_fraction_0.4
   log_file: experiment.log
 
 simulation:
