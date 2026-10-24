@@ -140,7 +140,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_patches_pretrained_brodatz
+  run_name: fastvit_t8_centralized_pretrained_brodatz
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log
