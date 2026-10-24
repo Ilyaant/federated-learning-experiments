@@ -28,7 +28,7 @@ dataset:
 patches:
   size: 224
   # Перекрытие соседних патчей сетки, 0 <= overlap < 1.
-  train_overlap: 0.0
+  train_overlap: 0.5
   eval_overlap: 0.0
   # Добавлять патчи, прижатые к правому/нижнему краю, чтобы покрыть всё
   # изображение, даже если размер не кратен шагу сетки.
@@ -55,17 +55,17 @@ augmentation:
     # Чтобы не было чёрных углов, из изображения вырезается патч
     # с запасом (size * sqrt(2)), поворачивается и обрезается до size.
     # 0 отключает произвольный поворот.
-    degrees: 15.0
+    degrees: 0
   hflip_prob: 0.5
   vflip_prob: 0.5
   gaussian_blur:
-    prob: 0.3
+    prob: 0
     kernel_size: 5
     sigma: [0.1, 2.0]
   gaussian_noise:
     prob: 0.3
     # Стандартное отклонение шума в единицах яркости [0, 1].
-    std: 0.03
+    std: 0.01
 
 model:
   # fastvit_* и другие имена timm, texture_cnn / tcnn, twistnet18, hipervit, vortex.
@@ -83,7 +83,14 @@ model:
   # m — число RAE в супе (16), rae_hidden 1. Учится только линейная голова.
   # model.train_backbone: true включает обучение ViT. dropout — только головы.
   name: fastvit_t8
-  pretrained: true
+  # true — веса ImageNet через timm. false — случайная инициализация.
+  # Если задан weights, ImageNet не скачивается и берётся этот state_dict.
+  pretrained: false
+  # Локальный чекпоинт timm-модели. FastViT-T8, дообученный на Brodatz
+  # (64 класса, RGB-вход): models/brodatz_fastvit_t8.pth.
+  # Голова с другим числом классов создаётся заново. Для grayscale первый
+  # свёрточный слой суммируется по RGB-каналам, как при загрузке ImageNet.
+  weights: models/brodatz_fastvit_t8.pth
   dropout: 0.2
   drop_path_rate: 0.1
   # Обучать только классификационную голову.
@@ -103,13 +110,13 @@ train:
   # Взвешивать классы в loss обратно пропорционально числу изображений.
   class_weights: false
   max_grad_norm: 1.0
-  num_workers: 4
+  num_workers: 8
   # Mixed precision (только на CUDA).
   amp: true
 
 evaluation:
   batch_size: 64
-  num_workers: 4
+  num_workers: 8
   # Агрегация предсказаний патчей в предсказание изображения:
   # mean_prob | majority_vote
   aggregation: mean_prob
@@ -133,7 +140,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_patches_all_patches_overlap_0.5
+  run_name: fastvit_t8_patches_pretrained_brodatz
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log
