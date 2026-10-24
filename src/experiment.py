@@ -247,8 +247,12 @@ def run_experiment(config: Config, dry_run: bool = False) -> Dict[str, object]:
     )
     total, trainable = count_parameters(model)
     logger.info(
-        "Model: %s | pretrained=%s | params %.2fM (trainable %.2fM)",
-        get_path(config, "model.name"), get_path(config, "model.pretrained"), total / 1e6, trainable / 1e6,
+        "Model: %s | pretrained=%s | weights=%s | params %.2fM (trainable %.2fM)",
+        get_path(config, "model.name"),
+        get_path(config, "model.pretrained"),
+        get_path(config, "model.weights") or "none",
+        total / 1e6,
+        trainable / 1e6,
     )
 
     if dry_run:

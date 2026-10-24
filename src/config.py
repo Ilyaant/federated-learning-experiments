@@ -105,4 +105,10 @@ def validate_config(config: Config) -> List[str]:
     if pad_mode not in {"reflect", "replicate"}:
         problems.append("patches.pad_mode must be reflect or replicate")
 
+    weights = get_path(config, "model.weights")
+    if weights not in (None, ""):
+        path = Path(str(weights))
+        if not path.is_file():
+            problems.append(f"model.weights file not found: {path}")
+
     return problems
