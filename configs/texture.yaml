@@ -94,7 +94,7 @@ model:
   dropout: 0.2
   drop_path_rate: 0.1
   # Обучать только классификационную голову.
-  freeze_backbone: false
+  freeze_backbone: true
 
 train:
   epochs: 40
@@ -140,7 +140,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_centralized_pretrained_brodatz
+  run_name: fastvit_t8_centralized_pretrained_brodatz_freeze_backbone
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log
