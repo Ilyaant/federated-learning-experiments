@@ -1,4 +1,5 @@
 import os
+import shutil
 import cv2
 import random
 from pathlib import Path
@@ -10,9 +11,9 @@ import pyrallis
 class Config:
     source_dir: str = "data/brodatz"
     output_dir: str = "data/brodatz_exp"
-    block_size: int = 128
-    patch_size: int = 64
-    stride: int = 32
+    block_size: int = 256
+    patch_size: int = 224
+    stride: int = 8
     random_seed: int = 42
 
     def __post_init__(self):
@@ -46,6 +47,8 @@ def save_patches(config, block, class_name, split, block_id):
 
 @pyrallis.wrap()
 def main(config: Config):
+    if os.path.exists(config.output_dir):
+        shutil.rmtree(config.output_dir)
 
     for split in ("train", "val", "test"):
         os.makedirs(os.path.join(config.output_dir, split), exist_ok=True)
@@ -73,9 +76,9 @@ def main(config: Config):
 
         random.shuffle(blocks)
 
-        train_blocks = blocks[:11]
-        val_blocks = blocks[11:13]
-        test_blocks = blocks[13:]
+        train_blocks = blocks[:2]
+        val_blocks = blocks[2:3]
+        test_blocks = blocks[3:]
 
         for bid, block in train_blocks:
             save_patches(config, block, class_name, "train", bid)

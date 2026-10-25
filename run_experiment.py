@@ -7,7 +7,6 @@ import torch
 import timm
 import fastervit
 import argparse
-import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
@@ -29,40 +28,50 @@ class Config:
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model: str = 'fastvit_t8'
     pretrained: bool = True
+    grayscale: bool = True
     n_workers: int = 4
 
 
 @pyrallis.wrap()
 def main(config: Config):
+    os.makedirs("logs", exist_ok=True)
     logging.basicConfig(filename=f'logs/{config.model}.log',
                     filemode='a',
                     format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-    train_transform = transforms.Compose([
+    in_chans = 1 if config.grayscale else 3
+    norm_mean = [0.5] if config.grayscale else [0.485, 0.456, 0.406]
+    norm_std = [0.5] if config.grayscale else [0.229, 0.224, 0.225]
+
+    train_steps = []
+    test_steps = []
+    if config.grayscale:
+        train_steps.append(transforms.Grayscale(num_output_channels=1))
+        test_steps.append(transforms.Grayscale(num_output_channels=1))
+
+    train_steps.extend([
         transforms.Resize((config.image_size, config.image_size)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
-        transforms.RandomRotation(20),
-        transforms.RandomResizedCrop(
-            config.image_size,
-            scale=(0.8, 1.0)
-        ),
+        transforms.RandomChoice([
+            transforms.RandomRotation((0, 0)),
+            transforms.RandomRotation((90, 90)),
+            transforms.RandomRotation((180, 180)),
+            transforms.RandomRotation((270, 270)),
+        ]),
         transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485,0.456,0.406],
-            std=[0.229,0.224,0.225]
-        )
+        transforms.Normalize(mean=norm_mean, std=norm_std),
     ])
-    test_transform = transforms.Compose([
+    test_steps.extend([
         transforms.Resize((config.image_size, config.image_size)),
         transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485,0.456,0.406],
-            std=[0.229,0.224,0.225]
-        )
+        transforms.Normalize(mean=norm_mean, std=norm_std),
     ])
+
+    train_transform = transforms.Compose(train_steps)
+    test_transform = transforms.Compose(test_steps)
 
     train_dataset = datasets.ImageFolder(
         os.path.join(config.data_dir, "train"),
@@ -106,7 +115,7 @@ def main(config: Config):
 
     if config.model == "ConvNextV2Model":
         convnext_config = ConvNextV2Config(
-            num_channels=3,
+            num_channels=in_chans,
             num_labels=NUM_CLASSES
         )
         backbone = ConvNextV2Model(convnext_config)
@@ -116,6 +125,7 @@ def main(config: Config):
         model = timm.create_model(
             "fastvit_t8",
             pretrained=config.pretrained,
+            in_chans=in_chans,
             num_classes=NUM_CLASSES
         )
     
@@ -123,6 +133,7 @@ def main(config: Config):
         model = timm.create_model(
             "fastvit_s12",
             pretrained=config.pretrained,
+            in_chans=in_chans,
             num_classes=NUM_CLASSES
         )
 
@@ -137,6 +148,7 @@ def main(config: Config):
         model = timm.create_model(
             "hf_hub:timm/mobilenetv5_300m.gemma3n",
             pretrained=config.pretrained,
+            in_chans=in_chans,
             num_classes=NUM_CLASSES
         )
 
