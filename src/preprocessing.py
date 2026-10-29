@@ -8,7 +8,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
 
+import numpy as np
+import torch
+import torch.nn.functional as F
 from PIL import Image, ImageOps
+from torchvision.transforms import functional as TF
 
 VALID_EXTENSIONS = {
     ".jpg",
@@ -24,6 +28,7 @@ LabeledPath = Tuple[Path, str]
 LabeledSample = Tuple[Path, int]
 
 _FRAME_SUFFIX = re.compile(r"-\d+-\d+$")
+DEFAULT_PREPARED_OUTPUT_ROOT = "data/dataset2_exp_prepared_flatfield"
 
 
 def find_classes(dataset_root: Path) -> List[str]:
@@ -66,6 +71,11 @@ def sample_group_id(path: str | Path) -> str:
     return stem
 
 
+def specimen_prefix(group_id: str) -> str:
+    """Physical specimen identifier shared by sub-series ``(k-1)`` and ``(k-2)``."""
+    return group_id.split("-")[0]
+
+
 def _copy_preserving_structure(
     src: Path,
     class_dir: Path,
@@ -79,9 +89,88 @@ def _copy_preserving_structure(
     shutil.copy2(src, dst)
 
 
+def flatfield_correct_grayscale(
+    img: Image.Image,
+    sigma: float = 64.0,
+    contrast_gain: float = 4.0,
+    preserve_mean: bool = True,
+    cutoff_percent: float = 0.0,
+    downscale: int = 8,
+) -> Image.Image:
+    """Remove low-frequency microscope vignetting in float32 while preserving true class brightness/contrast.
+
+    When ``preserve_mean=True`` and ``contrast_gain > 0``, removes the smooth background
+    illumination gradient ``bg`` and scales the local texture residual by a fixed
+    ``contrast_gain`` around the image's mean intensity: ``mean(arr) + contrast_gain * (arr - bg)``.
+    This eliminates corner vignetting without inflating noise in low-contrast ``clear`` gels.
+    """
+    gray = img.convert("L")
+    arr = np.asarray(gray, dtype=np.float32)
+    h, w = arr.shape
+
+    if sigma > 0:
+        scale = max(1, int(downscale))
+        small_sigma = max(0.5, float(sigma) / scale)
+        radius = max(1, int(round(3.0 * small_sigma)))
+        ksize = 2 * radius + 1
+
+        tensor = torch.from_numpy(arr).unsqueeze(0).unsqueeze(0)
+        small = F.interpolate(
+            tensor,
+            size=(max(1, h // scale), max(1, w // scale)),
+            mode="area",
+        )
+        pad_h = min(radius, max(0, small.shape[-2] - 1))
+        pad_w = min(radius, max(0, small.shape[-1] - 1))
+        small_padded = F.pad(small, (pad_w, pad_w, pad_h, pad_h), mode="reflect")
+        blurred = TF.gaussian_blur(
+            small_padded,
+            kernel_size=[ksize, ksize],
+            sigma=[small_sigma, small_sigma],
+        )
+        if pad_h > 0 or pad_w > 0:
+            blurred = blurred[
+                :,
+                :,
+                pad_h : pad_h + small.shape[-2],
+                pad_w : pad_w + small.shape[-1],
+            ]
+        bg = (
+            F.interpolate(blurred, size=(h, w), mode="bicubic", align_corners=False)
+            .squeeze(0)
+            .squeeze(0)
+            .numpy()
+        )
+        residual = arr - bg
+    else:
+        residual = arr - float(arr.mean())
+
+    if preserve_mean and cutoff_percent <= 0:
+        base = float(arr.mean()) if preserve_mean else 128.0
+        stretched = np.clip(base + residual * float(contrast_gain), 0.0, 255.0)
+        return Image.fromarray(stretched.round().astype(np.uint8), mode="L")
+
+    signal = residual
+    if cutoff_percent > 0:
+        q_low, q_high = np.percentile(
+            signal, [float(cutoff_percent), 100.0 - float(cutoff_percent)]
+        )
+    else:
+        q_low, q_high = float(signal.min()), float(signal.max())
+
+    span = max(float(q_high - q_low), 1e-3)
+    stretched = np.clip((signal - q_low) / span * 255.0, 0.0, 255.0)
+    return Image.fromarray(stretched.round().astype(np.uint8), mode="L")
+
+
 def convert_to_grayscale(
     src_root: str | Path,
     dst_root: str | Path,
+    flatfield_sigma: float = 64.0,
+    contrast_gain: float = 4.0,
+    preserve_mean: bool = True,
+    cutoff_percent: float = 0.0,
+    output_ext: str = ".png",
 ) -> None:
     src_root = Path(src_root)
     dst_root = Path(dst_root)
@@ -91,11 +180,30 @@ def convert_to_grayscale(
 
         for image_path in images:
             rel = image_path.relative_to(class_dir)
+            if output_ext:
+                rel = rel.with_suffix(output_ext)
             dst = dst_root / cls / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
-            img = Image.open(image_path).convert("L")
-            img = ImageOps.autocontrast(img, cutoff=1)
-            img.save(dst)
+            with Image.open(image_path) as raw_img:
+                if flatfield_sigma and flatfield_sigma > 0:
+                    img = flatfield_correct_grayscale(
+                        raw_img,
+                        sigma=flatfield_sigma,
+                        contrast_gain=contrast_gain,
+                        preserve_mean=preserve_mean,
+                        cutoff_percent=cutoff_percent,
+                    )
+                else:
+                    img = ImageOps.autocontrast(
+                        raw_img.convert("L"), cutoff=max(1.0, cutoff_percent)
+                    )
+
+            if dst.suffix.lower() == ".png":
+                img.save(dst, format="PNG", compress_level=1)
+            elif dst.suffix.lower() in {".jpg", ".jpeg"}:
+                img.save(dst, quality=98, subsampling=0)
+            else:
+                img.save(dst)
 
 
 def _split_counts(
@@ -154,6 +262,86 @@ def collect_labeled_paths(dataset_root: str | Path) -> List[LabeledPath]:
     return labeled
 
 
+def _partition_group_buckets(
+    buckets: Sequence[Tuple[str, List[LabeledPath]]],
+    train_ratio: float,
+    val_ratio: float,
+    test_ratio: float,
+    rng: random.Random,
+) -> Dict[str, List[Tuple[str, List[LabeledPath]]]]:
+    """Split group buckets into train/val/test balancing image counts and keeping every specimen in train."""
+    n = len(buckets)
+    shuffled = list(buckets)
+    rng.shuffle(shuffled)
+
+    if n <= 2:
+        n_train, n_val, n_test = _split_counts(n, train_ratio, val_ratio)
+        return {
+            "train": shuffled[:n_train],
+            "val": shuffled[n_train : n_train + n_val],
+            "test": shuffled[n_train + n_val : n_train + n_val + n_test],
+        }
+
+    total_imgs = sum(len(items) for _, items in shuffled)
+    target_val = val_ratio * total_imgs
+    target_test = test_ratio * total_imgs
+    target_train = train_ratio * total_imgs
+
+    by_specimen: Dict[str, List[Tuple[str, List[LabeledPath]]]] = defaultdict(list)
+    for group_id, items in shuffled:
+        by_specimen[specimen_prefix(group_id)].append((group_id, items))
+
+    best_score = float("inf")
+    best_slices: Dict[str, List[Tuple[str, List[LabeledPath]]]] | None = None
+
+    num_trials = min(256, max(16, n * 16))
+    for _ in range(num_trials):
+        train_locked: List[Tuple[str, List[LabeledPath]]] = []
+        holdout_pool: List[Tuple[str, List[LabeledPath]]] = []
+        specs = list(by_specimen.items())
+        rng.shuffle(specs)
+        for _, glist in specs:
+            glist_copy = list(glist)
+            rng.shuffle(glist_copy)
+            train_locked.append(glist_copy[0])
+            holdout_pool.extend(glist_copy[1:])
+
+        rng.shuffle(holdout_pool)
+        m = len(holdout_pool)
+        if m < 2:
+            break
+
+        for i in range(1, m):
+            for j in range(i + 1, m + 1):
+                va_cand = holdout_pool[:i]
+                te_cand = holdout_pool[i:j]
+                tr_cand = train_locked + holdout_pool[j:]
+                c_tr = sum(len(b[1]) for b in tr_cand)
+                c_va = sum(len(b[1]) for b in va_cand)
+                c_te = sum(len(b[1]) for b in te_cand)
+                penalty = 0.0
+                if len(va_cand) < 2 and m >= 4:
+                    penalty += 10.0
+                if len(te_cand) < 2 and m >= 4:
+                    penalty += 10.0
+                score = (
+                    penalty
+                    + abs(c_tr - target_train)
+                    + 2.0 * abs(c_va - target_val)
+                    + 2.0 * abs(c_te - target_test)
+                )
+                if score < best_score:
+                    best_score = score
+                    best_slices = {
+                        "train": tr_cand,
+                        "val": va_cand,
+                        "test": te_cand,
+                    }
+
+    assert best_slices is not None
+    return best_slices
+
+
 def split_labeled_by_group(
     labeled: Sequence[LabeledPath],
     train_ratio: float = 0.7,
@@ -183,6 +371,17 @@ def split_labeled_by_group(
             buckets: List[Tuple[str, List[LabeledPath]]] = [
                 (str(path), [(path, item_cls)]) for path, item_cls in items
             ]
+            rng.shuffle(buckets)
+            n_train, n_val, n_test = _split_counts(
+                len(buckets),
+                train_ratio,
+                val_ratio,
+            )
+            slices = {
+                "train": buckets[:n_train],
+                "val": buckets[n_train : n_train + n_val],
+                "test": buckets[n_train + n_val : n_train + n_val + n_test],
+            }
         else:
             grouped: Dict[str, List[LabeledPath]] = defaultdict(list)
             for path, item_cls in items:
@@ -191,18 +390,14 @@ def split_labeled_by_group(
                 (group_id, grouped[group_id])
                 for group_id in sorted(grouped)
             ]
+            slices = _partition_group_buckets(
+                buckets,
+                train_ratio=train_ratio,
+                val_ratio=val_ratio,
+                test_ratio=test_ratio,
+                rng=rng,
+            )
 
-        rng.shuffle(buckets)
-        n_train, n_val, n_test = _split_counts(
-            len(buckets),
-            train_ratio,
-            val_ratio,
-        )
-        slices = {
-            "train": buckets[:n_train],
-            "val": buckets[n_train : n_train + n_val],
-            "test": buckets[n_train + n_val : n_train + n_val + n_test],
-        }
         for split, split_buckets in slices.items():
             for group_id, group_items in split_buckets:
                 assigned[split].extend(group_items)
@@ -341,16 +536,28 @@ def prepare_dataset(
     test_ratio: float = 0.15,
     seed: int = 42,
     group_by: str = "sample",
-) -> None:
+    flatfield_sigma: float = 64.0,
+    contrast_gain: float = 4.0,
+    preserve_mean: bool = True,
+    cutoff_percent: float = 0.0,
+    output_ext: str = ".png",
+) -> dict:
     raw_root = Path(raw_root)
     output_root = Path(output_root)
+    if output_root.exists():
+        shutil.rmtree(output_root)
     grayscale_root = output_root / "_grayscale_tmp"
 
-    if grayscale_root.exists():
-        shutil.rmtree(grayscale_root)
-
-    convert_to_grayscale(raw_root, grayscale_root)
-    split_dataset(
+    convert_to_grayscale(
+        raw_root,
+        grayscale_root,
+        flatfield_sigma=flatfield_sigma,
+        contrast_gain=contrast_gain,
+        preserve_mean=preserve_mean,
+        cutoff_percent=cutoff_percent,
+        output_ext=output_ext,
+    )
+    manifest = split_dataset(
         grayscale_root,
         output_root,
         train_ratio=train_ratio,
@@ -360,6 +567,7 @@ def prepare_dataset(
         group_by=group_by,
     )
     shutil.rmtree(grayscale_root)
+    return manifest
 
 
 def load_split(
@@ -394,7 +602,60 @@ def groups_leak_across_splits(
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Preprocess raw cryogel micrographs (flat-field + contrast gain + grouped split)."
+    )
+    parser.add_argument(
+        "--raw-root",
+        default="data/dataset2_exp",
+        help="Path to raw dataset directory",
+    )
+    parser.add_argument(
+        "--output-root",
+        default=DEFAULT_PREPARED_OUTPUT_ROOT,
+        help="Path to output prepared dataset directory",
+    )
+    parser.add_argument(
+        "--flatfield-sigma",
+        type=float,
+        default=64.0,
+        help="Gaussian sigma for flat-field background subtraction (0 disables flat-field)",
+    )
+    parser.add_argument(
+        "--contrast-gain",
+        type=float,
+        default=4.0,
+        help="Fixed contrast amplification factor around mean brightness",
+    )
+    parser.add_argument(
+        "--cutoff-percent",
+        type=float,
+        default=0.0,
+        help="Percentile cutoff for per-image contrast stretching (0 uses fixed contrast-gain)",
+    )
+    parser.add_argument(
+        "--output-ext",
+        default=".png",
+        help="Output image extension (.png for lossless, .jpg for high-quality JPEG)",
+    )
+    parser.add_argument(
+        "--group-by",
+        default="sample",
+        choices=["sample", "none"],
+        help="Group frames of the same sample capture into the same split",
+    )
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for split")
+    args = parser.parse_args()
+
     prepare_dataset(
-        raw_root="data/dataset2_exp",
-        output_root="data/dataset2_exp_prepared_new",
+        raw_root=args.raw_root,
+        output_root=args.output_root,
+        seed=args.seed,
+        group_by=args.group_by,
+        flatfield_sigma=args.flatfield_sigma,
+        contrast_gain=args.contrast_gain,
+        cutoff_percent=args.cutoff_percent,
+        output_ext=args.output_ext,
     )

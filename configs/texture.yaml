@@ -10,7 +10,7 @@ seed: 42
 device: auto
 
 dataset:
-  root: data/dataset2_exp_prepared
+  root: data/dataset2_exp_prepared_flatfield_filesplit
   # На диске сплит сделан по файлам, и кадры одного образца
   # (``15_11_17(2-1)пп(20)-1-3`` и ``-2-4``) попадают в разные сплиты.
   # regroup: true пересобирает train/val/test в памяти по группам кадров,
@@ -29,17 +29,25 @@ patches:
   size: 224
   # Перекрытие соседних патчей сетки, 0 <= overlap < 1.
   train_overlap: 0.5
-  eval_overlap: 0.0
+  eval_overlap: 0.5
   # Добавлять патчи, прижатые к правому/нижнему краю, чтобы покрыть всё
   # изображение, даже если размер не кратен шагу сетки.
   include_edges: true
+  # Случайный сдвиг узлов сетки на train в пределах [-stride//2, +stride//2].
+  train_grid_jitter: true
   # Сколько случайных патчей сетки брать с каждого train-изображения за
   # эпоху. null = все патчи каждую эпоху.
   train_patches_per_image: null
   # Режим дополнения при выходе патча за границы изображения: reflect | replicate.
   pad_mode: reflect
   # Нормализация патча (в градациях серого один канал).
+  # mode:
+  #   fixed        — глобальная (x - mean) / std
+  #   patch_mean   — центрирование каждого патча по его среднему: (x - mean(x)) / std
+  #   patch_median — центрирование каждого патча по его медиане:  (x - median(x)) / std
+  #   patch_zscore — полная стандартизация патча: (x - mean(x)) / (std(x) + eps)
   normalize:
+    mode: fixed
     mean: [0.5]
     std: [0.5]
   # LRU-кэш декодированных изображений (шт.) в каждом воркере DataLoader.
@@ -49,7 +57,7 @@ augmentation:
   enabled: true
   rotation:
     prob: 1.0
-    # Случайный поворот на кратный 90 градусам угол (без потери пикселей).
+    # Случайный поворот на кратный 90 градусам угол (0, 90, 180, 270; без потери пикселей).
     rot90: true
     # Дополнительный поворот на произвольный угол в [-degrees, degrees].
     # Чтобы не было чёрных углов, из изображения вырезается патч
@@ -62,6 +70,12 @@ augmentation:
     prob: 0
     kernel_size: 5
     sigma: [0.1, 2.0]
+  contrast:
+    prob: 0.3
+    scale: [0.9, 1.1]
+  illumination_gradient:
+    prob: 0.2
+    max_strength: 0.02
   gaussian_noise:
     prob: 0.3
     # Стандартное отклонение шума в единицах яркости [0, 1].
@@ -85,16 +99,16 @@ model:
   name: fastvit_t8
   # true — веса ImageNet через timm. false — случайная инициализация.
   # Если задан weights, ImageNet не скачивается и берётся этот state_dict.
-  pretrained: false
+  pretrained: true
   # Локальный чекпоинт timm-модели. FastViT-T8, дообученный на Brodatz
   # (64 класса, RGB-вход): models/brodatz_fastvit_t8.pth.
   # Голова с другим числом классов создаётся заново. Для grayscale первый
   # свёрточный слой суммируется по RGB-каналам, как при загрузке ImageNet.
-  weights: models/brodatz_fastvit_t8.pth
+  weights: null
   dropout: 0.2
   drop_path_rate: 0.1
   # Обучать только классификационную голову.
-  freeze_backbone: true
+  freeze_backbone: false
 
 train:
   epochs: 40
@@ -110,13 +124,13 @@ train:
   # Взвешивать классы в loss обратно пропорционально числу изображений.
   class_weights: false
   max_grad_norm: 1.0
-  num_workers: 8
+  num_workers: 12
   # Mixed precision (только на CUDA).
   amp: true
 
 evaluation:
   batch_size: 64
-  num_workers: 8
+  num_workers: 12
   # Агрегация предсказаний патчей в предсказание изображения:
   # mean_prob | majority_vote
   aggregation: mean_prob
@@ -140,7 +154,7 @@ evaluation:
 
 logging:
   save_dir: logs
-  run_name: fastvit_t8_centralized_pretrained_brodatz_freeze_backbone
+  run_name: fastvit_t8_centralized_flatfield_filesplit_pretrained
   # Добавлять к имени запуска метку времени.
   timestamp_dir: true
   log_file: experiment.log

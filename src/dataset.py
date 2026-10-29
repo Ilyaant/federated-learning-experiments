@@ -39,6 +39,7 @@ class TexturePatchDataset(Dataset):
         rotation_context: bool = False,
         pad_mode: str = "reflect",
         cache_size: int = 512,
+        grid_jitter: bool = False,
     ):
         self.samples: List[Sample] = [(Path(p), int(label)) for p, label in samples]
         self.grid = PatchGrid(patch_size, overlap, include_edges)
@@ -46,6 +47,7 @@ class TexturePatchDataset(Dataset):
         self.transform = transform
         self.pad_mode = pad_mode
         self.cache_size = int(cache_size)
+        self.grid_jitter = bool(grid_jitter)
         self.context_size = (
             context_size_for_rotation(patch_size) if rotation_context else None
         )
@@ -110,6 +112,17 @@ class TexturePatchDataset(Dataset):
         image_idx, x, y = self.patches[idx]
         _, label = self.samples[image_idx]
 
+        if self.grid_jitter:
+            width, height = self.image_sizes[image_idx]
+            half_stride = self.grid.stride // 2
+            if half_stride > 0:
+                dx = int(torch.randint(-half_stride, half_stride + 1, (1,)).item())
+                dy = int(torch.randint(-half_stride, half_stride + 1, (1,)).item())
+                max_x = max(0, width - self.patch_size)
+                max_y = max(0, height - self.patch_size)
+                x = min(max_x, max(0, x + dx))
+                y = min(max_y, max(0, y + dy))
+
         patch = extract_patch(
             self._load_image(image_idx),
             x,
@@ -133,7 +146,7 @@ class TexturePatchDataset(Dataset):
         return (
             f"{self.__class__.__name__}(images={self.num_images}, "
             f"patches={self.num_patches}, patch_size={self.patch_size}, "
-            f"overlap={self.grid.overlap}, context={self.context_size})"
+            f"overlap={self.grid.overlap}, jitter={self.grid_jitter}, context={self.context_size})"
         )
 
 

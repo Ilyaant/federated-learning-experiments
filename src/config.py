@@ -105,6 +105,22 @@ def validate_config(config: Config) -> List[str]:
     if pad_mode not in {"reflect", "replicate"}:
         problems.append("patches.pad_mode must be reflect or replicate")
 
+    norm_mode = get_path(config, "patches.normalize.mode", "fixed")
+    allowed_norm_modes = {"fixed", "patch_mean", "patch_median", "patch_zscore"}
+    if norm_mode not in allowed_norm_modes:
+        problems.append(f"patches.normalize.mode must be one of {sorted(allowed_norm_modes)}")
+
+    contrast_prob = float(get_path(config, "augmentation.contrast.prob", 0.0) or 0.0)
+    if contrast_prob > 0:
+        scale = get_path(config, "augmentation.contrast.scale", [0.8, 1.25])
+        if (
+            not isinstance(scale, (list, tuple))
+            or len(scale) != 2
+            or float(scale[0]) <= 0
+            or float(scale[0]) > float(scale[1])
+        ):
+            problems.append("augmentation.contrast.scale must be [min_scale, max_scale] with 0 < min <= max")
+
     weights = get_path(config, "model.weights")
     if weights not in (None, ""):
         path = Path(str(weights))

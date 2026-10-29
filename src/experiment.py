@@ -97,6 +97,7 @@ def build_datasets(config: Config) -> Tuple[Dict[str, TexturePatchDataset], dict
             overlap=float(patch_cfg.get("train_overlap", 0.0)),
             transform=train_transform,
             rotation_context=needs_rotation_context(aug_cfg),
+            grid_jitter=bool(patch_cfg.get("train_grid_jitter", False)),
             **common,
         )
     }
