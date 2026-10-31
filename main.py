@@ -72,26 +72,70 @@ import torchvision.transforms as T
 
 
 class RandomRotation90:
-    def __init__(self, p: float = 0.75):
+    """Rotate by a random multiple of 90 degrees (0, 90, 180, 270; lossless for square patches)."""
+
+    def __init__(self, p: float = 1.0):
         self.p = p
 
     def __call__(self, tensor: torch.Tensor) -> torch.Tensor:
         if torch.rand(1).item() < self.p:
-            k = int(torch.randint(1, 4, (1,)).item())
-            return torch.rot90(tensor, k, [-2, -1])
+            k = int(torch.randint(0, 4, (1,)).item())
+            if k > 0:
+                return torch.rot90(tensor, k, [-2, -1])
+        return tensor
+
+
+class RandomContrastScale:
+    """Scale patch contrast around its spatial mean to simulate session contrast variation."""
+
+    def __init__(self, scale_range=(0.9, 1.1), p: float = 0.3, normalized: bool = True):
+        if len(scale_range) != 2 or float(scale_range[0]) <= 0 or float(scale_range[0]) > float(scale_range[1]):
+            raise ValueError(f"Invalid contrast scale_range: {scale_range!r}")
+        self.min_scale = float(scale_range[0])
+        self.max_scale = float(scale_range[1])
+        self.p = float(p)
+        self.low = -1.0 if normalized else 0.0
+
+    def __call__(self, tensor: torch.Tensor) -> torch.Tensor:
+        if (self.min_scale != 1.0 or self.max_scale != 1.0) and torch.rand(1).item() < self.p:
+            alpha = self.min_scale + torch.rand(1).item() * (self.max_scale - self.min_scale)
+            mean = tensor.mean(dim=(-2, -1), keepdim=True)
+            return torch.clamp((tensor - mean) * alpha + mean, self.low, 1.0)
+        return tensor
+
+
+class RandomIlluminationGradient:
+    """Add a smooth linear brightness gradient across the patch to simulate residual vignetting."""
+
+    def __init__(self, max_strength: float = 0.02, p: float = 0.2, normalized: bool = True):
+        self.max_strength = float(max_strength) * (2.0 if normalized else 1.0)
+        self.p = float(p)
+        self.low = -1.0 if normalized else 0.0
+
+    def __call__(self, tensor: torch.Tensor) -> torch.Tensor:
+        if self.max_strength > 0 and torch.rand(1).item() < self.p:
+            _, h, w = tensor.shape
+            gx = (torch.rand(1).item() * 2.0 - 1.0) * self.max_strength
+            gy = (torch.rand(1).item() * 2.0 - 1.0) * self.max_strength
+            ys = torch.linspace(-1.0, 1.0, h, device=tensor.device, dtype=tensor.dtype).view(1, h, 1)
+            xs = torch.linspace(-1.0, 1.0, w, device=tensor.device, dtype=tensor.dtype).view(1, 1, w)
+            grad = gy * ys + gx * xs
+            return torch.clamp(tensor + grad, self.low, 1.0)
         return tensor
 
 
 class AddGaussianNoise:
-    def __init__(self, std=0.05, p=0.2):
-        self.std = std
-        self.p = p
+    def __init__(self, std=0.05, p=0.2, normalized: bool = True):
+        self.std = float(std)
+        self.p = float(p)
+        self.low = -1.0 if normalized else 0.0
 
     def __call__(self, tensor):
-        if torch.rand(1).item() < self.p:
+        if self.std > 0 and torch.rand(1).item() < self.p:
             noise = torch.randn_like(tensor) * self.std
-            return torch.clamp(tensor + noise, -1.0, 1.0)
+            return torch.clamp(tensor + noise, self.low, 1.0)
         return tensor
+
 
 def patch_kwargs_from_config(cfg: dict) -> dict:
     """Patch extraction settings shared by every dataset in the run."""
@@ -111,19 +155,56 @@ def build_train_transform(cfg: dict):
     if not aug_cfg.get("enabled", False):
         return None
 
+    normalized = bool(cfg["dataset"].get("normalize", True))
     transforms_list = []
-    if aug_cfg.get("hflip_prob", 0.0) > 0:
-        transforms_list.append(T.RandomHorizontalFlip(p=aug_cfg["hflip_prob"]))
-    if aug_cfg.get("vflip_prob", 0.0) > 0:
-        transforms_list.append(T.RandomVerticalFlip(p=aug_cfg["vflip_prob"]))
     if aug_cfg.get("rot90_prob", 0.0) > 0:
-        transforms_list.append(RandomRotation90(p=aug_cfg["rot90_prob"]))
+        transforms_list.append(RandomRotation90(p=float(aug_cfg["rot90_prob"])))
+    if aug_cfg.get("hflip_prob", 0.0) > 0:
+        transforms_list.append(T.RandomHorizontalFlip(p=float(aug_cfg["hflip_prob"])))
+    if aug_cfg.get("vflip_prob", 0.0) > 0:
+        transforms_list.append(T.RandomVerticalFlip(p=float(aug_cfg["vflip_prob"])))
     if aug_cfg.get("rotation_degrees", 0.0) > 0:
-        transforms_list.append(T.RandomRotation(degrees=aug_cfg["rotation_degrees"]))
+        transforms_list.append(T.RandomRotation(degrees=float(aug_cfg["rotation_degrees"])))
     if aug_cfg.get("blur_prob", 0.0) > 0:
-        transforms_list.append(T.RandomApply([T.GaussianBlur(kernel_size=aug_cfg.get("blur_kernel_size", 5))], p=aug_cfg["blur_prob"]))
+        transforms_list.append(
+            T.RandomApply(
+                [T.GaussianBlur(kernel_size=int(aug_cfg.get("blur_kernel_size", 5)))],
+                p=float(aug_cfg["blur_prob"]),
+            )
+        )
+
+    contrast_cfg = aug_cfg.get("contrast") or {}
+    contrast_prob = float(contrast_cfg.get("prob", aug_cfg.get("contrast_prob", 0.0)))
+    if contrast_prob > 0:
+        scale_range = contrast_cfg.get("scale", aug_cfg.get("contrast_scale", (0.9, 1.1)))
+        transforms_list.append(
+            RandomContrastScale(
+                scale_range=tuple(float(s) for s in scale_range),
+                p=contrast_prob,
+                normalized=normalized,
+            )
+        )
+
+    illum_cfg = aug_cfg.get("illumination_gradient") or {}
+    illum_prob = float(illum_cfg.get("prob", aug_cfg.get("illumination_prob", 0.0)))
+    if illum_prob > 0:
+        max_strength = float(illum_cfg.get("max_strength", aug_cfg.get("illumination_max_strength", 0.02)))
+        transforms_list.append(
+            RandomIlluminationGradient(
+                max_strength=max_strength,
+                p=illum_prob,
+                normalized=normalized,
+            )
+        )
+
     if aug_cfg.get("noise_prob", 0.0) > 0:
-        transforms_list.append(AddGaussianNoise(std=aug_cfg.get("noise_std", 0.05), p=aug_cfg["noise_prob"]))
+        transforms_list.append(
+            AddGaussianNoise(
+                std=float(aug_cfg.get("noise_std", 0.05)),
+                p=float(aug_cfg["noise_prob"]),
+                normalized=normalized,
+            )
+        )
 
     return T.Compose(transforms_list) if transforms_list else None
 
@@ -161,6 +242,7 @@ def build_datasets(cfg: dict, client_id: int):
         balanced_per_image=cfg["train"].get("balanced_per_image", True),
         with_replacement=cfg["train"].get("with_replacement", False),
         transform=train_transform,
+        grid_jitter=bool(cfg["dataset"].get("train_grid_jitter", False)),
         **patch_kwargs,
     )
     val_dataset = TexturePatchDataset(
