@@ -1,9 +1,11 @@
 seed: 42
 
 dataset:
-  root: data/dataset2_exp_prepared
+  root: data/dataset2_exp_prepared_flatfield_filesplit
   patch_size: 224
   overlap: 0.5
+  # Случайный сдвиг узлов сетки на train в пределах [-stride//2, +stride//2].
+  train_grid_jitter: true
   # Shrink the whole image by this factor before cutting patches:
   # 1.0 = native scale (300 patches/image), 3.0 => a 224 patch spans
   # ~30% of the image width (~15 patches/image, much more context).
@@ -15,10 +17,14 @@ dataset:
     enabled: true
     hflip_prob: 0.5
     vflip_prob: 0.5
-    rot90_prob: 0.75
+    rot90_prob: 1.0
     rotation_degrees: 0.0
     blur_prob: 0
     blur_kernel_size: 5
+    contrast_prob: 0.3
+    contrast_scale: [0.9, 1.1]
+    illumination_prob: 0.2
+    illumination_max_strength: 0.02
     noise_prob: 0.3
     noise_std: 0.01
 
@@ -35,7 +41,7 @@ train:
   weight_decay: 0.05
   max_grad_norm: 1.0
   batch_size: 32
-  local_epochs: 3
+  local_epochs: 1
   num_workers: 4
   # With downscale=3 there are only ~30 patches/image, so the per-epoch
   # subsampling that fought redundancy at native scale is not needed.
@@ -69,7 +75,7 @@ server:
   address: 127.0.0.1:8080
 
 logging:
-  save_dir: logs/exp_new_aug_20261023_3epochs_fraction_0.4
+  save_dir: logs/exp_flatfield_filesplit_1epochs_fraction_0.4
   log_file: experiment.log
 
 simulation:

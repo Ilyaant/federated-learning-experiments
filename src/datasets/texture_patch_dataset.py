@@ -37,6 +37,7 @@ class TexturePatchDataset(Dataset):
         seed: int = 42,
         cache_size: int = 64,
         downscale: float = 1.0,
+        grid_jitter: bool = False,
     ):
         self.samples: List[Sample] = [
             (Path(path), int(label)) for path, label in samples
@@ -47,6 +48,7 @@ class TexturePatchDataset(Dataset):
         self.with_replacement = with_replacement
         self.seed = seed
         self.cache_size = cache_size
+        self.grid_jitter = bool(grid_jitter)
 
         self.extractor = PatchExtractor(
             patch_size=patch_size,
@@ -58,6 +60,7 @@ class TexturePatchDataset(Dataset):
 
         self._all_patches: List[PatchEntry] = []
         self._active_patches: List[PatchEntry] = []
+        self._image_Cache_sizes: List[Tuple[int, int]] = []
         self._image_cache: OrderedDict[str, torch.Tensor] = OrderedDict()
 
         self._build_patch_index()
@@ -65,9 +68,17 @@ class TexturePatchDataset(Dataset):
 
     def _build_patch_index(self) -> None:
         self._all_patches.clear()
+        self._image_Cache_sizes.clear()
 
         for image_idx, (path, _) in enumerate(self.samples):
-            for x, y in self.extractor.coordinates(path):
+            coords = self.extractor.coordinates(path)
+            if coords:
+                max_x = max(c[0] for c in coords) + self.extractor.patch_size
+                max_y = max(c[1] for c in coords) + self.extractor.patch_size
+                self._image_Cache_sizes.append((max_x, max_y))
+            else:
+                self._image_Cache_sizes.append((self.extractor.patch_size, self.extractor.patch_size))
+            for x, y in coords:
                 self._all_patches.append((image_idx, x, y))
 
     def set_epoch(self, epoch: int) -> None:
@@ -128,8 +139,20 @@ class TexturePatchDataset(Dataset):
         image_idx, x, y = self._active_patches[idx]
         path, label = self.samples[image_idx]
 
+        image_tensor = self._load_image(path)
+        if self.grid_jitter:
+            _, height, width = image_tensor.shape
+            half_stride = self.extractor.stride // 2
+            if half_stride > 0:
+                dx = int(torch.randint(-half_stride, half_stride + 1, (1,)).item())
+                dy = int(torch.randint(-half_stride, half_stride + 1, (1,)).item())
+                max_x = max(0, width - self.extractor.patch_size)
+                max_y = max(0, height - self.extractor.patch_size)
+                x = min(max_x, max(0, x + dx))
+                y = min(max_y, max(0, y + dy))
+
         patch = self.extractor.extract_patch(
-            self._load_image(path),
+            image_tensor,
             x,
             y,
         )
@@ -175,6 +198,7 @@ class TexturePatchDataset(Dataset):
             seed=self.seed,
             cache_size=self.cache_size,
             downscale=self.extractor.downscale,
+            grid_jitter=self.grid_jitter,
         )
 
     def __repr__(self) -> str:
@@ -185,5 +209,6 @@ class TexturePatchDataset(Dataset):
             f"active={len(self)}, "
             f"patch_size={self.extractor.patch_size}, "
             f"overlap={self.extractor.overlap}, "
+            f"jitter={self.grid_jitter}, "
             f"downscale={self.extractor.downscale})"
         )

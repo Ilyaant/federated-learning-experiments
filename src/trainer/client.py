@@ -217,6 +217,7 @@ class FlowerClient(fl.client.NumPyClient):
         dataset = self.train_dataset
         restored_fraction = None
         restored_transform = getattr(dataset, "transform", None)
+        restored_jitter = getattr(dataset, "grid_jitter", False)
 
         if hasattr(dataset, "epoch_fraction") and dataset.epoch_fraction < 1.0:
             restored_fraction = dataset.epoch_fraction
@@ -225,12 +226,16 @@ class FlowerClient(fl.client.NumPyClient):
 
         if hasattr(dataset, "transform"):
             dataset.transform = None
+        if hasattr(dataset, "grid_jitter"):
+            dataset.grid_jitter = False
 
         try:
             metrics = self._run_evaluation(self.train_eval_loader, tta=False)
         finally:
             if hasattr(dataset, "transform"):
                 dataset.transform = restored_transform
+            if hasattr(dataset, "grid_jitter"):
+                dataset.grid_jitter = restored_jitter
             if restored_fraction is not None:
                 dataset.epoch_fraction = restored_fraction
                 dataset.set_epoch(0)

@@ -16,7 +16,7 @@ class PatchExtractor:
         overlap: float = 0.5,
         grayscale: bool = True,
         normalize: bool = True,
-        pad_mode: str = "replicate",
+        pad_mode: str = "reflect",
         downscale: float = 1.0,
     ):
         if not 0 <= overlap < 1:
@@ -131,11 +131,14 @@ class PatchExtractor:
         pad_w = max(0, self.patch_size - w)
 
         if pad_h or pad_w:
+            mode = self.pad_mode
+            if mode == "reflect" and (pad_w >= w or pad_h >= h):
+                mode = "replicate"
             tensor = F.pad(
-                tensor,
+                tensor.unsqueeze(0),
                 (0, pad_w, 0, pad_h),
-                mode=self.pad_mode,
-            )
+                mode=mode,
+            ).squeeze(0)
 
         return tensor[
             :,
